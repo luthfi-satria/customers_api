@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces';
+// import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Message } from '../message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 
@@ -22,7 +22,7 @@ export class ResponseInterceptor
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<Promise<any> | string>> {
-    const ctx: HttpArgumentsHost = context.switchToHttp();
+    // const ctx: HttpArgumentsHost = context.switchToHttp();
     // const responseExpress: any = ctx.getResponse();
 
     return next.handle().pipe(

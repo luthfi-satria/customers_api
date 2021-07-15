@@ -8,7 +8,7 @@ export default {
   validate: {
     success: 'Validasi Otp Success.',
     invalid_otp: 'Kode OTP yang Anda masukan tidak valid',
-    validated: 'Kode OTP sudah tervalidasi'
+    validated: 'Kode OTP sudah tervalidasi',
   },
   error: {
     notFound: 'Otp not found.',

@@ -1,3 +1,3 @@
 export default {
-    hello: 'This is test endpoint.'
+  hello: 'This is test endpoint.',
 };
