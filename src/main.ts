@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Global Prefix
-  app.setGlobalPrefix('/' + process.env.HTTP_PATH);
+  app.setGlobalPrefix('/' + (process.env.HTTP_PATH || ''));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

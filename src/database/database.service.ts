@@ -12,10 +12,10 @@ export class DatabaseService implements TypeOrmOptionsFactory {
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize: Boolean(process.env.DB_SYNC),
-      dropSchema: Boolean(process.env.DB_DROP_SCHEMA),
-      logging: Boolean(process.env.DB_LOGGING),
-      autoLoadEntities: Boolean(process.env.DB_AUTOLOAD_ENTITIES),
+      synchronize: Boolean(process.env.DB_SYNC || true),
+      dropSchema: Boolean(process.env.DB_DROP_SCHEMA || false),
+      logging: Boolean(process.env.DB_LOGGING || false),
+      autoLoadEntities: Boolean(process.env.DB_AUTOLOAD_ENTITIES || true),
       entities: ['dist/**/*.entity.ts', 'dist/**/**/*.entity.ts'],
     };
   }
