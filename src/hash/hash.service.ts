@@ -25,12 +25,7 @@ export class HashService {
     passwordString: string,
     passwordHashed: string,
   ): Promise<boolean> {
-    const logger = new Logger();
-    logger.log('passwordString: ' + passwordString, 'TROUBLE SHOOT');
-    logger.log('passwordHashed: ' + passwordHashed, 'TROUBLE SHOOT');
-
     const res: boolean = compare(passwordString, passwordHashed);
-    logger.log('result: ' + res, 'TROUBLE SHOOT');
     return res;
   }
 
