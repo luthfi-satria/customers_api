@@ -4,3 +4,11 @@ export type IApplyDecorator = <TFunction extends Function, Y>(
   propertyKey?: string | symbol,
   descriptor?: TypedPropertyDescriptor<Y>,
 ) => void;
+
+export interface ReqUpdataProfile {
+  phone: string;
+  name: string;
+  email: string;
+  password: string;
+  dob: string;
+}
