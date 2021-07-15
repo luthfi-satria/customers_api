@@ -8,7 +8,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Global Prefix
-  app.setGlobalPrefix(process.env.HTTP_PATH || '');
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -23,8 +22,8 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.HTTP_PORT || 3000, () => {
-    logger.log(`Running on ${process.env.HTTP_PORT || 3000}`);
+  await app.listen(process.env.HTTP_PORT || 4001, () => {
+    logger.log(`Running on ${process.env.HTTP_PORT || 4001}`);
   });
 }
 bootstrap();
