@@ -24,7 +24,7 @@ import util from 'util';
 import { CustomerProfileValidation } from './validation/customers.profile.validation';
 import { request } from 'express';
 
-@Controller('customers')
+@Controller('api/v1/customers')
 export class CustomersController {
   constructor(
     private readonly customerService: CustomersService,
@@ -143,7 +143,7 @@ export class CustomersController {
             idotp,
             phone,
           });
-        const rdata: Record<string, string>[] = [{ token: accessToken }];
+        const rdata: Record<string, string> = { token: accessToken };
 
         return this.responseService.success(
           true,
