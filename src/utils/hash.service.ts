@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { PASSWORD_SALT_LENGTH } from 'src/hash/hash.constant';
 import { ConfigService } from '@nestjs/config';
 import { hash, compare, genSalt } from 'bcrypt';
 import { isString } from 'class-validator';
@@ -23,8 +22,7 @@ export class HashService {
   async randomSalt(): Promise<string> {
     // Env Variable
     const defaultPasswordSaltLength: number =
-      this.configService.get(process.env.HASH_PASSWORDSALTLENGTH) ||
-      PASSWORD_SALT_LENGTH;
+      this.configService.get(process.env.HASH_PASSWORDSALTLENGTH) || 16;
 
     return genSalt(defaultPasswordSaltLength);
   }

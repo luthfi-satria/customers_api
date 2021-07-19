@@ -13,5 +13,6 @@ export class CustomerProfileValidation {
 
   dob: string;
 
-  gender: string;
+  gender?: string;
+  user_type: string;
 }

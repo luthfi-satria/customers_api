@@ -8,7 +8,7 @@ import {
 
 @Entity({ name: 'customers_pofile' })
 export class ProfileDocument {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id_profile: number;
 
   @Column({ length: '15' })

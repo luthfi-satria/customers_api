@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomersController } from './customers.controller';
-import { OtpDocument } from '../database/entities/otp.entity';
 import { CustomersService } from './customers.service';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
+// import { HashModule } from 'src/hash/hash.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OtpDocument, ProfileDocument])],
+  imports: [TypeOrmModule.forFeature([ProfileDocument]), HttpModule],
   exports: [CustomersService],
   providers: [CustomersService],
   controllers: [CustomersController],

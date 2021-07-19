@@ -23,6 +23,7 @@ export class ResponseFilter implements ExceptionFilter {
       const exceptionHttp: Record<string, any> = exception;
       const exceptionData: Record<string, any> = exceptionHttp.response;
 
+      console.log('statustus: ' + status);
       response.status(status).json({
         statusCode: status,
         message: exceptionData.message,

@@ -32,7 +32,7 @@ export class JwtGuard extends AuthGuard('jwt') {
       const errors: RMessage = {
         value: '',
         property: 'token',
-        constraint: [this.messageService.get('customers.profile.unauthorize')],
+        constraint: [this.messageService.get('auth.profile.unauthorize')],
       };
       throw new UnauthorizedException(
         this.responseService.error(

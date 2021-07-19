@@ -10,12 +10,11 @@ import {
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { Message, Response } from 'src/customers/customers.decorator';
-import { OtpCreateValidation } from './otp.create.validation';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { RMessage } from 'src/response/response.interface';
-import { OtpValidateValidation } from './otp.validate.validation';
 import { CustomerProfileValidation } from './customers.profile.validation';
+import { CustomerResetPasswordValidation } from './customers.resetpass.validation';
 
 export function RequestValidationPipe(schema: {
   new (...args: any[]): any;
@@ -23,7 +22,7 @@ export function RequestValidationPipe(schema: {
   class MixinRequestValidationPipe implements PipeTransform {
     constructor(
       @Response() private readonly responseService: ResponseService,
-      @Message() private readonly messageService: MessageService, //   @Logger() private readonly logger: LoggerService,
+      @Message() private readonly messageService: MessageService,
     ) {}
 
     async transform(
@@ -67,9 +66,8 @@ export function RequestValidationPipe(schema: {
 
     private toValidate(metatype: Record<string, any>): boolean {
       const types: Record<string, any>[] = [
-        OtpCreateValidation,
-        OtpValidateValidation,
         CustomerProfileValidation,
+        CustomerResetPasswordValidation,
       ];
       return types.includes(metatype);
     }

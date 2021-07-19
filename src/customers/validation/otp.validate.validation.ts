@@ -10,4 +10,5 @@ export class OtpValidateValidation {
   @Length(4, 4)
   @IsNumberString()
   otp_code: string;
+  user_type: string;
 }

@@ -9,4 +9,5 @@ export class OtpCreateValidation {
   referral_code: string;
 
   otp_code: string;
+  user_type: string;
 }

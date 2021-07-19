@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Headers,
+  HttpService,
   HttpStatus,
   Logger,
   Post,
@@ -11,18 +12,17 @@ import {
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
-import { CreateRandomNumber } from 'src/utils/general-utils';
-import { OtpDocument } from '../database/entities/otp.entity';
 import { CustomersService } from './customers.service';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
 import { Response } from 'src/response/response.decorator';
 import { RMessage } from 'src/response/response.interface';
-import { OtpValidateValidation } from './validation/otp.validate.validation';
-import { AuthJwtGuard } from 'src/hash/auth.decorators';
 import { OtpCreateValidation } from './validation/otp.create.validation';
+import { catchError, map } from 'rxjs/operators';
+import { OtpValidateValidation } from './validation/otp.validate.validation';
 import { CustomerProfileValidation } from './validation/customers.profile.validation';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { ReqUpdataProfile } from './customers.interface';
+import { CustomerResetPasswordValidation } from './validation/customers.resetpass.validation';
 
 @Controller('api/v1/customers')
 export class CustomersController {
@@ -30,6 +30,7 @@ export class CustomersController {
     private readonly customerService: CustomersService,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
+    private httpService: HttpService,
   ) {}
 
   @Post('otp')
@@ -37,44 +38,30 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpCreateValidation))
     data: OtpCreateValidation,
   ): Promise<any> {
-    const logger = new Logger();
-    const otpcode: string = CreateRandomNumber(4);
-    logger.log(
-      'Create OTP for ' + data.phone + ' :' + otpcode,
-      'CtrlCreateOTP ',
-    );
-
-    const existphone: OtpDocument =
-      await this.customerService.findOneOtpByPhone(data.phone);
-
-    if (existphone) {
-      const errors: RMessage = {
-        value: data.phone,
-        property: 'phone',
-        constraint: [this.messageService.get('customers.create.exist')],
-      };
-
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    } else {
-      data.otp_code = otpcode;
-
-      try {
-        await this.customerService.createOtp(data);
-        return { status: true };
-      } catch (err: any) {
-        logger.error(err, 'create try catch');
+    const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp';
+    const messageHandler: Record<string, any> = {
+      property: 'otp_code',
+      map: 'customers.create.fail',
+    };
+    const headersRequest = {
+      'Content-Type': 'application/json',
+    };
+    data.user_type = 'customer';
+    return (
+      await this.customerService.postHttp(
+        url,
+        data,
+        messageHandler,
+        headersRequest,
+      )
+    ).pipe(
+      map(async (response) => response),
+      catchError(() => {
         const errors: RMessage = {
-          value: data.phone,
-          property: 'phone',
-          constraint: [this.messageService.get('customers.create.invalid')],
+          value: '',
+          property: 'otp_code',
+          constraint: [this.messageService.get('customers.create.fail')],
         };
-
         throw new BadRequestException(
           this.responseService.error(
             HttpStatus.BAD_REQUEST,
@@ -82,8 +69,8 @@ export class CustomersController {
             'Bad Request',
           ),
         );
-      }
-    }
+      }),
+    );
   }
 
   @Post('otp-validation')
@@ -91,89 +78,125 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpValidateValidation))
     data: OtpValidateValidation,
   ): Promise<any> {
-    const existphone: OtpDocument =
-      await this.customerService.findOneOtpByPhone(data.phone);
-
-    if (existphone) {
-      if (existphone.otp_code !== data.otp_code) {
-        const errors: RMessage = {
-          value: data.otp_code,
-          property: 'otp_code',
-          constraint: [
-            this.messageService.get('customers.validate.invalid_otp'),
-          ],
-        };
-
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            errors,
-            'Bad Request',
-          ),
-        );
-      }
-
-      if (existphone.validated == true) {
-        const errors: RMessage = {
-          value: data.otp_code,
-          property: 'otp_code',
-          constraint: [this.messageService.get('customers.validate.validated')],
-        };
-
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            errors,
-            'Bad Request',
-          ),
-        );
-      }
-
-      try {
-        existphone.validated = true;
-        this.customerService.updateFullOtp(existphone);
-
-        //Create Token
-        const idotp: number = existphone.id_otp;
-        const phone = data.phone;
-        const accessToken: string =
-          await this.customerService.createAccessToken({
-            idotp,
-            phone,
-          });
-        const rdata: Record<string, string> = { token: accessToken };
-
-        return this.responseService.success(
-          true,
-          this.messageService.get('customers.validate.success'),
-          rdata,
-        );
-      } catch (err: any) {
-        const errors: RMessage = {
-          value: data.otp_code,
-          property: 'otp_code',
-          constraint: [
-            this.messageService.get('customers.validate.invalid_otp'),
-          ],
-        };
-
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            errors,
-            'Bad Request',
-          ),
-        );
-      }
-    }
-    const errors: RMessage = {
-      value: data.phone,
-      property: 'phone',
-      constraint: [this.messageService.get('customers.create.invalid')],
+    const url: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-validation';
+    const headersRequest = {
+      'Content-Type': 'application/json',
     };
+    const messageHandler: Record<string, any> = {
+      property: 'otp_code',
+      map: 'customers.validate.fail',
+    };
+    data.user_type = 'customer';
+    return (
+      await this.customerService.postHttp(
+        url,
+        data,
+        messageHandler,
+        headersRequest,
+      )
+    ).pipe(
+      map(async (response) => response),
+      catchError((erro) => {
+        let errors: RMessage;
+        if (erro.status == 400) {
+          errors = erro.response.error.message[0];
+        } else {
+          errors = {
+            value: '',
+            property: 'otp_code',
+            constraint: [this.messageService.get('customers.validate.fail')],
+          };
+        }
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            errors,
+            'Bad Request',
+          ),
+        );
+      }),
+    );
+  }
 
-    throw new BadRequestException(
-      this.responseService.error(HttpStatus.BAD_REQUEST, errors, 'Bad Request'),
+  @Put('profile')
+  async profile(
+    @Body(RequestValidationPipe(CustomerProfileValidation))
+    data: CustomerProfileValidation,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    const url: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/profile';
+    const headersRequest: Record<string, any> = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    };
+    const messageHandler: Record<string, any> = {
+      property: 'token',
+      map: 'customers.profile.fail',
+    };
+    data.user_type = 'customer';
+    return (
+      await this.customerService.putHttp(
+        url,
+        data,
+        messageHandler,
+        headersRequest,
+      )
+    ).pipe(
+      map(async (response) => {
+        const profile: ProfileDocument =
+          await this.customerService.findOneCustomerByPhone(
+            response.data.payload.phone,
+          );
+
+        if (profile) {
+          const errors: RMessage = {
+            value: response.data.payload.phone,
+            property: 'phone',
+            constraint: [
+              this.messageService.get('customers.profile.invalid_phone'),
+            ],
+          };
+          throw new BadRequestException(
+            this.responseService.error(
+              HttpStatus.BAD_REQUEST,
+              errors,
+              'Bad Request',
+            ),
+          );
+        }
+
+        try {
+          const profiledata: ReqUpdataProfile = {
+            phone: response.data.payload.phone,
+            name: data.name,
+            email: data.email,
+            password: data.password,
+            dob: data.dob,
+          };
+          await this.customerService.createCustomerProfile(profiledata);
+          delete response.data.payload;
+          return this.responseService.success(
+            true,
+            this.messageService.get('customers.profile.success'),
+            response.data,
+          );
+        } catch (err: any) {
+          const errors: RMessage = {
+            value: '',
+            property: 'request',
+            constraint: [this.messageService.get('customers.profile.invalid')],
+          };
+          throw new BadRequestException(
+            this.responseService.error(
+              HttpStatus.BAD_REQUEST,
+              errors,
+              'Bad Request',
+            ),
+          );
+        }
+      }),
     );
   }
 
@@ -188,14 +211,12 @@ export class CustomersController {
     let data_property: string;
 
     if (
-      typeof data.email !== 'undefined' &&
+      typeof data.email != 'undefined' &&
       typeof data.phone == 'undefined' &&
-      data.email !== ''
+      data.email != ''
     ) {
       const err: string = await this.customerService.validateLoginEmail(data);
-      logger.log('Validasi Login by Email: ' + err, 'troubleshoot');
-
-      if (err) {
+      if (typeof err != 'undefined') {
         const errors: RMessage = {
           value: '',
           property: 'request',
@@ -203,7 +224,6 @@ export class CustomersController {
             this.messageService.get('customers.login.invalid_email'),
           ],
         };
-
         throw new BadRequestException(
           this.responseService.error(
             HttpStatus.BAD_REQUEST,
@@ -214,16 +234,17 @@ export class CustomersController {
       }
 
       existcust = await this.customerService.findOneCustomerByEmail(data.email);
-      data_value = data.email;
-      data_property = 'email';
+      if (existcust) {
+        logger.log(existcust, 'existcust');
+        data_value = data.email;
+        data_property = 'email';
+      }
     } else if (
-      typeof data.phone !== 'undefined' &&
+      typeof data.phone != 'undefined' &&
       typeof data.email == 'undefined' &&
       data.phone !== ''
     ) {
       const err: string = await this.customerService.validateLoginPhone(data);
-      logger.log('Validasi Login by Phone: ' + err, 'troubleshoot');
-
       if (err) {
         const errors: RMessage = {
           value: '',
@@ -241,10 +262,11 @@ export class CustomersController {
           ),
         );
       }
-
       existcust = await this.customerService.findOneCustomerByPhone(data.phone);
-      data_value = data.phone;
-      data_property = 'phone';
+      if (existcust) {
+        data_value = data.phone;
+        data_property = 'phone';
+      }
     } else if (
       typeof data.email == 'undefined' &&
       typeof data.phone == 'undefined'
@@ -263,7 +285,6 @@ export class CustomersController {
         ),
       );
     }
-
     if (!existcust) {
       const errors: RMessage = {
         value: data_value,
@@ -282,11 +303,10 @@ export class CustomersController {
       );
     }
 
-    const validate: boolean = await this.customerService.validateCustomer(
+    const validate: boolean = await this.customerService.validatePassword(
       data.password,
       existcust.password,
     );
-
     if (!validate) {
       const errors: RMessage = {
         value: data.password,
@@ -306,75 +326,50 @@ export class CustomersController {
     }
 
     const { id_profile, phone, password, email, name, dob } = existcust;
-    const accessToken: string = await this.customerService.createAccessToken({
-      id_profile,
-      phone,
-      password,
-      email,
-      name,
-      dob,
-    });
-    const rdata: Record<string, string> = { token: accessToken };
-    return this.responseService.success(
-      true,
-      this.messageService.get('customers.login.success'),
-      rdata,
-    );
-  }
-
-  @AuthJwtGuard()
-  @Put('profile')
-  async profile(
-    @Body(RequestValidationPipe(CustomerProfileValidation))
-    data: CustomerProfileValidation,
-    @Headers('Authorization') token: string,
-  ): Promise<any> {
-    const logger = new Logger();
-    token = token.replace('Bearer ', '');
-
-    logger.log(token, 'UpdProfilToken');
-
-    const payload: Record<string, any> =
-      await this.customerService.validateAccessToken(token);
-    const profile: ProfileDocument =
-      await this.customerService.findOneCustomerByPhone(payload.phone);
-
-    if (profile) {
-      const errors: RMessage = {
-        value: payload.phone,
-        property: 'phone',
-        constraint: [
-          this.messageService.get('customers.profile.invalid_phone'),
-        ],
-      };
-
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    } else {
-      try {
-        const profiledata: ReqUpdataProfile = {
-          phone: payload.phone,
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          dob: data.dob,
-        };
-        await this.customerService.createCustomerProfile(profiledata);
+    const http_req: Record<string, any> = {
+      id_profile: id_profile,
+      phone: phone,
+      password: password,
+      email: email,
+      name: name,
+      dob: dob,
+      user_type: 'customer',
+    };
+    const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/login';
+    const headersRequest: Record<string, any> = {
+      'Content-Type': 'application/json',
+    };
+    const messageHandler: Record<string, any> = {
+      property: 'token',
+      map: 'customers.login.fail',
+    };
+    return (
+      await this.customerService.postHttp(
+        url,
+        http_req,
+        messageHandler,
+        headersRequest,
+      )
+    ).pipe(
+      map(async (response) => {
+        delete response.data.payload;
         return this.responseService.success(
           true,
-          this.messageService.get('customers.profile.success'),
+          this.messageService.get('customers.login.success'),
+          response.data,
         );
-      } catch (err: any) {
-        const errors: RMessage = {
-          value: '',
-          property: 'request',
-          constraint: [this.messageService.get('customers.profile.invalid')],
-        };
+      }),
+      catchError((erro) => {
+        let errors: RMessage;
+        if (erro.status == 400) {
+          errors = erro.response.error.message[0];
+        } else {
+          errors = {
+            value: '',
+            property: 'login',
+            constraint: [this.messageService.get('customers.login.fail')],
+          };
+        }
         throw new BadRequestException(
           this.responseService.error(
             HttpStatus.BAD_REQUEST,
@@ -382,7 +377,119 @@ export class CustomersController {
             'Bad Request',
           ),
         );
-      }
-    }
+      }),
+    );
+  }
+
+  @Post('refresh-token')
+  async refreshToken(@Headers('Authorization') token: string): Promise<any> {
+    const url: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/refresh-token';
+    const headersRequest: Record<string, any> = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    };
+    const messageHandler: Record<string, any> = {
+      property: 'token',
+      map: 'customers.profile.fail',
+    };
+    const http_req: Record<string, any> = {
+      user_type: 'customer',
+    };
+    return (
+      await this.customerService.postHttp(
+        url,
+        http_req,
+        messageHandler,
+        headersRequest,
+      )
+    ).pipe(
+      map(async (response) => {
+        return this.responseService.success(
+          true,
+          this.messageService.get('customers.profile.success'),
+          response.data,
+        );
+      }),
+    );
+  }
+
+  @Put('reset-password')
+  async resetPassword(
+    @Body(RequestValidationPipe(CustomerResetPasswordValidation))
+    data: CustomerResetPasswordValidation,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    const url: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/reset-password';
+    const headersRequest: Record<string, any> = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    };
+    const messageHandler: Record<string, any> = {
+      property: 'token',
+      map: 'customers.reset_password.fail',
+    };
+    const http_req: Record<string, any> = {
+      user_type: 'customer',
+    };
+    return (
+      await this.customerService.putHttp(
+        url,
+        http_req,
+        messageHandler,
+        headersRequest,
+      )
+    ).pipe(
+      map(async (response) => {
+        const salt = await this.customerService.randomSalt();
+        const passwordHash = await this.customerService.hashPassword(
+          data.password,
+          salt,
+        );
+        data.password = passwordHash;
+        const profile: ProfileDocument =
+          await this.customerService.findOneCustomerByPhone(
+            response.data.payload.phone,
+          );
+        if (!profile) {
+          const errors = {
+            value: '',
+            property: 'reset-password',
+            constraint: [
+              this.messageService.get('customers.reset_password.fail'),
+            ],
+          };
+          throw new BadRequestException(
+            this.responseService.error(
+              HttpStatus.BAD_REQUEST,
+              errors,
+              'Bad Request',
+            ),
+          );
+        }
+        profile.password = passwordHash;
+        try {
+          await this.customerService.updateCustomerProfile(profile);
+          return this.responseService.success(
+            true,
+            this.messageService.get('customers.reset_password.success'),
+          );
+        } catch (err) {
+          const errors = {
+            value: '',
+            property: 'login',
+            constraint: [this.messageService.get('customers.login.fail')],
+          };
+          throw new BadRequestException(
+            this.responseService.error(
+              HttpStatus.BAD_REQUEST,
+              errors,
+              'Bad Request',
+            ),
+          );
+        }
+      }),
+    );
   }
 }

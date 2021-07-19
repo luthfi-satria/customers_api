@@ -1,56 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpService,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { validateOrReject } from 'class-validator';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
-import { Hash } from 'src/hash/hash.decorator';
-import { HashService } from 'src/hash/hash.service';
 import { Repository } from 'typeorm';
-import { OtpDocument } from '../database/entities/otp.entity';
 import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
 import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
+import { Observable } from 'rxjs';
+import { AxiosResponse } from 'axios';
+import { catchError, map } from 'rxjs/operators';
+import { RMessage } from 'src/response/response.interface';
+import { MessageService } from 'src/message/message.service';
+import { ResponseService } from 'src/response/response.service';
+import { compare, genSalt, hash } from 'bcrypt';
+import { HashService } from 'src/hash/hash.service';
+import { Hash } from 'src/hash/hash.decorator';
 
 @Injectable()
 export class CustomersService {
   constructor(
-    @InjectRepository(OtpDocument)
-    private readonly otpRepository: Repository<OtpDocument>,
     @InjectRepository(ProfileDocument)
     private readonly profileRepository: Repository<ProfileDocument>,
+    private httpService: HttpService,
+    private readonly messageService: MessageService,
+    private readonly responseService: ResponseService,
     @Hash() private readonly hashService: HashService,
   ) {}
-
-  async createOtp(data: Record<string, any>): Promise<OtpDocument> {
-    const createotp: Partial<OtpDocument> = {
-      // id_otp: data.id_otp,
-      phone: data.phone,
-      referral_code: data.referral_code,
-      otp_code: data.otp_code,
-    };
-
-    return this.otpRepository.save(createotp);
-  }
-
-  async updateFullOtp(data: Record<string, any>): Promise<OtpDocument> {
-    const createotp: OtpDocument = {
-      id_otp: data.id_otp,
-      phone: data.phone,
-      referral_code: data.referral_code,
-      otp_code: data.otp_code,
-      validated: data.validated,
-    };
-
-    return this.otpRepository.save(createotp);
-  }
-
-  findOneOtpByPhone(id: string): Promise<OtpDocument> {
-    return this.otpRepository.findOne({ where: { phone: id } });
-  }
-
-  findOneOtpByIDPhone(id: number, phone: string): Promise<OtpDocument> {
-    return this.otpRepository.findOne({
-      where: { id_profile: id, phone: phone },
-    });
-  }
 
   findOneCustomerByPhone(id: string): Promise<ProfileDocument> {
     return this.profileRepository.findOne({ where: { phone: id } });
@@ -75,24 +55,41 @@ export class CustomersService {
       password: passwordHash,
       dob: data.dob,
     };
-
     return this.profileRepository.save(create_profile);
   }
+
+  async updateCustomerProfile(
+    data: Record<string, any>,
+  ): Promise<ProfileDocument> {
+    return this.profileRepository.save(data);
+  }
+
   //--------------------------------------------------------------
 
-  async createAccessToken(payload: Record<string, any>): Promise<string> {
-    return this.hashService.jwtSign(payload);
+  // bcrypt
+  async hashPassword(passwordString: string, salt: string): Promise<string> {
+    return hash(passwordString, salt);
   }
 
-  async validateAccessToken(token: string): Promise<Record<string, any>> {
-    return this.hashService.jwtPayload(token);
+  async randomSalt(): Promise<string> {
+    // Env Variable
+    const defaultPasswordSaltLength = Number(process.env.passwordSaltLength);
+
+    return genSalt(defaultPasswordSaltLength);
   }
 
-  async validateCustomer(
+  async validatePassword(
     passwordString: string,
     passwordHash: string,
   ): Promise<boolean> {
-    return this.hashService.bcryptComparePassword(passwordString, passwordHash);
+    return this.bcryptComparePassword(passwordString, passwordHash);
+  }
+
+  async bcryptComparePassword(
+    passwordString: string,
+    passwordHashed: string,
+  ): Promise<boolean> {
+    return compare(passwordString, passwordHashed);
   }
 
   async validateLoginEmail(input: Record<string, any>): Promise<any> {
@@ -119,5 +116,61 @@ export class CustomersService {
       console.log('Validation failed. Errors: ', errors);
       return errors;
     }
+  }
+
+  async postHttp(
+    url: string,
+    body: Record<string, any>,
+    msgHandler: Record<string, any>,
+    headers: Record<string, any>,
+  ): Promise<Observable<AxiosResponse<any>>> {
+    return this.httpService.post(url, body, { headers: headers }).pipe(
+      map((response) => response.data),
+      catchError((err) => {
+        const logger = new Logger();
+        logger.debug('error: ' + err);
+        logger.debug('error response: ' + err.response.data);
+        const errors: RMessage = {
+          value: '',
+          property: msgHandler.property,
+          constraint: [this.messageService.get(msgHandler.map)],
+        };
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            errors,
+            'Internal Server Error',
+          ),
+        );
+      }),
+    );
+  }
+
+  async putHttp(
+    url: string,
+    body: Record<string, any>,
+    msgHandler: Record<string, any>,
+    headers: Record<string, any>,
+  ): Promise<Observable<AxiosResponse<any>>> {
+    return this.httpService.put(url, body, { headers: headers }).pipe(
+      map((response) => response.data),
+      catchError((err) => {
+        const logger = new Logger();
+        logger.debug('error: ' + err);
+        logger.debug('error response: ' + err.response.data);
+        const errors: RMessage = {
+          value: '',
+          property: msgHandler.property,
+          constraint: [this.messageService.get(msgHandler.map)],
+        };
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            errors,
+            'Internal Server Error',
+          ),
+        );
+      }),
+    );
   }
 }
