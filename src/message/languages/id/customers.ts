@@ -18,7 +18,7 @@ export default {
     unauthorize: 'Authorisasi tidak valid.',
     invalid: 'Data yang anda masukan tidak valid.',
     invalid_phone: 'Nomor Telepon sudah terdaftar.',
-    existemail: 'Email sudah terdaftar.',
+    existemail: 'Email sudah diapakai oleh user lain.',
   },
   login: {
     success: 'Login Success.',
@@ -26,6 +26,14 @@ export default {
     invalid: 'Data yang anda masukan tidak valid',
     invalid_email: 'Email dan atau password tidak benar',
     invalid_phone: 'Nomor telepon dan atau password tidak benar',
+    password_null: 'Data anda belum lengkap. Silakan lengkapi profile anda.',
+  },
+  refresh_token: {
+    success: 'Refresh Token Success.',
+    fail: 'Refresh Token Gagal.',
+    update_failed: 'Reset Password Gagal',
+    invalid: 'Data yang anda masukan tidak valid',
+    invalid_token: 'Token tidak benar',
   },
   reset_password: {
     success: 'Reset Password Success.',

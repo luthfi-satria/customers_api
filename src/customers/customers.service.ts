@@ -62,6 +62,15 @@ export class CustomersService {
     return this.profileRepository.save(create_profile);
   }
 
+  async createCustomerProfileOTP(
+    data: Record<string, any>,
+  ): Promise<ProfileDocument> {
+    const create_profile: Partial<ProfileDocument> = {
+      phone: data.phone,
+    };
+    return this.profileRepository.save(create_profile);
+  }
+
   async updateCustomerProfile(
     data: Record<string, any>,
   ): Promise<ProfileDocument> {

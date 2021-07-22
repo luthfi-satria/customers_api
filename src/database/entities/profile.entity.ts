@@ -14,16 +14,16 @@ export class ProfileDocument {
   @Column({ length: '15' })
   phone: string;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', nullable: true })
   dob: Date;
 
   @CreateDateColumn({ nullable: true })
