@@ -18,6 +18,7 @@ export default {
     unauthorize: 'Authorisasi tidak valid.',
     invalid: 'Data yang anda masukan tidak valid.',
     invalid_phone: 'Nomor Telepon sudah terdaftar.',
+    existemail: 'Email sudah terdaftar.',
   },
   login: {
     success: 'Login Success.',
@@ -26,7 +27,7 @@ export default {
     invalid_email: 'Email dan atau password tidak benar',
     invalid_phone: 'Nomor telepon dan atau password tidak benar',
   },
-  resetpassword: {
+  reset_password: {
     success: 'Reset Password Success.',
     fail: 'Reset Password Gagal.',
     update_failed: 'Reset Password Gagal',

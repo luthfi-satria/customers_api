@@ -6,6 +6,7 @@ export type IApplyDecorator = <TFunction extends Function, Y>(
 ) => void;
 
 export interface ReqUpdataProfile {
+  id_profile?: number;
   phone: string;
   name: string;
   email: string;

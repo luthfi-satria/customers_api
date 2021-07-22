@@ -38,6 +38,7 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpCreateValidation))
     data: OtpCreateValidation,
   ): Promise<any> {
+    const logger = new Logger();
     const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp';
     const messageHandler: Record<string, any> = {
       property: 'otp_code',
@@ -56,11 +57,12 @@ export class CustomersController {
       )
     ).pipe(
       map(async (response) => response),
-      catchError(() => {
+      catchError((err) => {
+        logger.debug(err, 'catch error');
         const errors: RMessage = {
-          value: '',
-          property: 'otp_code',
-          constraint: [this.messageService.get('customers.create.fail')],
+          value: data.phone,
+          property: 'phone',
+          constraint: [this.messageService.get('customers.create.exist')],
         };
         throw new BadRequestException(
           this.responseService.error(
@@ -78,6 +80,7 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpValidateValidation))
     data: OtpValidateValidation,
   ): Promise<any> {
+    const logger = new Logger();
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-validation';
     const headersRequest = {
@@ -98,16 +101,12 @@ export class CustomersController {
     ).pipe(
       map(async (response) => response),
       catchError((erro) => {
-        let errors: RMessage;
-        if (erro.status == 400) {
-          errors = erro.response.error.message[0];
-        } else {
-          errors = {
-            value: '',
-            property: 'otp_code',
-            constraint: [this.messageService.get('customers.validate.fail')],
-          };
-        }
+        logger.log(erro, 'catch error');
+        const errors: RMessage = {
+          value: '',
+          property: 'otp_code',
+          constraint: [this.messageService.get('customers.validate.fail')],
+        };
         throw new BadRequestException(
           this.responseService.error(
             HttpStatus.BAD_REQUEST,
@@ -145,17 +144,15 @@ export class CustomersController {
       )
     ).pipe(
       map(async (response) => {
-        const profile: ProfileDocument =
-          await this.customerService.findOneCustomerByPhone(
-            response.data.payload.phone,
-          );
-
-        if (profile) {
+        const flg_update = false;
+        const cekemail: ProfileDocument =
+          await this.customerService.findOneCustomerByEmail(data.email);
+        if (cekemail) {
           const errors: RMessage = {
-            value: response.data.payload.phone,
-            property: 'phone',
+            value: data.email,
+            property: 'email',
             constraint: [
-              this.messageService.get('customers.profile.invalid_phone'),
+              this.messageService.get('customers.profile.existemail'),
             ],
           };
           throw new BadRequestException(
@@ -166,6 +163,14 @@ export class CustomersController {
             ),
           );
         }
+        const profile: ProfileDocument =
+          await this.customerService.findOneCustomerByPhone(
+            response.data.payload.phone,
+          );
+
+        // if (profile) {
+        //   flg_update = true;
+        // }
 
         try {
           const profiledata: ReqUpdataProfile = {
@@ -175,7 +180,13 @@ export class CustomersController {
             password: data.password,
             dob: data.dob,
           };
-          await this.customerService.createCustomerProfile(profiledata);
+          if (flg_update) {
+            profiledata.id_profile = profile.id_profile;
+          }
+          await this.customerService.createCustomerProfile(
+            profiledata,
+            flg_update,
+          );
           delete response.data.payload;
           return this.responseService.success(
             true,
@@ -205,7 +216,6 @@ export class CustomersController {
     @Body()
     data: Record<string, any>,
   ): Promise<any> {
-    const logger = new Logger();
     let existcust: ProfileDocument;
     let data_value: string;
     let data_property: string;
@@ -235,7 +245,6 @@ export class CustomersController {
 
       existcust = await this.customerService.findOneCustomerByEmail(data.email);
       if (existcust) {
-        logger.log(existcust, 'existcust');
         data_value = data.email;
         data_property = 'email';
       }
@@ -479,7 +488,9 @@ export class CustomersController {
           const errors = {
             value: '',
             property: 'login',
-            constraint: [this.messageService.get('customers.login.fail')],
+            constraint: [
+              this.messageService.get('customers.reset_password.fail'),
+            ],
           };
           throw new BadRequestException(
             this.responseService.error(

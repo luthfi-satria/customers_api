@@ -42,6 +42,7 @@ export class CustomersService {
 
   async createCustomerProfile(
     data: Record<string, any>,
+    flg_update: boolean,
   ): Promise<ProfileDocument> {
     const salt: string = await this.hashService.randomSalt();
     const passwordHash = await this.hashService.hashPassword(
@@ -55,6 +56,9 @@ export class CustomersService {
       password: passwordHash,
       dob: data.dob,
     };
+    if (flg_update) {
+      create_profile.id_profile = data.id_profile;
+    }
     return this.profileRepository.save(create_profile);
   }
 
@@ -126,10 +130,7 @@ export class CustomersService {
   ): Promise<Observable<AxiosResponse<any>>> {
     return this.httpService.post(url, body, { headers: headers }).pipe(
       map((response) => response.data),
-      catchError((err) => {
-        const logger = new Logger();
-        logger.debug('error: ' + err);
-        logger.debug('error response: ' + err.response.data);
+      catchError(() => {
         const errors: RMessage = {
           value: '',
           property: msgHandler.property,
@@ -157,7 +158,6 @@ export class CustomersService {
       catchError((err) => {
         const logger = new Logger();
         logger.debug('error: ' + err);
-        logger.debug('error response: ' + err.response.data);
         const errors: RMessage = {
           value: '',
           property: msgHandler.property,
