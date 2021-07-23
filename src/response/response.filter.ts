@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Message } from 'src/message/message.decorator';
@@ -23,11 +24,13 @@ export class ResponseFilter implements ExceptionFilter {
       const exceptionHttp: Record<string, any> = exception;
       const exceptionData: Record<string, any> = exceptionHttp.response;
 
-      console.log('statustus: ' + status);
+      console.log('statustus: ' + exceptionData);
+      const logger = new Logger();
+      logger.debug(exceptionData, 'data');
       response.status(status).json({
         statusCode: status,
         message: exceptionData.message,
-        errors: exceptionData.errors,
+        error: exceptionData.error,
       });
     } else {
       // if error is not http cause
@@ -38,7 +41,12 @@ export class ResponseFilter implements ExceptionFilter {
 
       response.status(status).json({
         statusCode: status,
-        message: exception || message,
+        message: {
+          value: '',
+          property: '',
+          constraint: [message],
+        },
+        errors: message,
       });
     }
   }

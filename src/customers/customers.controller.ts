@@ -8,13 +8,14 @@ import {
   Logger,
   Post,
   Put,
+  UseFilters,
 } from '@nestjs/common';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
-import { Response } from 'src/response/response.decorator';
+import { Response, ResponseStatusCode } from 'src/response/response.decorator';
 import { RMessage } from 'src/response/response.interface';
 import { OtpCreateValidation } from './validation/otp.create.validation';
 import { catchError, map } from 'rxjs/operators';
@@ -25,6 +26,7 @@ import { ReqUpdataProfile } from './customers.interface';
 import { CustomerResetPasswordValidation } from './validation/customers.resetpass.validation';
 import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
 import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
+import { STATUS_CODES } from 'http';
 
 @Controller('api/v1/customers')
 export class CustomersController {
@@ -36,6 +38,7 @@ export class CustomersController {
   ) {}
 
   @Post('otp')
+  @ResponseStatusCode()
   async createotp(
     @Body(RequestValidationPipe(OtpCreateValidation))
     data: OtpCreateValidation,
@@ -58,21 +61,22 @@ export class CustomersController {
         headersRequest,
       )
     ).pipe(
-      map(async (response) => response),
+      map(async (response) => {
+        const rsp: Record<string, any> = response;
+        logger.debug(rsp, 'Response');
+        if (rsp.statusCode) {
+          throw new BadRequestException(
+            this.responseService.error(
+              HttpStatus.BAD_REQUEST,
+              rsp.message[0],
+              'Bad Request',
+            ),
+          );
+        }
+        return response;
+      }),
       catchError((err) => {
-        logger.debug(err, 'catch error');
-        const errors: RMessage = {
-          value: data.phone,
-          property: 'phone',
-          constraint: [this.messageService.get('customers.create.exist')],
-        };
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            errors,
-            'Bad Request',
-          ),
-        );
+        throw err;
       }),
     );
   }

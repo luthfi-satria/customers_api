@@ -139,19 +139,8 @@ export class CustomersService {
   ): Promise<Observable<AxiosResponse<any>>> {
     return this.httpService.post(url, body, { headers: headers }).pipe(
       map((response) => response.data),
-      catchError(() => {
-        const errors: RMessage = {
-          value: '',
-          property: msgHandler.property,
-          constraint: [this.messageService.get(msgHandler.map)],
-        };
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            errors,
-            'Internal Server Error',
-          ),
-        );
+      catchError((err) => {
+        throw err;
       }),
     );
   }
