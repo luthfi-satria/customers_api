@@ -8,7 +8,6 @@ import {
   Logger,
   Post,
   Put,
-  UseFilters,
 } from '@nestjs/common';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
@@ -26,7 +25,6 @@ import { ReqUpdataProfile } from './customers.interface';
 import { CustomerResetPasswordValidation } from './validation/customers.resetpass.validation';
 import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
 import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
-import { STATUS_CODES } from 'http';
 
 @Controller('api/v1/customers')
 export class CustomersController {
@@ -43,7 +41,6 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpCreateValidation))
     data: OtpCreateValidation,
   ): Promise<any> {
-    const logger = new Logger();
     const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp';
     const messageHandler: Record<string, any> = {
       property: 'otp_code',
@@ -63,7 +60,49 @@ export class CustomersController {
     ).pipe(
       map(async (response) => {
         const rsp: Record<string, any> = response;
-        logger.debug(rsp, 'Response');
+        if (rsp.statusCode) {
+          throw new BadRequestException(
+            this.responseService.error(
+              HttpStatus.BAD_REQUEST,
+              rsp.message[0],
+              'Bad Request',
+            ),
+          );
+        }
+        return response;
+      }),
+      catchError((err) => {
+        throw err;
+      }),
+    );
+  }
+
+  @Post('otp-forget-password')
+  @ResponseStatusCode()
+  async createotpforgetpassword(
+    @Body(RequestValidationPipe(OtpCreateValidation))
+    data: OtpCreateValidation,
+  ): Promise<any> {
+    const url: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-forget-password';
+    const messageHandler: Record<string, any> = {
+      property: 'otp_code',
+      map: 'customers.create.fail',
+    };
+    const headersRequest = {
+      'Content-Type': 'application/json',
+    };
+    data.user_type = 'customer';
+    return (
+      await this.customerService.postHttp(
+        url,
+        data,
+        messageHandler,
+        headersRequest,
+      )
+    ).pipe(
+      map(async (response) => {
+        const rsp: Record<string, any> = response;
         if (rsp.statusCode) {
           throw new BadRequestException(
             this.responseService.error(
@@ -173,7 +212,6 @@ export class CustomersController {
         let flg_update = false;
         const cekemail: ProfileDocument =
           await this.customerService.findOneCustomerByEmail(data.email);
-        // const logger = new Logger();
         if (cekemail) {
           if (cekemail.phone == response.data.payload.phone) {
             flg_update = true;
@@ -350,9 +388,6 @@ export class CustomersController {
         ),
       );
     }
-    const logger = new Logger();
-    logger.debug(data.password, 'args.password');
-    logger.debug(existcust.password, 'db.password');
     if (existcust.password == null) {
       const errors: RMessage = {
         value: data.password,
