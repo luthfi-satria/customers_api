@@ -12,4 +12,6 @@ export class OtpValidateValidation {
   otp_code: string;
   user_type: string;
   id_profile: number;
+  id: number;
+  roles: string[];
 }

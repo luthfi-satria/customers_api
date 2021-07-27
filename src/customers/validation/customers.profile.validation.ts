@@ -16,4 +16,5 @@ export class CustomerProfileValidation {
   gender?: string;
   user_type: string;
   id_profile: number;
+  roles: string[];
 }

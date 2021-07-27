@@ -33,14 +33,14 @@ export default {
     fail: 'Refresh Token Gagal.',
     update_failed: 'Reset Password Gagal',
     invalid: 'Data yang anda masukan tidak valid',
-    invalid_token: 'Token tidak benar',
+    invalid_token: 'Kode Token yang Anda masukan tidak valid.',
   },
   reset_password: {
     success: 'Reset Password Success.',
     fail: 'Reset Password Gagal.',
     update_failed: 'Reset Password Gagal',
     invalid: 'Data yang anda masukan tidak valid',
-    invalid_token: 'Token tidak benar',
+    invalid_token: 'Kode Token yang Anda masukan tidak valid.',
   },
   error: {
     notFound: 'Otp not found.',

@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  HttpService,
-  HttpStatus,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { validateOrReject } from 'class-validator';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
@@ -14,9 +8,6 @@ import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { catchError, map } from 'rxjs/operators';
-import { RMessage } from 'src/response/response.interface';
-import { MessageService } from 'src/message/message.service';
-import { ResponseService } from 'src/response/response.service';
 import { compare, genSalt, hash } from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
 import { Hash } from 'src/hash/hash.decorator';
@@ -27,8 +18,6 @@ export class CustomersService {
     @InjectRepository(ProfileDocument)
     private readonly profileRepository: Repository<ProfileDocument>,
     private httpService: HttpService,
-    private readonly messageService: MessageService,
-    private readonly responseService: ResponseService,
     @Hash() private readonly hashService: HashService,
   ) {}
 
@@ -38,6 +27,10 @@ export class CustomersService {
 
   findOneCustomerByEmail(id: string): Promise<ProfileDocument> {
     return this.profileRepository.findOne({ where: { email: id } });
+  }
+
+  findOneCustomerById(id: string): Promise<ProfileDocument> {
+    return this.profileRepository.findOne({ where: { id_profile: id } });
   }
 
   async createCustomerProfile(
@@ -86,7 +79,9 @@ export class CustomersService {
 
   async randomSalt(): Promise<string> {
     // Env Variable
-    const defaultPasswordSaltLength = Number(process.env.passwordSaltLength);
+    const defaultPasswordSaltLength = Number(
+      process.env.HASH_PASSWORDSALTLENGTH,
+    );
 
     return genSalt(defaultPasswordSaltLength);
   }
@@ -134,7 +129,6 @@ export class CustomersService {
   async postHttp(
     url: string,
     body: Record<string, any>,
-    msgHandler: Record<string, any>,
     headers: Record<string, any>,
   ): Promise<Observable<AxiosResponse<any>>> {
     return this.httpService.post(url, body, { headers: headers }).pipe(
@@ -148,26 +142,12 @@ export class CustomersService {
   async putHttp(
     url: string,
     body: Record<string, any>,
-    msgHandler: Record<string, any>,
     headers: Record<string, any>,
   ): Promise<Observable<AxiosResponse<any>>> {
     return this.httpService.put(url, body, { headers: headers }).pipe(
       map((response) => response.data),
       catchError((err) => {
-        const logger = new Logger();
-        logger.debug('error: ' + err);
-        const errors: RMessage = {
-          value: '',
-          property: msgHandler.property,
-          constraint: [this.messageService.get(msgHandler.map)],
-        };
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            errors,
-            'Internal Server Error',
-          ),
-        );
+        throw err;
       }),
     );
   }

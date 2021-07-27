@@ -4,7 +4,6 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Message } from 'src/message/message.decorator';
@@ -15,7 +14,7 @@ import { MessageService } from 'src/message/message.service';
 export class ResponseFilter implements ExceptionFilter {
   constructor(@Message() private readonly messageService: MessageService) {}
 
-  catch(exception: unknown, host: ArgumentsHost): void {
+  catch(exception: any, host: ArgumentsHost): void {
     const ctx: HttpArgumentsHost = host.switchToHttp();
     const response: any = ctx.getResponse();
 
@@ -24,15 +23,19 @@ export class ResponseFilter implements ExceptionFilter {
       const exceptionHttp: Record<string, any> = exception;
       const exceptionData: Record<string, any> = exceptionHttp.response;
 
-      console.log('statustus: ' + exceptionData);
-      const logger = new Logger();
-      logger.debug(exceptionData, 'data');
       response.status(status).json({
         statusCode: status,
         message: exceptionData.message,
         error: exceptionData.error,
       });
     } else {
+      if (exception.statusCode) {
+        response.status(exception.statusCode).json({
+          statusCode: exception.statusCode,
+          message: exception.message,
+          errors: exception.error,
+        });
+      }
       // if error is not http cause
       const status: number = HttpStatus.INTERNAL_SERVER_ERROR;
       const message: string = this.messageService.get(

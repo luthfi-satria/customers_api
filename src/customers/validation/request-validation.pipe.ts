@@ -4,7 +4,6 @@ import {
   BadRequestException,
   Type,
   mixin,
-  Logger,
   HttpStatus,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
@@ -33,20 +32,11 @@ export function RequestValidationPipe(schema: {
         return value;
       }
 
-      const logger = new Logger();
       const request = plainToClass(schema, value);
-
-      logger.log('Request data', 'RequestValidationPipe');
-      logger.log(request, 'RequestValidationPipe');
-
       const rawErrors: Record<string, any>[] = await validate(request);
       if (rawErrors.length > 0) {
         const error_message: string =
           this.messageService.getRequestErrorsMessage(rawErrors);
-
-        logger.log('Request Error', 'RequestValidationPipe');
-        logger.log(error_message, 'RequestValidationPipe');
-
         const errors: RMessage = {
           value: '',
           property: 'validation',
