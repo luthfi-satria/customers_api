@@ -1,11 +1,11 @@
 pipeline {
   agent any
   tools {nodejs "node"}
-  
+
   stages {
     stage('Install dependencies') {
       steps {
-        sh 'npm install'
+        sh 'npm install --force'
       }
     }
 
@@ -14,13 +14,13 @@ pipeline {
          sh 'npm test'
       }
     }
-    
+
     stage('Test Cov') {
       steps {
          sh 'npm run test:cov'
       }
     }
-    
+
     stage('Sonarqube') {
       environment {
         scannerHome = tool 'sonarqube-scanner'
