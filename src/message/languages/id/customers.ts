@@ -25,7 +25,7 @@ export default {
     fail: 'Login Gagal.',
     invalid: 'Data yang anda masukan tidak valid',
     invalid_email: 'Email dan atau password tidak benar',
-    invalid_phone: 'Nomor telepon dan atau password tidak benar',
+    invalid_phone: 'Nomor telepon tidak benar',
     password_null: 'Data anda belum lengkap. Silakan lengkapi profile anda.',
   },
   refresh_token: {

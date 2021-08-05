@@ -4,7 +4,6 @@ import { validateOrReject } from 'class-validator';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { Repository } from 'typeorm';
 import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
-import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { catchError, map } from 'rxjs/operators';
@@ -113,18 +112,17 @@ export class CustomersService {
     }
   }
 
-  async validateLoginPhone(input: Record<string, any>): Promise<any> {
-    const data = new CustomerLoginPhoneValidation();
-    data.phone = input.phone;
-    data.password = input.password;
+  // async validateLoginPhone(input: Record<string, any>): Promise<any> {
+  //   const data = new CustomerLoginPhoneValidation();
+  //   data.phone = input.phone;
 
-    try {
-      return await validateOrReject(data);
-    } catch (errors) {
-      console.log('Validation failed. Errors: ', errors);
-      return errors;
-    }
-  }
+  //   try {
+  //     return await validateOrReject(data);
+  //   } catch (errors) {
+  //     console.log('Validation failed. Errors: ', errors);
+  //     return errors;
+  //   }
+  // }
 
   async postHttp(
     url: string,

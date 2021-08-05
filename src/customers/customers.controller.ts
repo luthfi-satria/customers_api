@@ -367,51 +367,15 @@ export class CustomersController {
         ),
       );
     }
-    if (existcust.password == null) {
-      const errors: RMessage = {
-        value: data.password,
-        property: 'password',
-        constraint: [this.messageService.get('customers.login.password_null')],
-      };
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    }
 
-    const validate: boolean = await this.customerService.validatePassword(
-      data.password,
-      existcust.password,
-    );
+    const data_otp = new OtpCreateValidation();
+    data_otp.phone = data.phone;
+    data_otp.user_type = 'login';
 
-    if (!validate) {
-      const errors: RMessage = {
-        value: data.password,
-        property: 'password',
-        constraint: [this.messageService.get('customers.login.invalid_phone')],
-      };
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    }
-
-    const { id_profile } = existcust;
-    const http_req: Record<string, any> = {
-      id_profile: id_profile,
-      user_type: 'customer',
-      roles: ['customer'],
-    };
-    const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/login';
-
+    const url_otp: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-login-phone';
     return (
-      await this.customerService.postHttp(url, http_req, defaultJsonHeader)
+      await this.customerService.postHttp(url_otp, data_otp, defaultJsonHeader)
     ).pipe(
       map(async (response) => {
         const rsp: Record<string, any> = response;
@@ -425,12 +389,93 @@ export class CustomersController {
             ),
           );
         }
-        delete response.data.payload;
-        return this.responseService.success(
-          true,
-          this.messageService.get('customers.login.success'),
-          response.data,
-        );
+        return this.responseService.success(true, 'Success', response.data);
+      }),
+      catchError((err) => {
+        throw err.response.data;
+      }),
+    );
+
+    // const { id_profile } = existcust;
+    // const http_req: Record<string, any> = {
+    //   id_profile: id_profile,
+    //   user_type: 'customer',
+    //   roles: ['customer'],
+    // };
+    // const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/login';
+
+    // return (
+    //   await this.customerService.postHttp(url, http_req, defaultJsonHeader)
+    // ).pipe(
+    //   map(async (response) => {
+    //     const rsp: Record<string, any> = response;
+
+    //     if (rsp.statusCode) {
+    //       throw new BadRequestException(
+    //         this.responseService.error(
+    //           HttpStatus.BAD_REQUEST,
+    //           rsp.message[0],
+    //           'Bad Request',
+    //         ),
+    //       );
+    //     }
+    //     delete response.data.payload;
+    //     return this.responseService.success(
+    //       true,
+    //       this.messageService.get('customers.login.success'),
+    //       response.data,
+    //     );
+    //   }),
+    //   catchError((err) => {
+    //     throw err.response.data;
+    //   }),
+    // );
+  }
+
+  @Post('login/phone-otp-validation')
+  @ResponseStatusCode()
+  async validatePhoneOtpValidation(
+    @Body(RequestValidationPipe(OtpValidateValidation))
+    data: OtpValidateValidation,
+  ): Promise<any> {
+    const create_profile = await this.customerService.findOneCustomerByPhone(
+      data.phone,
+    );
+    if (!create_profile) {
+      const errors: RMessage = {
+        value: data.phone,
+        property: 'phone',
+        constraint: [this.messageService.get('customers.login.invalid_phone')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    data.id = create_profile.id_profile;
+    const url: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-login-validation';
+    data.user_type = 'customer';
+    data.roles = ['customer'];
+    return (
+      await this.customerService.postHttp(url, data, defaultJsonHeader)
+    ).pipe(
+      map(async (response) => {
+        const rsp: Record<string, any> = response;
+
+        if (rsp.statusCode) {
+          throw new BadRequestException(
+            this.responseService.error(
+              HttpStatus.BAD_REQUEST,
+              rsp.message[0],
+              'Bad Request',
+            ),
+          );
+        }
+        return response;
       }),
       catchError((err) => {
         throw err.response.data;
