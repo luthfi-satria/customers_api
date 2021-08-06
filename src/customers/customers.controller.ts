@@ -403,10 +403,10 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpValidateValidation))
     data: OtpValidateValidation,
   ): Promise<any> {
-    const create_profile = await this.customerService.findOneCustomerByPhone(
+    const customer = await this.customerService.findOneCustomerByPhone(
       data.phone,
     );
-    if (!create_profile) {
+    if (!customer) {
       const errors: RMessage = {
         value: data.phone,
         property: 'phone',
@@ -420,7 +420,7 @@ export class CustomersController {
         ),
       );
     }
-    data.id = create_profile.id_profile;
+    data.id = customer.id_profile;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-login-validation';
     data.user_type = 'customer';
