@@ -112,18 +112,6 @@ export class CustomersService {
     }
   }
 
-  // async validateLoginPhone(input: Record<string, any>): Promise<any> {
-  //   const data = new CustomerLoginPhoneValidation();
-  //   data.phone = input.phone;
-
-  //   try {
-  //     return await validateOrReject(data);
-  //   } catch (errors) {
-  //     console.log('Validation failed. Errors: ', errors);
-  //     return errors;
-  //   }
-  // }
-
   async postHttp(
     url: string,
     body: Record<string, any>,

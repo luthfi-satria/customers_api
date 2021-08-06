@@ -395,41 +395,6 @@ export class CustomersController {
         throw err.response.data;
       }),
     );
-
-    // const { id_profile } = existcust;
-    // const http_req: Record<string, any> = {
-    //   id_profile: id_profile,
-    //   user_type: 'customer',
-    //   roles: ['customer'],
-    // };
-    // const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/login';
-
-    // return (
-    //   await this.customerService.postHttp(url, http_req, defaultJsonHeader)
-    // ).pipe(
-    //   map(async (response) => {
-    //     const rsp: Record<string, any> = response;
-
-    //     if (rsp.statusCode) {
-    //       throw new BadRequestException(
-    //         this.responseService.error(
-    //           HttpStatus.BAD_REQUEST,
-    //           rsp.message[0],
-    //           'Bad Request',
-    //         ),
-    //       );
-    //     }
-    //     delete response.data.payload;
-    //     return this.responseService.success(
-    //       true,
-    //       this.messageService.get('customers.login.success'),
-    //       response.data,
-    //     );
-    //   }),
-    //   catchError((err) => {
-    //     throw err.response.data;
-    //   }),
-    // );
   }
 
   @Post('login/phone-otp-validation')
