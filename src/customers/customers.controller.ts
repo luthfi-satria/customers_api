@@ -389,7 +389,7 @@ export class CustomersController {
             ),
           );
         }
-        return this.responseService.success(true, 'Success', response.data);
+        return response;
       }),
       catchError((err) => {
         throw err.response.data;
