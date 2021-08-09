@@ -8,4 +8,7 @@ export default {
     success: 'Login Basci Token Success',
     test: 'Test Basic Token Success',
   },
+  token: {
+    invalid_token: 'Kode Token yang Anda masukan tidak valid.',
+  },
 };

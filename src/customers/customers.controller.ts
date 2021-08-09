@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Post,
   Put,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
@@ -164,6 +165,21 @@ export class CustomersController {
     data: CustomerProfileValidation,
     @Headers('Authorization') token: string,
   ): Promise<any> {
+    if (typeof token == 'undefined' || token == 'undefined') {
+      const errors: RMessage = {
+        value: '',
+        property: 'token',
+        constraint: [this.messageService.get('auth.token.invalid_token')],
+      };
+      throw new UnauthorizedException(
+        this.responseService.error(
+          HttpStatus.UNAUTHORIZED,
+          errors,
+          'UNAUTHORIZED',
+        ),
+      );
+    }
+
     const payload = await this.hashService.jwtPayload(
       token.replace('Bearer ', ''),
     );
