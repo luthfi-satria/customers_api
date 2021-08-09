@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CustomerProfileValidation {
   @IsNotEmpty()
@@ -7,10 +7,12 @@ export class CustomerProfileValidation {
   @IsNotEmpty()
   password: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEmail()
   email: string;
 
+  @IsOptional()
+  @IsNotEmpty()
   dob: string;
 
   gender?: string;

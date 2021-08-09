@@ -12,6 +12,7 @@ import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
+import { HashService } from './../hash/hash.service';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
 import { Response, ResponseStatusCode } from 'src/response/response.decorator';
 import { RMessage } from 'src/response/response.interface';
@@ -33,6 +34,7 @@ const defaultJsonHeader: Record<string, any> = {
 export class CustomersController {
   constructor(
     private readonly customerService: CustomersService,
+    private readonly hashService: HashService,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
     private httpService: HttpService,
@@ -162,6 +164,9 @@ export class CustomersController {
     data: CustomerProfileValidation,
     @Headers('Authorization') token: string,
   ): Promise<any> {
+    const payload = await this.hashService.jwtPayload(
+      token.replace('Bearer ', ''),
+    );
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/profile';
     const headersRequest: Record<string, any> = {
@@ -170,12 +175,10 @@ export class CustomersController {
     };
     data.user_type = 'customer';
     data.roles = ['customer'];
-
     return (await this.customerService.putHttp(url, data, headersRequest)).pipe(
       map(async (response) => {
         const rsp: Record<string, any> = response;
-
-        if (rsp.statusCode) {
+        if (!rsp.success) {
           throw new BadRequestException(
             this.responseService.error(
               HttpStatus.BAD_REQUEST,
@@ -186,7 +189,10 @@ export class CustomersController {
         }
 
         const cekemail: ProfileDocument =
-          await this.customerService.findOneCustomerByEmail(data.email);
+          await this.customerService.findOneCustomerByEmailExceptId(
+            data.email,
+            payload.id,
+          );
 
         if (cekemail) {
           const errors: RMessage = {
@@ -231,9 +237,8 @@ export class CustomersController {
             name: data.name,
             email: data.email,
             password: data.password,
-            dob: data.dob,
+            dob: data.dob ?? null,
           };
-
           await this.customerService.createCustomerProfile(profiledata, true);
           delete response.data.payload;
           return this.responseService.success(

@@ -24,8 +24,24 @@ export class CustomersService {
     return this.profileRepository.findOne({ where: { phone: id } });
   }
 
-  findOneCustomerByEmail(id: string): Promise<ProfileDocument> {
-    return this.profileRepository.findOne({ where: { email: id } });
+  findOneCustomerByEmail(email: string): Promise<ProfileDocument> {
+    return this.profileRepository.findOne({ where: { email } });
+  }
+
+  async findOneCustomerByEmailExceptId(
+    email: string,
+    id: string,
+  ): Promise<ProfileDocument> {
+    try {
+      const profile = await this.profileRepository
+        .createQueryBuilder()
+        .where('email = :email', { email: email })
+        .andWhere('id_profile != :id', { id: id })
+        .getOne();
+      return profile;
+    } catch (error: any) {
+      return null;
+    }
   }
 
   findOneCustomerById(id: string): Promise<ProfileDocument> {
