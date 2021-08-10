@@ -378,7 +378,9 @@ export class CustomersController {
       const errors: RMessage = {
         value: data.phone,
         property: 'phone',
-        constraint: [this.messageService.get('customers.login.invalid_phone')],
+        constraint: [
+          this.messageService.get('customers.login.unregistered_phone'),
+        ],
       };
       throw new BadRequestException(
         this.responseService.error(
@@ -431,7 +433,9 @@ export class CustomersController {
       const errors: RMessage = {
         value: data.phone,
         property: 'phone',
-        constraint: [this.messageService.get('customers.login.invalid_phone')],
+        constraint: [
+          this.messageService.get('customers.login.unregistered_phone'),
+        ],
       };
       throw new BadRequestException(
         this.responseService.error(

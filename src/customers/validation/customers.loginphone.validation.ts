@@ -1,6 +1,7 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsNumberString } from 'class-validator';
 
 export class CustomerLoginPhoneValidation {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Nomor telpon tidak boleh kosong' })
+  @IsNumberString({}, { message: 'Harus angka' })
   phone: string;
 }
