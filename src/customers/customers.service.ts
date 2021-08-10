@@ -101,31 +101,11 @@ export class CustomersService {
     return genSalt(defaultPasswordSaltLength);
   }
 
-  async validatePassword(
-    passwordString: string,
-    passwordHash: string,
-  ): Promise<boolean> {
-    return this.bcryptComparePassword(passwordString, passwordHash);
-  }
-
   async bcryptComparePassword(
     passwordString: string,
     passwordHashed: string,
   ): Promise<boolean> {
     return compare(passwordString, passwordHashed);
-  }
-
-  async validateLoginEmail(input: Record<string, any>): Promise<any> {
-    const data = new CustomerLoginEmailValidation();
-    data.email = input.email;
-    data.password = input.password;
-
-    try {
-      return await validateOrReject(data);
-    } catch (errors) {
-      console.log('Validation failed. Errors: ', errors);
-      return errors;
-    }
   }
 
   async postHttp(

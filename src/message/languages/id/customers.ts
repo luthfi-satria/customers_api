@@ -33,6 +33,10 @@ export default {
       code: 'UNREGISTERED_PHONE',
       message: 'No. handphone belum terdaftar. Daftar sebagai member?',
     },
+    unregistered_email: {
+      code: 'UNREGISTERED_EMAIL',
+      message: 'Email belum terdaftar. Daftar sebagai member?',
+    },
     password_null: 'Data anda belum lengkap. Silakan lengkapi profile anda.',
   },
   refresh_token: {
