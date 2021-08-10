@@ -18,7 +18,7 @@ async function bootstrap() {
             return {
               value,
               property,
-              constraints: Object.keys(constraints).map((key) => {
+              constraint: Object.keys(constraints).map((key) => {
                 return {
                   code: `VALIDATION_${key.toUpperCase()}`,
                   message: constraints[key],
