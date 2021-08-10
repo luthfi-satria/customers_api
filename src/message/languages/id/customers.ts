@@ -4,8 +4,7 @@ export default {
     fail: 'Create Otp Gagal.',
     exist: {
       code: 'PHONE_ALREADY_REGISTERED',
-      message:
-        'Nomor telepon yang anda masukan sudah terdaftar, silahkan login',
+      message: 'Nomor handphone kamu sudah terdaftar. Masuk ke aplikasi?',
     },
     invalid: 'Nomor telepon yang anda masukan tidak valid',
     invalid_referral: 'Kode referral yang anda masukan tidak valid',
@@ -32,7 +31,7 @@ export default {
     invalid_phone: 'Nomor telepon tidak benar',
     unregistered_phone: {
       code: 'UNREGISTERED_PHONE',
-      message: 'Nomor Telepon sudah terdaftar.',
+      message: 'No. handphone belum terdaftar. Daftar sebagai member?',
     },
     password_null: 'Data anda belum lengkap. Silakan lengkapi profile anda.',
   },
