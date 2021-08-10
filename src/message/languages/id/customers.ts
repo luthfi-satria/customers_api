@@ -2,7 +2,11 @@ export default {
   create: {
     success: 'Create Otp Success.',
     fail: 'Create Otp Gagal.',
-    exist: 'Nomor telepon yang anda masukan sudah terdaftar, silahkan login',
+    exist: {
+      code: 'PHONE_ALREADY_REGISTERED',
+      message:
+        'Nomor telepon yang anda masukan sudah terdaftar, silahkan login',
+    },
     invalid: 'Nomor telepon yang anda masukan tidak valid',
     invalid_referral: 'Kode referral yang anda masukan tidak valid',
   },
