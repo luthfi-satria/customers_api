@@ -25,7 +25,7 @@ pipeline {
 
     stage('Scan Code') {
       when {
-        branch 'development'
+        expression { BRANCH_NAME ==~ /(development|jenkins)/ }
       }
       steps {
         sh 'ls -al'
