@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, Validate } from 'class-validator';
+import { ValidDOBRule } from './valid-dob.rule';
 
 export class CustomerProfileValidation {
   @IsNotEmpty()
@@ -13,6 +14,9 @@ export class CustomerProfileValidation {
 
   @IsOptional()
   @IsNotEmpty()
+  @Validate(ValidDOBRule, {
+    message: 'Format tanggal lahir tidak valid (dd/mm/yyyy)',
+  })
   dob: string;
 
   gender?: string;
