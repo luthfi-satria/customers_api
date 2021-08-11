@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: customers-svc
+spec:
+  selector:
+    app: customers
+  ports:
+    - port: 3000

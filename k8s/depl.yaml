@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customers-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customers
+  template:
+    metadata:
+      labels:
+        app: customers
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+      containers:
+      - name: customers
+        image: efood/customers
+        # resources:
+        #   limits:
+        #     memory: "128Mi"
+        #     cpu: "500m"
+        ports:
+          - name: customers
+            protocol: TCP
+            containerPort: 3000
+        envFrom:
+          - configMapRef:
+              name: efood-config
