@@ -16,7 +16,7 @@ spec:
         - name: ghcr
       containers:
       - name: customers
-        image: efood/customers
+        image: ghcr.io/wofood/efood_customers
         # resources:
         #   limits:
         #     memory: "128Mi"
