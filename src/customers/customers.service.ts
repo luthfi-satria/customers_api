@@ -1,15 +1,14 @@
 import { HttpService, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { validateOrReject } from 'class-validator';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { Repository } from 'typeorm';
-import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { catchError, map } from 'rxjs/operators';
 import { compare, genSalt, hash } from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
 import { Hash } from 'src/hash/hash.decorator';
+import * as moment from 'moment';
 
 @Injectable()
 export class CustomersService {
@@ -62,7 +61,7 @@ export class CustomersService {
       name: data.name,
       email: data.email,
       password: passwordHash,
-      dob: data.dob,
+      dob: moment(data.dob, 'DD/MM/YYYY', true).toDate(),
     };
     if (flg_update) {
       create_profile.id_profile = data.id_profile;
