@@ -8,6 +8,7 @@ import { MessageModule } from './message/message.module';
 import { CustomersModule } from './customers/customers.module';
 import { ResponseModule } from './response/response.module';
 import { HashModule } from './hash/hash.module';
+import { AddressModule } from './address/address.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HashModule } from './hash/hash.module';
     ResponseModule,
     HashModule,
     HttpModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],
