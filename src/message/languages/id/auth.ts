@@ -9,6 +9,13 @@ export default {
     test: 'Test Basic Token Success',
   },
   token: {
-    invalid_token: 'Kode Token yang Anda masukan tidak valid.',
+    invalid_token: {
+      code: 'INVALID_TOKEN',
+      message: 'Kode Token yang Anda masukan tidak valid.',
+    },
+    forbidden: {
+      code: 'FORBIDDEN',
+      message: 'Access Forbidden.',
+    },
   },
 };

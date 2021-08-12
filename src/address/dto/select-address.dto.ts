@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional, IsString, IsUUID } from 'class-validator';
 import { CreateAddressDto } from './create-address.dto';
 
 export class SelectAddressDto extends PartialType(CreateAddressDto) {
@@ -14,4 +14,9 @@ export class SelectAddressDto extends PartialType(CreateAddressDto) {
   @IsOptional()
   @IsNumberString()
   limit = '10';
+
+  @IsOptional()
+  @IsUUID()
+  @IsString()
+  id_profile: string;
 }

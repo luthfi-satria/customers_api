@@ -1,5 +1,6 @@
 import {
   IsBoolean,
+  IsEmpty,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
@@ -28,4 +29,7 @@ export class CreateAddressDto {
   @IsNotEmpty()
   @IsBoolean()
   is_active: boolean;
+
+  @IsEmpty()
+  customer_id: string;
 }

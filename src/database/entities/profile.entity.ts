@@ -18,9 +18,6 @@ export class ProfileDocument {
   name: string;
 
   @Column({ nullable: true })
-  password: string;
-
-  @Column({ nullable: true })
   email: string;
 
   @Column({ type: 'date', nullable: true })

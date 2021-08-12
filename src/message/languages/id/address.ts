@@ -21,6 +21,14 @@ export default {
     },
     unauthorize: 'Authorisasi tidak valid.',
   },
+  set_active: {
+    success: 'Set aktif alamat sukses.',
+    fail: {
+      code: 'ADDRESS_SET_ACTIVE_FAIL',
+      message: 'Set aktif alamat gagal.',
+    },
+    unauthorize: 'Authorisasi tidak valid.',
+  },
   delete: {
     success: 'Hapus alamat sukses.',
     fail: {

@@ -2,14 +2,25 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { ProfileDocument } from './profile.entity';
 
 @Entity({ name: 'customers_address' })
 export class Address {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToOne(() => ProfileDocument, (profile) => profile.id_profile)
+  @JoinColumn({ name: 'customer_id' })
+  customer: ProfileDocument;
+
+  @Column()
+  customer_id: string;
 
   @Column()
   name: string;

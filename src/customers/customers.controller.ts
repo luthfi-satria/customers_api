@@ -600,9 +600,7 @@ export class CustomersController {
           const errors = {
             value: '',
             property: 'token',
-            constraint: [
-              this.messageService.get('customers.reset_password.invalid_token'),
-            ],
+            constraint: [this.messageService.get('auth.token.invalid_token')],
           };
           throw new BadRequestException(
             this.responseService.error(
@@ -613,7 +611,7 @@ export class CustomersController {
           );
         }
 
-        profile.password = passwordHash;
+        // profile.password = passwordHash;
 
         try {
           await this.customerService.updateCustomerProfile(profile);

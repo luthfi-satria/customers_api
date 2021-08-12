@@ -20,6 +20,7 @@ import { AddressService } from './address.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { SelectAddressDto } from './dto/select-address.dto';
+import { SetActiveAddressDto } from './dto/set-active-address.dto';
 
 @Controller('api/v1/customers/address')
 export class AddressController {
@@ -35,7 +36,8 @@ export class AddressController {
     @Body() createAddressDto: CreateAddressDto,
     @Headers('Authorization') token: string,
   ) {
-    this.addressService.auth(token);
+    const payload = await this.addressService.auth(token);
+    createAddressDto.customer_id = payload.id;
     const create_address = await this.addressService.create(createAddressDto);
     if (!create_address) {
       const errors: RMessage = {
@@ -59,7 +61,12 @@ export class AddressController {
   }
 
   @Get()
-  async findAll(@Query() request: SelectAddressDto) {
+  async findAll(
+    @Query() request: SelectAddressDto,
+    @Headers('Authorization') token: string,
+  ) {
+    const payload = await this.addressService.auth(token);
+    request.id_profile = payload.id;
     const address = await this.addressService.findAll(request);
     if (!address) {
       const errors: RMessage = {
@@ -83,8 +90,12 @@ export class AddressController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const address = await this.addressService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @Headers('Authorization') token: string,
+  ) {
+    const payload = await this.addressService.auth(token);
+    const address = await this.addressService.findOne(id, payload.id);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -112,8 +123,9 @@ export class AddressController {
     @Body() updateAddressDto: UpdateAddressDto,
     @Headers('Authorization') token: string,
   ) {
-    this.addressService.auth(token);
-    const address = await this.addressService.findOne(id);
+    const payload = await this.addressService.auth(token);
+    updateAddressDto.customer_id = payload.id;
+    const address = await this.addressService.findOne(id, payload.id);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -155,8 +167,12 @@ export class AddressController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const address = await this.addressService.findOne(id);
+  async remove(
+    @Param('id') id: string,
+    @Headers('Authorization') token: string,
+  ) {
+    const payload = await this.addressService.auth(token);
+    const address = await this.addressService.findOne(id, payload.id);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -190,6 +206,55 @@ export class AddressController {
     return this.responseService.success(
       true,
       this.messageService.get('address.delete.success'),
+    );
+  }
+
+  @Put('set-active/:id')
+  async setActive(
+    @Param('id') id: string,
+    @Body() setActiveAddressDto: SetActiveAddressDto,
+    @Headers('Authorization') token: string,
+  ) {
+    const payload = await this.addressService.auth(token);
+    setActiveAddressDto.customer_id = payload.id;
+    setActiveAddressDto.id = id;
+    const address = await this.addressService.findOne(id, payload.id);
+    if (!address) {
+      const errors: RMessage = {
+        value: id,
+        property: 'id',
+        constraint: [this.messageService.get('address.select.not_found')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    const update_address = await this.addressService.setActive(
+      setActiveAddressDto,
+    );
+    if (!update_address) {
+      const errors: RMessage = {
+        value: '',
+        property: '',
+        constraint: [this.messageService.get('address.set_active.fail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    return this.responseService.success(
+      true,
+      this.messageService.get('address.set_active.success'),
+      update_address,
     );
   }
 }

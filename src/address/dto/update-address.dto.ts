@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import {
   IsBoolean,
+  IsEmpty,
   IsLatitude,
   IsLongitude,
   IsOptional,
@@ -30,4 +31,7 @@ export class UpdateAddressDto extends PartialType(CreateAddressDto) {
   @IsOptional()
   @IsBoolean()
   is_active: boolean;
+
+  @IsEmpty()
+  customer_id: string;
 }
