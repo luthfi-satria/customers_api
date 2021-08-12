@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Address } from 'src/database/entities/address.entity';
 import { Repository } from 'typeorm';
 import { CreateAddressDto } from './dto/create-address.dto';
+import { SelectAddressDto } from './dto/select-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 
 @Injectable()
@@ -16,12 +17,16 @@ export class AddressService {
     return await this.addressRepository.save(create_address);
   }
 
-  async findAll() {
+  async findAll(selectAddressDto: SelectAddressDto) {
     return await this.addressRepository.find();
   }
 
   async findOne(id: string) {
-    return await this.addressRepository.findOne(id);
+    return await this.addressRepository.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
   async update(id: string, updateAddressDto: UpdateAddressDto) {
@@ -29,7 +34,10 @@ export class AddressService {
       id,
       updateAddressDto,
     );
-    return update_address;
+    if (!update_address.affected) {
+      return false;
+    }
+    return await this.findOne(id);
   }
 
   async remove(id: string) {

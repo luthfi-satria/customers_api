@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsLatitude,
+  IsLongitude,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class CreateAddressDto {
   @IsNotEmpty()
@@ -8,4 +14,18 @@ export class CreateAddressDto {
   @IsNotEmpty()
   @IsString()
   address: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsLatitude({ message: 'Latitude yang anda masukan salah.' })
+  lat: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsLongitude({ message: 'Longitude yang anda masukan salah.' })
+  long: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  is_active: boolean;
 }

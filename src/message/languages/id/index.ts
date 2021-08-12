@@ -5,6 +5,7 @@ import auth from './auth';
 import app from './app';
 import response from './response';
 import customers from './customers';
+import address from './address';
 
 export default {
   user,
@@ -14,4 +15,5 @@ export default {
   app,
   response,
   customers,
+  address,
 };
