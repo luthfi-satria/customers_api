@@ -5,10 +5,6 @@ export default {
       code: 'ADDRESS_SELECT_FAIL',
       message: 'Get data alamat gagal.',
     },
-    not_found: {
-      code: 'ADDRESS_NOT_FOUND',
-      message: 'Alamat tidak ditemukan.',
-    },
   },
   create: {
     success: 'Tambah alamat sukses.',

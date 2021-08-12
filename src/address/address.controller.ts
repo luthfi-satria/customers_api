@@ -9,6 +9,7 @@ import {
   BadRequestException,
   HttpStatus,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
@@ -30,7 +31,11 @@ export class AddressController {
   ) {}
 
   @Post()
-  async create(@Body() createAddressDto: CreateAddressDto) {
+  async create(
+    @Body() createAddressDto: CreateAddressDto,
+    @Headers('Authorization') token: string,
+  ) {
+    this.addressService.auth(token);
     const create_address = await this.addressService.create(createAddressDto);
     if (!create_address) {
       const errors: RMessage = {
@@ -84,7 +89,7 @@ export class AddressController {
       const errors: RMessage = {
         value: id,
         property: 'id',
-        constraint: [this.messageService.get('address.select.not_found')],
+        constraint: [this.messageService.get('address.error.not_found')],
       };
       throw new BadRequestException(
         this.responseService.error(
@@ -105,7 +110,9 @@ export class AddressController {
   async update(
     @Param('id') id: string,
     @Body() updateAddressDto: UpdateAddressDto,
+    @Headers('Authorization') token: string,
   ) {
+    this.addressService.auth(token);
     const address = await this.addressService.findOne(id);
     if (!address) {
       const errors: RMessage = {

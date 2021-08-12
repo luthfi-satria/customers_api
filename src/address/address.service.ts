@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Response } from 'src/customers/customers.decorator';
 import { Address } from 'src/database/entities/address.entity';
-import { ListResponse } from 'src/response/response.interface';
+import { Message } from 'src/message/message.decorator';
+import { MessageService } from 'src/message/message.service';
+import { RMessage } from 'src/response/response.interface';
+import { ResponseService } from 'src/response/response.service';
 import { Repository } from 'typeorm';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { SelectAddressDto } from './dto/select-address.dto';
@@ -11,7 +15,28 @@ import { UpdateAddressDto } from './dto/update-address.dto';
 export class AddressService {
   constructor(
     @InjectRepository(Address) private addressRepository: Repository<Address>,
+    @Response() private readonly responseService: ResponseService,
+    @Message() private readonly messageService: MessageService,
   ) {}
+
+  auth(token: string) {
+    if (typeof token == 'undefined' || token == 'undefined') {
+      const errors: RMessage = {
+        value: '',
+        property: 'token',
+        constraint: [
+          this.messageService.get('merchant.createlob.invalid_token'),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.UNAUTHORIZED,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+  }
 
   async create(createAddressDto: CreateAddressDto): Promise<Address> {
     const create_address = this.addressRepository.create(createAddressDto);
