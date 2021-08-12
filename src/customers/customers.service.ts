@@ -51,18 +51,20 @@ export class CustomersService {
     data: Record<string, any>,
     flg_update: boolean,
   ): Promise<ProfileDocument> {
-    const salt: string = await this.hashService.randomSalt();
-    const passwordHash = await this.hashService.hashPassword(
-      data.password,
-      salt,
-    );
+    // const salt: string = await this.hashService.randomSalt();
+    // const passwordHash = await this.hashService.hashPassword(
+    //   data.password,
+    //   salt,
+    // );
     const create_profile: Partial<ProfileDocument> = {
       phone: data.phone,
       name: data.name,
       email: data.email,
-      password: passwordHash,
-      dob: moment(data.dob, 'DD/MM/YYYY', true).toDate(),
+      // password: passwordHash,
     };
+    if (data.dob) {
+      create_profile.dob = moment(data.dob, 'DD/MM/YYYY', true).toDate();
+    }
     if (flg_update) {
       create_profile.id_profile = data.id_profile;
     }

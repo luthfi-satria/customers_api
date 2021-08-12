@@ -162,7 +162,7 @@ export class CustomersController {
   @Put('profile')
   @ResponseStatusCode()
   async profile(
-    @Body(RequestValidationPipe(CustomerProfileValidation))
+    @Body()
     data: CustomerProfileValidation,
     @Headers('Authorization') token: string,
   ): Promise<any> {
@@ -253,7 +253,6 @@ export class CustomersController {
             phone: cekbyid.phone,
             name: data.name,
             email: data.email,
-            password: data.password,
             dob: data.dob ?? null,
           };
           await this.customerService.createCustomerProfile(profiledata, true);
@@ -264,6 +263,13 @@ export class CustomersController {
             response.data,
           );
         } catch (err: any) {
+          console.log(
+            '===========================Start Debug err=================================\n',
+            new Date(Date.now()).toLocaleString(),
+            '\n',
+            err,
+            '\n============================End Debug err==================================',
+          );
           const errors: RMessage = {
             value: '',
             property: '',
@@ -482,13 +488,7 @@ export class CustomersController {
       '/api/v1/auth/otp-login-email-validation';
     data.user_type = 'customer';
     data.roles = ['customer'];
-    console.log(
-      '===========================Start Debug param post=================================\n',
-      new Date(Date.now()).toLocaleString(),
-      '\n',
-      data,
-      '\n============================End Debug param post==================================',
-    );
+
     return (
       await this.customerService.postHttp(url, data, defaultJsonHeader)
     ).pipe(

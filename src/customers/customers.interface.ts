@@ -10,6 +10,5 @@ export interface ReqUpdataProfile {
   phone: string;
   name: string;
   email: string;
-  password: string;
   dob: string;
 }

@@ -5,9 +5,6 @@ export class CustomerProfileValidation {
   @IsNotEmpty()
   name: string;
 
-  @IsNotEmpty()
-  password: string;
-
   @IsOptional()
   @IsEmail()
   email: string;
