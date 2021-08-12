@@ -223,7 +223,7 @@ export class AddressController {
       const errors: RMessage = {
         value: id,
         property: 'id',
-        constraint: [this.messageService.get('address.select.not_found')],
+        constraint: [this.messageService.get('address.error.not_found')],
       };
       throw new BadRequestException(
         this.responseService.error(
