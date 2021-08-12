@@ -1,6 +1,10 @@
 export default {
   select: {
     success: 'Get data alamat sukses.',
+    fail: {
+      code: 'ADDRESS_SELECT_FAIL',
+      message: 'Get data alamat gagal.',
+    },
     not_found: {
       code: 'ADDRESS_NOT_FOUND',
       message: 'Alamat tidak ditemukan.',
@@ -29,8 +33,8 @@ export default {
     },
   },
   error: {
-    notFound: {
-      code: 'ADDRESS_NOTFOUND',
+    not_found: {
+      code: 'ADDRESS_NOT_FOUND',
       message: 'Alamat tidak di temukan.',
     },
   },

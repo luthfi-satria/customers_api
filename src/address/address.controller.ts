@@ -54,9 +54,27 @@ export class AddressController {
   }
 
   @Get()
-  findAll(@Query() request: SelectAddressDto) {
-    const address = this.addressService.findAll(request);
-    return address;
+  async findAll(@Query() request: SelectAddressDto) {
+    const address = await this.addressService.findAll(request);
+    if (!address) {
+      const errors: RMessage = {
+        value: '',
+        property: '',
+        constraint: [this.messageService.get('address.select.fail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    return this.responseService.success(
+      true,
+      this.messageService.get('address.select.success'),
+      address,
+    );
   }
 
   @Get(':id')
@@ -131,6 +149,22 @@ export class AddressController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    const address = await this.addressService.findOne(id);
+    if (!address) {
+      const errors: RMessage = {
+        value: id,
+        property: 'id',
+        constraint: [this.messageService.get('address.error.not_found')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     const delete_address = await this.addressService.remove(id);
     if (!delete_address) {
       const errors: RMessage = {
@@ -149,7 +183,6 @@ export class AddressController {
     return this.responseService.success(
       true,
       this.messageService.get('address.delete.success'),
-      delete_address,
     );
   }
 }

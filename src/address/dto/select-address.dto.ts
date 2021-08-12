@@ -9,9 +9,9 @@ export class SelectAddressDto extends PartialType(CreateAddressDto) {
 
   @IsOptional()
   @IsNumberString()
-  page: number;
+  page = '1';
 
   @IsOptional()
   @IsNumberString()
-  limit: number;
+  limit = '10';
 }

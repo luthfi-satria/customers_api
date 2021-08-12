@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Address } from 'src/database/entities/address.entity';
+import { ListResponse } from 'src/response/response.interface';
 import { Repository } from 'typeorm';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { SelectAddressDto } from './dto/select-address.dto';
@@ -17,8 +18,24 @@ export class AddressService {
     return await this.addressRepository.save(create_address);
   }
 
-  async findAll(selectAddressDto: SelectAddressDto) {
-    return await this.addressRepository.find();
+  async findAll(paramDto: SelectAddressDto) {
+    const address = this.addressRepository
+      .createQueryBuilder()
+      .where('name ilike :name', { name: `%${paramDto.search}%` });
+    const skip = (+paramDto.page - 1) * +paramDto.limit;
+    address.skip(skip);
+    address.take(+paramDto.limit);
+
+    const totalItems = await address.getCount();
+    const list = await address.getRawMany();
+
+    const list_result = {
+      total_item: +totalItems,
+      limit: Number(paramDto.limit),
+      current_page: Number(paramDto.page),
+      items: list,
+    };
+    return list_result;
   }
 
   async findOne(id: string) {
