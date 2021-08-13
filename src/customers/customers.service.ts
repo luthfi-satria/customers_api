@@ -19,6 +19,30 @@ export class CustomersService {
     @Hash() private readonly hashService: HashService,
   ) {}
 
+  async findOne(id: string) {
+    console.log(
+      '===========================Start Debug id=================================\n',
+      new Date(Date.now()).toLocaleString(),
+      '\n',
+      id,
+      '\n============================End Debug id==================================',
+    );
+    const profile = await this.profileRepository.findOne({
+      relations: ['address'],
+      where: {
+        id_profile: id,
+      },
+    });
+    console.log(
+      '===========================Start Debug profile=================================\n',
+      new Date(Date.now()).toLocaleString(),
+      '\n',
+      profile,
+      '\n============================End Debug profile==================================',
+    );
+    return profile;
+  }
+
   findOneCustomerByPhone(id: string): Promise<ProfileDocument> {
     return this.profileRepository.findOne({ where: { phone: id } });
   }

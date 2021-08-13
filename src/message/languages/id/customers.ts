@@ -1,4 +1,11 @@
 export default {
+  select: {
+    success: 'Get data customer sukses.',
+    fail: {
+      code: 'ADDRESS_SELECT_FAIL',
+      message: 'Get data customer gagal.',
+    },
+  },
   create: {
     success: 'Create Otp Success.',
     fail: 'Create Otp Gagal.',

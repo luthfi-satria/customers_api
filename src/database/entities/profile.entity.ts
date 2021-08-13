@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Address } from './address.entity';
 
 @Entity({ name: 'customers_profile' })
 export class ProfileDocument {
@@ -28,4 +31,7 @@ export class ProfileDocument {
 
   @UpdateDateColumn({ nullable: true })
   updated_at: Date;
+
+  @OneToMany(() => Address, (address) => address.customer)
+  address: Address[];
 }

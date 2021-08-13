@@ -21,12 +21,13 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { SelectAddressDto } from './dto/select-address.dto';
 import { SetActiveAddressDto } from './dto/set-active-address.dto';
+import { AuthService } from 'src/utils/auth.service';
 
 @Controller('api/v1/customers/address')
 export class AddressController {
   constructor(
     private readonly addressService: AddressService,
-
+    private readonly authService: AuthService,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
   ) {}
@@ -36,7 +37,7 @@ export class AddressController {
     @Body() createAddressDto: CreateAddressDto,
     @Headers('Authorization') token: string,
   ) {
-    const payload = await this.addressService.auth(token);
+    const payload = await this.authService.auth(token);
     createAddressDto.customer_id = payload.id;
     const create_address = await this.addressService.create(createAddressDto);
     if (!create_address) {
@@ -65,7 +66,7 @@ export class AddressController {
     @Query() request: SelectAddressDto,
     @Headers('Authorization') token: string,
   ) {
-    const payload = await this.addressService.auth(token);
+    const payload = await this.authService.auth(token);
     request.id_profile = payload.id;
     const address = await this.addressService.findAll(request);
     if (!address) {
@@ -94,7 +95,7 @@ export class AddressController {
     @Param('id') id: string,
     @Headers('Authorization') token: string,
   ) {
-    const payload = await this.addressService.auth(token);
+    const payload = await this.authService.auth(token);
     const address = await this.addressService.findOne(id, payload.id);
     if (!address) {
       const errors: RMessage = {
@@ -123,7 +124,7 @@ export class AddressController {
     @Body() updateAddressDto: UpdateAddressDto,
     @Headers('Authorization') token: string,
   ) {
-    const payload = await this.addressService.auth(token);
+    const payload = await this.authService.auth(token);
     updateAddressDto.customer_id = payload.id;
     const address = await this.addressService.findOne(id, payload.id);
     if (!address) {
@@ -171,7 +172,7 @@ export class AddressController {
     @Param('id') id: string,
     @Headers('Authorization') token: string,
   ) {
-    const payload = await this.addressService.auth(token);
+    const payload = await this.authService.auth(token);
     const address = await this.addressService.findOne(id, payload.id);
     if (!address) {
       const errors: RMessage = {
@@ -215,7 +216,7 @@ export class AddressController {
     @Body() setActiveAddressDto: SetActiveAddressDto,
     @Headers('Authorization') token: string,
   ) {
-    const payload = await this.addressService.auth(token);
+    const payload = await this.authService.auth(token);
     setActiveAddressDto.customer_id = payload.id;
     setActiveAddressDto.id = id;
     const address = await this.addressService.findOne(id, payload.id);

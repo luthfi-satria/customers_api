@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Headers,
   HttpService,
   HttpStatus,
@@ -27,6 +28,7 @@ import { CustomerResetPasswordValidation } from './validation/customers.resetpas
 import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
 import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
 import { OtpEmailValidateValidation } from './validation/otp.email-validate.validation';
+import { AuthService } from 'src/utils/auth.service';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -37,6 +39,7 @@ export class CustomersController {
   constructor(
     private readonly customerService: CustomersService,
     private readonly hashService: HashService,
+    private readonly authService: AuthService,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
     private httpService: HttpService,
@@ -263,13 +266,6 @@ export class CustomersController {
             response.data,
           );
         } catch (err: any) {
-          console.log(
-            '===========================Start Debug err=================================\n',
-            new Date(Date.now()).toLocaleString(),
-            '\n',
-            err,
-            '\n============================End Debug err==================================',
-          );
           const errors: RMessage = {
             value: '',
             property: '',
@@ -287,6 +283,39 @@ export class CustomersController {
       catchError((err) => {
         throw err.response.data;
       }),
+    );
+  }
+
+  @Get('profile')
+  @ResponseStatusCode()
+  async getProfile(@Headers('Authorization') token: string): Promise<any> {
+    const payload = await this.authService.auth(token);
+    console.log(
+      '===========================Start Debug payload=================================\n',
+      new Date(Date.now()).toLocaleString(),
+      '\n',
+      payload,
+      '\n============================End Debug payload==================================',
+    );
+    const profile = await this.customerService.findOne(payload.id);
+    if (!profile) {
+      const errors: RMessage = {
+        value: payload.id,
+        property: 'token_payload.id',
+        constraint: [this.messageService.get('customers.error.not_found')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    return this.responseService.success(
+      true,
+      this.messageService.get('customers.select.success'),
+      profile,
     );
   }
 
