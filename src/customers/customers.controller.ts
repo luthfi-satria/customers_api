@@ -323,7 +323,7 @@ export class CustomersController {
   @UseInterceptors(
     FileInterceptor('photo', {
       storage: diskStorage({
-        destination: './upload',
+        destination: './upload_customers',
         filename: editFileName,
       }),
       fileFilter: imageFileFilter,
@@ -335,7 +335,7 @@ export class CustomersController {
     @Headers('Authorization') token: string,
   ): Promise<any> {
     const payload = await this.authService.auth(token);
-    const path_photo = '/upload/' + file.filename;
+    const path_photo = '/upload_customers/' + file.filename;
     const photo_url = await this.storage.store(path_photo);
     const profile: ProfileDocument =
       await this.customerService.findOneCustomerById(payload.id);
