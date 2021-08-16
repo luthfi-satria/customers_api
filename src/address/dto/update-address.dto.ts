@@ -22,12 +22,12 @@ export class UpdateAddressDto extends PartialType(CreateAddressDto) {
   @IsOptional()
   @IsNumber()
   @IsLatitude({ message: 'Latitude yang anda masukan salah.' })
-  lat: number;
+  location_latitude: number;
 
   @IsOptional()
   @IsNumber()
   @IsLongitude({ message: 'Longitude yang anda masukan salah.' })
-  long: number;
+  location_longitude: number;
 
   @IsOptional()
   @IsBoolean()

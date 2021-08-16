@@ -7,17 +7,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ColumnNumericTransformer } from '../helper/column_numberic_transformer';
 
 import { ProfileDocument } from './profile.entity';
-
-export class ColumnNumericTransformer {
-  to(data: number): number {
-    return data;
-  }
-  from(data: string): number {
-    return parseFloat(data);
-  }
-}
 
 @Entity({ name: 'customers_address' })
 export class Address {
@@ -41,13 +33,13 @@ export class Address {
     default: '-6.175392',
     transformer: new ColumnNumericTransformer(),
   }) //monas
-  lat: number;
+  location_latitude: number;
 
   @Column('decimal', {
     default: '106.827153',
     transformer: new ColumnNumericTransformer(),
   }) //monas
-  long: number;
+  location_longitude: number;
 
   @Column({ default: false })
   is_active: boolean;

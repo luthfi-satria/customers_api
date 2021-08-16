@@ -20,12 +20,12 @@ export class CreateAddressDto {
   @IsNotEmpty()
   @IsNumber()
   @IsLatitude({ message: 'Latitude yang anda masukan salah.' })
-  lat: number;
+  location_latitude: number;
 
   @IsNotEmpty()
   @IsNumber()
   @IsLongitude({ message: 'Longitude yang anda masukan salah.' })
-  long: number;
+  location_longitude: number;
 
   @IsNotEmpty()
   @IsBoolean()
