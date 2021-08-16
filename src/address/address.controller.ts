@@ -23,7 +23,7 @@ import { SelectAddressDto } from './dto/select-address.dto';
 import { SetActiveAddressDto } from './dto/set-active-address.dto';
 import { AuthService } from 'src/utils/auth.service';
 
-@Controller('api/v1/customers/address')
+@Controller('api/v1/customers/addresses')
 export class AddressController {
   constructor(
     private readonly addressService: AddressService,
@@ -131,7 +131,7 @@ export class AddressController {
       const errors: RMessage = {
         value: id,
         property: 'id',
-        constraint: [this.messageService.get('address.select.not_found')],
+        constraint: [this.messageService.get('address.error.not_found')],
       };
       throw new BadRequestException(
         this.responseService.error(

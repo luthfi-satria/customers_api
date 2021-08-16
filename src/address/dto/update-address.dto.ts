@@ -4,6 +4,7 @@ import {
   IsEmpty,
   IsLatitude,
   IsLongitude,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -19,14 +20,14 @@ export class UpdateAddressDto extends PartialType(CreateAddressDto) {
   address: string;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
   @IsLatitude({ message: 'Latitude yang anda masukan salah.' })
-  lat: string;
+  lat: number;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
   @IsLongitude({ message: 'Longitude yang anda masukan salah.' })
-  long: string;
+  long: number;
 
   @IsOptional()
   @IsBoolean()

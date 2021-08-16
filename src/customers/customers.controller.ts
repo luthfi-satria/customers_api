@@ -35,7 +35,6 @@ import { CommonStorageService } from 'src/common/storage/storage.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { editFileName, imageFileFilter } from 'src/utils/general-utils';
 import { diskStorage } from 'multer';
-import { throwError } from 'rxjs';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',

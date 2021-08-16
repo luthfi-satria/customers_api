@@ -1,8 +1,4 @@
-import {
-  HttpService,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { Repository } from 'typeorm';

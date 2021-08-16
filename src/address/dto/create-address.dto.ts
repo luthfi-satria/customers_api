@@ -4,6 +4,7 @@ import {
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
+  IsNumber,
   IsString,
 } from 'class-validator';
 
@@ -17,14 +18,14 @@ export class CreateAddressDto {
   address: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   @IsLatitude({ message: 'Latitude yang anda masukan salah.' })
-  lat: string;
+  lat: number;
 
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   @IsLongitude({ message: 'Longitude yang anda masukan salah.' })
-  long: string;
+  long: number;
 
   @IsNotEmpty()
   @IsBoolean()

@@ -10,6 +10,15 @@ import {
 
 import { ProfileDocument } from './profile.entity';
 
+export class ColumnNumericTransformer {
+  to(data: number): number {
+    return data;
+  }
+  from(data: string): number {
+    return parseFloat(data);
+  }
+}
+
 @Entity({ name: 'customers_address' })
 export class Address {
   @PrimaryGeneratedColumn('uuid')
@@ -28,11 +37,17 @@ export class Address {
   @Column({ type: 'text' })
   address: string;
 
-  @Column({ default: '-6.175392' }) //monas
-  lat: string;
+  @Column('decimal', {
+    default: '-6.175392',
+    transformer: new ColumnNumericTransformer(),
+  }) //monas
+  lat: number;
 
-  @Column({ default: '106.827153' }) //monas
-  long: string;
+  @Column('decimal', {
+    default: '106.827153',
+    transformer: new ColumnNumericTransformer(),
+  }) //monas
+  long: number;
 
   @Column({ default: false })
   is_active: boolean;

@@ -35,5 +35,5 @@ export class ProfileDocument {
   updated_at: Date;
 
   @OneToMany(() => Address, (address) => address.customer)
-  address: Address[];
+  addresses: Address[];
 }
