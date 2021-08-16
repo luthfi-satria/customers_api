@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -25,6 +24,9 @@ export class ProfileDocument {
 
   @Column({ type: 'date', nullable: true })
   dob: Date;
+
+  @Column({ nullable: true })
+  photo: string;
 
   @CreateDateColumn({ nullable: true })
   created_at: Date;

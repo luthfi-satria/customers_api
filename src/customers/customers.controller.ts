@@ -9,6 +9,8 @@ import {
   Post,
   Put,
   UnauthorizedException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
@@ -29,6 +31,11 @@ import { CustomerLoginEmailValidation } from './validation/customers.loginemail.
 import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
 import { OtpEmailValidateValidation } from './validation/otp.email-validate.validation';
 import { AuthService } from 'src/utils/auth.service';
+import { CommonStorageService } from 'src/common/storage/storage.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { editFileName, imageFileFilter } from 'src/utils/general-utils';
+import { diskStorage } from 'multer';
+import { throwError } from 'rxjs';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -37,12 +44,13 @@ const defaultJsonHeader: Record<string, any> = {
 @Controller('api/v1/customers')
 export class CustomersController {
   constructor(
+    @Response() private readonly responseService: ResponseService,
+    @Message() private readonly messageService: MessageService,
     private readonly customerService: CustomersService,
     private readonly hashService: HashService,
     private readonly authService: AuthService,
-    @Response() private readonly responseService: ResponseService,
-    @Message() private readonly messageService: MessageService,
     private httpService: HttpService,
+    private readonly storage: CommonStorageService,
   ) {}
 
   @Post('otp')
@@ -290,13 +298,6 @@ export class CustomersController {
   @ResponseStatusCode()
   async getProfile(@Headers('Authorization') token: string): Promise<any> {
     const payload = await this.authService.auth(token);
-    console.log(
-      '===========================Start Debug payload=================================\n',
-      new Date(Date.now()).toLocaleString(),
-      '\n',
-      payload,
-      '\n============================End Debug payload==================================',
-    );
     const profile = await this.customerService.findOne(payload.id);
     if (!profile) {
       const errors: RMessage = {
@@ -317,6 +318,50 @@ export class CustomersController {
       this.messageService.get('customers.select.success'),
       profile,
     );
+  }
+
+  @Put('profile-picture')
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: './upload',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
+  async updateProfilePicture(
+    @Body() request: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    const payload = await this.authService.auth(token);
+    const path_photo = '/upload/' + file.filename;
+    const photo_url = await this.storage.store(path_photo);
+    const profile: ProfileDocument =
+      await this.customerService.findOneCustomerById(payload.id);
+    profile.photo = photo_url;
+    try {
+      await this.customerService.updateCustomerProfile(profile);
+      return this.responseService.success(
+        true,
+        this.messageService.get('customers.reset_password.success'),
+        profile,
+      );
+    } catch (err) {
+      const errors = {
+        value: '',
+        property: '',
+        constraint: [this.messageService.get('customers.reset_password.fail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
   }
 
   @Post('login/phone')
@@ -576,7 +621,14 @@ export class CustomersController {
         );
       }),
       catchError((err) => {
-        throw err.response.data;
+        return err.response.data;
+        // return throwError(err);
+        // return this.responseService.error(
+        //   // err.response.data.c,
+        //   HttpStatus.BAD_REQUEST,
+        //   err.response.data.message,
+        //   'Bad Request',
+        // );
       }),
     );
   }

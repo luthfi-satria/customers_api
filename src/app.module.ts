@@ -9,6 +9,7 @@ import { CustomersModule } from './customers/customers.module';
 import { ResponseModule } from './response/response.module';
 import { HashModule } from './hash/hash.module';
 import { AddressModule } from './address/address.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AddressModule } from './address/address.module';
     HashModule,
     HttpModule,
     AddressModule,
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

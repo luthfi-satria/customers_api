@@ -1,4 +1,8 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import {
+  HttpService,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { Repository } from 'typeorm';
@@ -20,26 +24,12 @@ export class CustomersService {
   ) {}
 
   async findOne(id: string) {
-    console.log(
-      '===========================Start Debug id=================================\n',
-      new Date(Date.now()).toLocaleString(),
-      '\n',
-      id,
-      '\n============================End Debug id==================================',
-    );
     const profile = await this.profileRepository.findOne({
       relations: ['address'],
       where: {
         id_profile: id,
       },
     });
-    console.log(
-      '===========================Start Debug profile=================================\n',
-      new Date(Date.now()).toLocaleString(),
-      '\n',
-      profile,
-      '\n============================End Debug profile==================================',
-    );
     return profile;
   }
 
