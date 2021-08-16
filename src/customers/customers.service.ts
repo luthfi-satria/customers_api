@@ -21,7 +21,7 @@ export class CustomersService {
 
   async findOne(id: string) {
     const profile = await this.profileRepository.findOne({
-      relations: ['address'],
+      relations: ['addresses'],
       where: {
         id_profile: id,
       },
