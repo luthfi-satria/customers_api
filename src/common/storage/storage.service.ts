@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { StorageService as NestStorageService } from '@codebrew/nestjs-storage';
 import { AmazonWebServicesS3Storage } from '@slynova/flydrive-s3';
-import fs from 'fs';
+import * as fs from 'fs';
 import { createUrl } from '../../utils/general-utils';
 
 @Injectable()
