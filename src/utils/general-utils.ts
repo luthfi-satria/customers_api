@@ -22,7 +22,8 @@ export const editFileName = (req: any, file: any, callback: any) => {
 
 export const imageFileFilter = (req: any, file: any, callback) => {
   if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return callback(new Error('Only image files are allowed!'), false);
+    req.fileValidationError = 'file.image.not_allowed';
+    callback(null, false);
   }
   callback(null, true);
 };
@@ -51,6 +52,6 @@ export const createUrl = function (filename: any) {
   if (typeof filename == 'undefined' || filename == null || filename == '') {
     return null;
   } else {
-    return process.env.HTTP_ADDRESS + '/api/v1/merchants/image' + filename;
+    return process.env.HTTP_ADDRESS + '/api/v1/customers/image' + filename;
   }
 };

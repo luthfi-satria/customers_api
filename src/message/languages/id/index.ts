@@ -6,6 +6,7 @@ import app from './app';
 import response from './response';
 import customers from './customers';
 import address from './address';
+import file from './file';
 
 export default {
   user,
@@ -16,4 +17,5 @@ export default {
   response,
   customers,
   address,
+  file,
 };
