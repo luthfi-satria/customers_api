@@ -592,6 +592,7 @@ export class CustomersController {
     const headersRequest: Record<string, any> = {
       'Content-Type': 'application/json',
       Authorization: token,
+      'request-from': 'customer',
     };
     const http_req: Record<string, any> = {
       user_type: 'customer',
