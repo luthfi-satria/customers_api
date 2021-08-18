@@ -24,7 +24,10 @@ export default {
   },
   profile: {
     success: 'Update profile successful.',
-    fail: 'Validasi Token Gagal.',
+    fail: {
+      code: 'UPDATE_FAIL',
+      message: 'Update data gagal.',
+    },
     unauthorize: 'Authorisasi tidak valid.',
     invalid: 'Data yang anda masukan tidak valid.',
     invalid_phone: 'Nomor Telepon sudah terdaftar.',

@@ -344,14 +344,14 @@ export class CustomersController {
       await this.customerService.updateCustomerProfile(profile);
       return this.responseService.success(
         true,
-        this.messageService.get('customers.reset_password.success'),
+        this.messageService.get('customers.profile.success'),
         profile,
       );
     } catch (err) {
       const errors = {
         value: '',
         property: '',
-        constraint: [this.messageService.get('customers.reset_password.fail')],
+        constraint: [this.messageService.get('customers.profile.fail')],
       };
       throw new BadRequestException(
         this.responseService.error(
