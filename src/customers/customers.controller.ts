@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Post,
   Put,
+  Req,
   UnauthorizedException,
   UploadedFile,
   UseInterceptors,
@@ -35,6 +36,7 @@ import { CommonStorageService } from 'src/common/storage/storage.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { editFileName, imageFileFilter } from 'src/utils/general-utils';
 import { diskStorage } from 'multer';
+import { ImageValidationService } from 'src/utils/image-validation.service';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -50,6 +52,7 @@ export class CustomersController {
     private readonly authService: AuthService,
     private httpService: HttpService,
     private readonly storage: CommonStorageService,
+    private readonly imageValidationService: ImageValidationService,
   ) {}
 
   @Post('otp')
@@ -330,10 +333,12 @@ export class CustomersController {
     }),
   )
   async updateProfilePicture(
-    @Body() request: any,
+    @Req() request,
     @UploadedFile() file: Express.Multer.File,
     @Headers('Authorization') token: string,
   ): Promise<any> {
+    await this.imageValidationService.validateAll(request, ['required']);
+
     const payload = await this.authService.auth(token);
     const path_photo = '/upload_customers/' + file.filename;
     const photo_url = await this.storage.store(path_photo);
