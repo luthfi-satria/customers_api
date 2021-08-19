@@ -36,4 +36,7 @@ export class ProfileDocument {
 
   @OneToMany(() => Address, (address) => address.customer)
   addresses: Address[];
+
+  @OneToMany(() => Address, (address) => address.customer)
+  active_addresses: Address[];
 }

@@ -29,6 +29,16 @@ export class CustomersService {
     return profile;
   }
 
+  async findOneWithActiveAddresses(id: string) {
+    const profile = await this.profileRepository
+      .createQueryBuilder('customers_profile')
+      .leftJoinAndSelect('customers_profile.active_addresses', 'address')
+      .where('customers_profile.id_profile = :id', { id })
+      .andWhere('address.is_active = true')
+      .getOne();
+    return profile;
+  }
+
   findOneCustomerByPhone(id: string): Promise<ProfileDocument> {
     return this.profileRepository.findOne({ where: { phone: id } });
   }

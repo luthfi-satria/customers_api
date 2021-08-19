@@ -66,5 +66,9 @@ export default {
   error: {
     notFound: 'Otp not found.',
     otpExist: 'Otr exist.',
+    not_found: {
+      code: 'CUSTOMER_NOT_FOUND',
+      message: 'Customer tidak ditemukan.',
+    },
   },
 };

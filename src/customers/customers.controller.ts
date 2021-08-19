@@ -300,7 +300,9 @@ export class CustomersController {
   @ResponseStatusCode()
   async getProfile(@Headers('Authorization') token: string): Promise<any> {
     const payload = await this.authService.auth(token);
-    const profile = await this.customerService.findOne(payload.id);
+    const profile = await this.customerService.findOneWithActiveAddresses(
+      payload.id,
+    );
     if (!profile) {
       const errors: RMessage = {
         value: payload.id,
