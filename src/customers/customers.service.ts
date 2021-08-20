@@ -32,9 +32,12 @@ export class CustomersService {
   async findOneWithActiveAddresses(id: string) {
     const profile = await this.profileRepository
       .createQueryBuilder('customers_profile')
-      .leftJoinAndSelect('customers_profile.active_addresses', 'address')
+      .leftJoinAndSelect(
+        'customers_profile.active_addresses',
+        'address',
+        'address.is_active = true',
+      )
       .where('customers_profile.id_profile = :id', { id })
-      .andWhere('address.is_active = true')
       .getOne();
     return profile;
   }
