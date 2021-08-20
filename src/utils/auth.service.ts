@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Response } from 'src/customers/customers.decorator';
 import { HashService } from 'src/hash/hash.service';
 import { Message } from 'src/message/message.decorator';
@@ -34,7 +34,7 @@ export class AuthService {
         property: 'token',
         constraint: [this.messageService.get('auth.token.invalid_token')],
       };
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         this.responseService.error(
           HttpStatus.UNAUTHORIZED,
           errors,
