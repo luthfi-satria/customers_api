@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import {
   IsBoolean,
   IsEmpty,
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsNumber,
@@ -9,6 +10,7 @@ import {
   IsString,
 } from 'class-validator';
 import { CreateAddressDto } from './create-address.dto';
+import { GroupType } from 'src/database/entities/address.entity';
 
 export class UpdateAddressDto extends PartialType(CreateAddressDto) {
   @IsOptional()
@@ -35,4 +37,11 @@ export class UpdateAddressDto extends PartialType(CreateAddressDto) {
 
   @IsEmpty()
   customer_id: string;
+
+  @IsOptional()
+  customer_detail: string;
+
+  @IsOptional()
+  @IsEnum(GroupType, { message: 'Type yang anda masukan salah.' })
+  type: GroupType;
 }

@@ -11,6 +11,12 @@ import { ColumnNumericTransformer } from '../helper/column_numberic_transformer'
 
 import { ProfileDocument } from './profile.entity';
 
+export enum GroupType {
+  Home = 'home',
+  Office = 'office',
+  Custom = 'custom',
+}
+
 @Entity({ name: 'customers_address' })
 export class Address {
   @PrimaryGeneratedColumn('uuid')
@@ -43,6 +49,16 @@ export class Address {
 
   @Column({ default: false })
   is_active: boolean;
+
+  @Column({ default: '' })
+  address_detail: string;
+
+  @Column({
+    type: 'enum',
+    enum: GroupType,
+    default: GroupType.Custom,
+  })
+  type: string;
 
   @CreateDateColumn({ nullable: true })
   created_at: Date;

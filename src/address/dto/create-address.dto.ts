@@ -1,12 +1,15 @@
 import {
   IsBoolean,
   IsEmpty,
+  IsEnum,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
+import { GroupType } from 'src/database/entities/address.entity';
 
 export class CreateAddressDto {
   @IsNotEmpty()
@@ -33,4 +36,10 @@ export class CreateAddressDto {
 
   @IsEmpty()
   customer_id: string;
+
+  @IsOptional()
+  customer_detail: string;
+
+  @IsEnum(GroupType, { message: 'Type yang anda masukan salah.' })
+  type: GroupType;
 }
