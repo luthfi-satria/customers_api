@@ -23,6 +23,20 @@ export class AddressService {
 
   async create(createAddressDto: CreateAddressDto): Promise<Address> {
     const create_address = this.addressRepository.create(createAddressDto);
+
+    if (createAddressDto.is_active == true) {
+      const adresses = await this.addressRepository.find({
+        where: { customer_id: create_address.customer_id },
+      });
+      const listAddressId: string[] = [];
+      adresses.forEach(async (address) => {
+        listAddressId.push(address.id);
+      });
+      const updateAddress: Partial<CreateAddressDto> = {
+        is_active: false,
+      };
+      await this.addressRepository.update(listAddressId, updateAddress);
+    }
     return await this.addressRepository.save(create_address);
   }
 
@@ -68,12 +82,38 @@ export class AddressService {
   }
 
   async update(id: string, updateAddressDto: UpdateAddressDto) {
-    const update_address = await this.addressRepository.update(
-      id,
-      updateAddressDto,
-    );
-    if (!update_address.affected) {
-      return false;
+    let update_address;
+    if (updateAddressDto.is_active == true) {
+      update_address = await this.addressRepository
+        .query(
+          "UPDATE customers_address SET is_active=true WHERE id = '" +
+            id +
+            "';UPDATE customers_address SET is_active = false WHERE id != '" +
+            id +
+            "' AND customer_id = '" +
+            updateAddressDto.customer_id +
+            "'",
+        )
+        .then(() => {
+          return true;
+        })
+        .catch(() => {
+          return false;
+        });
+      if (!update_address) {
+        return false;
+      }
+    } else {
+      delete updateAddressDto.is_active;
+      update_address = await this.addressRepository.update(
+        id,
+        updateAddressDto,
+      );
+      console.log('update address', update_address);
+
+      if (!update_address.affected) {
+        return false;
+      }
     }
     return await this.findOne(id);
   }
