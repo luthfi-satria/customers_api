@@ -37,6 +37,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { editFileName, imageFileFilter } from 'src/utils/general-utils';
 import { diskStorage } from 'multer';
 import { ImageValidationService } from 'src/utils/image-validation.service';
+import { AuthJwtGuard } from 'src/hash/auth.decorators';
+import { UserType } from 'src/hash/guard/user-type.decorator';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -297,8 +299,14 @@ export class CustomersController {
   }
 
   @Get('profile')
+  @UserType('customer')
+  // @Permission('customer_profile.view')
+  @AuthJwtGuard()
   @ResponseStatusCode()
-  async getProfile(@Headers('Authorization') token: string): Promise<any> {
+  async getProfile(
+    @Req() req: any,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
     const payload = await this.authService.auth(token);
     const profile = await this.customerService.findOneWithActiveAddresses(
       payload.id,
@@ -593,6 +601,7 @@ export class CustomersController {
   }
 
   @Post('refresh-token')
+  @AuthJwtGuard()
   async refreshToken(@Headers('Authorization') token: string): Promise<any> {
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/refresh-token';

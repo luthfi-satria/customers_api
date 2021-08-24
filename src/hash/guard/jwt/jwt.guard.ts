@@ -1,7 +1,10 @@
 import { AuthGuard } from '@nestjs/passport';
 import {
+  ExecutionContext,
+  ForbiddenException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,29 +13,50 @@ import { Response } from 'src/response/response.decorator';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { RMessage } from 'src/response/response.interface';
+import { Reflector } from '@nestjs/core';
+import { User } from '../interface/user.interface';
+import { TokenExpiredError } from 'jsonwebtoken';
 
 @Injectable()
 export class JwtGuard extends AuthGuard('jwt') {
   constructor(
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
+    private reflector: Reflector,
   ) {
     super();
   }
 
-  handleRequest<TUser = any>(
-    err: Record<string, any>,
-    user: TUser,
-    // info: string,
-  ): TUser {
-    const logger = new Logger();
+  private roles: string[];
+  private permission: string[];
 
-    if (err || !user) {
-      logger.error('AuthJwtGuardError');
+  canActivate(context: ExecutionContext) {
+    this.roles = this.reflector.get<string[]>('roles', context.getHandler());
+    this.permission = this.reflector.get<string[]>(
+      'permission',
+      context.getHandler(),
+    );
+    return super.canActivate(context);
+  }
+
+  handleRequest(err: Error, user: any, info: Error) {
+    const logger = new Logger();
+    if (err) {
+      throw new InternalServerErrorException(err);
+    }
+    const loggedInUser: User = user;
+
+    if (!loggedInUser) {
+      let error_message = [this.messageService.get('auth.token.invalid_token')];
+      if (info instanceof TokenExpiredError) {
+        error_message = [this.messageService.get('auth.token.expired_token')];
+      }
+
+      logger.error('AuthJwtGuardError.Unauthorize');
       const errors: RMessage = {
         value: '',
         property: 'token',
-        constraint: [this.messageService.get('auth.profile.unauthorize')],
+        constraint: error_message,
       };
       throw new UnauthorizedException(
         this.responseService.error(
@@ -42,7 +66,21 @@ export class JwtGuard extends AuthGuard('jwt') {
         ),
       );
     }
-
+    if (this.roles && !this.roles.includes(user.user_type)) {
+      logger.error('AuthJwtGuardError.Forbidden');
+      const errors: RMessage = {
+        value: '',
+        property: 'token',
+        constraint: [this.messageService.get('auth.token.forbidden')],
+      };
+      throw new ForbiddenException(
+        this.responseService.error(
+          HttpStatus.FORBIDDEN,
+          errors,
+          'Forbidden Access',
+        ),
+      );
+    }
     return user;
   }
 }
