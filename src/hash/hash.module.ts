@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { HashService } from 'src/hash/hash.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtStrategy } from './guard/jwt/jwt.strategy';
+import { JwtStrategy } from '../auth/guard/jwt/jwt.strategy';
 import { CustomersModule } from 'src/customers/customers.module';
 
 @Global()

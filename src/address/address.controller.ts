@@ -21,8 +21,8 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { SelectAddressDto } from './dto/select-address.dto';
 import { SetActiveAddressDto } from './dto/set-active-address.dto';
-import { UserType } from 'src/hash/guard/user-type.decorator';
-import { AuthJwtGuard } from 'src/hash/auth.decorators';
+import { UserType } from 'src/auth/guard/user-type.decorator';
+import { AuthJwtGuard } from 'src/auth/auth.decorators';
 
 @Controller('api/v1/customers/addresses')
 export class AddressController {
@@ -60,7 +60,7 @@ export class AddressController {
   }
 
   @Get()
-  @UserType('admin')
+  @UserType('customer')
   @AuthJwtGuard()
   async findAll(@Req() req: any, @Query() request: SelectAddressDto) {
     request.id_profile = req.user.id;

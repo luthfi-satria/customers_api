@@ -35,8 +35,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { editFileName, imageFileFilter } from 'src/utils/general-utils';
 import { diskStorage } from 'multer';
 import { ImageValidationService } from 'src/utils/image-validation.service';
-import { AuthJwtGuard } from 'src/hash/auth.decorators';
-import { UserType } from 'src/hash/guard/user-type.decorator';
+import { AuthJwtGuard } from 'src/auth/auth.decorators';
+import { UserType } from 'src/auth/guard/user-type.decorator';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
