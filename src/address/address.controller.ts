@@ -9,7 +9,7 @@ import {
   BadRequestException,
   HttpStatus,
   Query,
-  Headers,
+  Req,
 } from '@nestjs/common';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
@@ -21,24 +21,22 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { SelectAddressDto } from './dto/select-address.dto';
 import { SetActiveAddressDto } from './dto/set-active-address.dto';
-import { AuthService } from 'src/utils/auth.service';
+import { UserType } from 'src/hash/guard/user-type.decorator';
+import { AuthJwtGuard } from 'src/hash/auth.decorators';
 
 @Controller('api/v1/customers/addresses')
 export class AddressController {
   constructor(
     private readonly addressService: AddressService,
-    private readonly authService: AuthService,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
   ) {}
 
   @Post()
-  async create(
-    @Body() createAddressDto: CreateAddressDto,
-    @Headers('Authorization') token: string,
-  ) {
-    const payload = await this.authService.auth(token);
-    createAddressDto.customer_id = payload.id;
+  @UserType('customer')
+  @AuthJwtGuard()
+  async create(@Req() req: any, @Body() createAddressDto: CreateAddressDto) {
+    createAddressDto.customer_id = req.user.id;
     const create_address = await this.addressService.create(createAddressDto);
     if (!create_address) {
       const errors: RMessage = {
@@ -62,12 +60,10 @@ export class AddressController {
   }
 
   @Get()
-  async findAll(
-    @Query() request: SelectAddressDto,
-    @Headers('Authorization') token: string,
-  ) {
-    const payload = await this.authService.auth(token);
-    request.id_profile = payload.id;
+  @UserType('admin')
+  @AuthJwtGuard()
+  async findAll(@Req() req: any, @Query() request: SelectAddressDto) {
+    request.id_profile = req.user.id;
     const address = await this.addressService.findAll(request);
     if (!address) {
       const errors: RMessage = {
@@ -91,12 +87,10 @@ export class AddressController {
   }
 
   @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @Headers('Authorization') token: string,
-  ) {
-    const payload = await this.authService.auth(token);
-    const address = await this.addressService.findOne(id, payload.id);
+  @UserType('customer')
+  @AuthJwtGuard()
+  async findOne(@Req() req: any, @Param('id') id: string) {
+    const address = await this.addressService.findOne(id, req.user.id);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -119,14 +113,15 @@ export class AddressController {
   }
 
   @Put(':id')
+  @UserType('customer')
+  @AuthJwtGuard()
   async update(
+    @Req() req: any,
     @Param('id') id: string,
     @Body() updateAddressDto: UpdateAddressDto,
-    @Headers('Authorization') token: string,
   ) {
-    const payload = await this.authService.auth(token);
-    updateAddressDto.customer_id = payload.id;
-    const address = await this.addressService.findOne(id, payload.id);
+    updateAddressDto.customer_id = req.user.id;
+    const address = await this.addressService.findOne(id, req.user.id);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -168,12 +163,10 @@ export class AddressController {
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id') id: string,
-    @Headers('Authorization') token: string,
-  ) {
-    const payload = await this.authService.auth(token);
-    const address = await this.addressService.findOne(id, payload.id);
+  @UserType('customer')
+  @AuthJwtGuard()
+  async remove(@Req() req: any, @Param('id') id: string) {
+    const address = await this.addressService.findOne(id, req.user.id);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -211,15 +204,16 @@ export class AddressController {
   }
 
   @Put('set-active/:id')
+  @UserType('customer')
+  @AuthJwtGuard()
   async setActive(
+    @Req() req: any,
     @Param('id') id: string,
     @Body() setActiveAddressDto: SetActiveAddressDto,
-    @Headers('Authorization') token: string,
   ) {
-    const payload = await this.authService.auth(token);
-    setActiveAddressDto.customer_id = payload.id;
+    setActiveAddressDto.customer_id = req.user.id;
     setActiveAddressDto.id = id;
-    const address = await this.addressService.findOne(id, payload.id);
+    const address = await this.addressService.findOne(id, req.user.id);
     if (!address) {
       const errors: RMessage = {
         value: id,
