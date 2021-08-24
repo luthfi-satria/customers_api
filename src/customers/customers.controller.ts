@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Req,
-  UnauthorizedException,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -31,7 +30,6 @@ import { CustomerResetPasswordValidation } from './validation/customers.resetpas
 import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
 import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
 import { OtpEmailValidateValidation } from './validation/otp.email-validate.validation';
-import { AuthService } from 'src/utils/auth.service';
 import { CommonStorageService } from 'src/common/storage/storage.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { editFileName, imageFileFilter } from 'src/utils/general-utils';
@@ -51,7 +49,6 @@ export class CustomersController {
     @Message() private readonly messageService: MessageService,
     private readonly customerService: CustomersService,
     private readonly hashService: HashService,
-    private readonly authService: AuthService,
     private httpService: HttpService,
     private readonly storage: CommonStorageService,
     private readonly imageValidationService: ImageValidationService,
@@ -175,27 +172,14 @@ export class CustomersController {
   }
 
   @Put('profile')
+  @UserType('customer')
+  @AuthJwtGuard()
   @ResponseStatusCode()
   async profile(
     @Body()
     data: CustomerProfileValidation,
     @Headers('Authorization') token: string,
   ): Promise<any> {
-    if (typeof token == 'undefined' || token == 'undefined') {
-      const errors: RMessage = {
-        value: '',
-        property: 'token',
-        constraint: [this.messageService.get('auth.token.invalid_token')],
-      };
-      throw new UnauthorizedException(
-        this.responseService.error(
-          HttpStatus.UNAUTHORIZED,
-          errors,
-          'UNAUTHORIZED',
-        ),
-      );
-    }
-
     const payload = await this.hashService.jwtPayload(
       token.replace('Bearer ', ''),
     );
@@ -303,17 +287,13 @@ export class CustomersController {
   // @Permission('customer_profile.view')
   @AuthJwtGuard()
   @ResponseStatusCode()
-  async getProfile(
-    @Req() req: any,
-    @Headers('Authorization') token: string,
-  ): Promise<any> {
-    const payload = await this.authService.auth(token);
+  async getProfile(@Req() req: any): Promise<any> {
     const profile = await this.customerService.findOneWithActiveAddresses(
-      payload.id,
+      req.user.id,
     );
     if (!profile) {
       const errors: RMessage = {
-        value: payload.id,
+        value: req.user.id,
         property: 'token_payload.id',
         constraint: [this.messageService.get('customers.error.not_found')],
       };
@@ -333,6 +313,8 @@ export class CustomersController {
   }
 
   @Put('profile-picture')
+  @UserType('customer')
+  @AuthJwtGuard()
   @UseInterceptors(
     FileInterceptor('photo', {
       storage: diskStorage({
@@ -343,17 +325,15 @@ export class CustomersController {
     }),
   )
   async updateProfilePicture(
-    @Req() request,
+    @Req() req,
     @UploadedFile() file: Express.Multer.File,
-    @Headers('Authorization') token: string,
   ): Promise<any> {
-    await this.imageValidationService.validateAll(request, ['required']);
+    await this.imageValidationService.validateAll(req, ['required']);
 
-    const payload = await this.authService.auth(token);
     const path_photo = '/upload_customers/' + file.filename;
     const photo_url = await this.storage.store(path_photo);
     const profile: ProfileDocument =
-      await this.customerService.findOneCustomerById(payload.id);
+      await this.customerService.findOneCustomerById(req.user.id);
     profile.photo = photo_url;
     try {
       await this.customerService.updateCustomerProfile(profile);
@@ -650,6 +630,7 @@ export class CustomersController {
   }
 
   @Put('reset-password')
+  @AuthJwtGuard()
   @ResponseStatusCode()
   async resetPassword(
     @Body(RequestValidationPipe(CustomerResetPasswordValidation))

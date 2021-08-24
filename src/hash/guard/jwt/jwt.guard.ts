@@ -27,11 +27,14 @@ export class JwtGuard extends AuthGuard('jwt') {
     super();
   }
 
-  private roles: string[];
+  private user_types: string[];
   private permission: string[];
 
   canActivate(context: ExecutionContext) {
-    this.roles = this.reflector.get<string[]>('roles', context.getHandler());
+    this.user_types = this.reflector.get<string[]>(
+      'user_types',
+      context.getHandler(),
+    );
     this.permission = this.reflector.get<string[]>(
       'permission',
       context.getHandler(),
@@ -66,7 +69,7 @@ export class JwtGuard extends AuthGuard('jwt') {
         ),
       );
     }
-    if (this.roles && !this.roles.includes(user.user_type)) {
+    if (this.user_types && !this.user_types.includes(user.user_type)) {
       logger.error('AuthJwtGuardError.Forbidden');
       const errors: RMessage = {
         value: '',
