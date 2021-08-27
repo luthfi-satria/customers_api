@@ -119,7 +119,11 @@ export class AddressService {
   }
 
   async remove(id: string) {
-    return await this.addressRepository.delete(id);
+    return await this.addressRepository.softDelete(id);
+  }
+
+  async restore(id: string) {
+    return await this.addressRepository.restore(id);
   }
 
   async setActive(setActiveParam: SetActiveAddressDto) {
