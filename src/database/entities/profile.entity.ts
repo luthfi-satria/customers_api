@@ -28,6 +28,9 @@ export class ProfileDocument {
   @Column({ nullable: true })
   photo: string;
 
+  @Column({ nullable: false, default: true })
+  is_active: boolean;
+
   @CreateDateColumn({ nullable: true })
   created_at: Date;
 

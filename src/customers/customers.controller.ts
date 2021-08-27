@@ -6,6 +6,7 @@ import {
   Headers,
   HttpService,
   HttpStatus,
+  Param,
   Post,
   Put,
   Req,
@@ -37,6 +38,7 @@ import { diskStorage } from 'multer';
 import { ImageValidationService } from 'src/utils/image-validation.service';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
 import { UserType } from 'src/auth/guard/user-type.decorator';
+import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -718,5 +720,77 @@ export class CustomersController {
         throw err.response.data;
       }),
     );
+  }
+
+  @Put('user-management/:id_profile')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async userManagement(
+    @Param('id_profile') id_profile: string,
+    @Body()
+    body: AdminCustomerProfileValidation,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    const cekemail: ProfileDocument =
+      await this.customerService.findOneCustomerByEmailExceptId(
+        body.email,
+        id_profile,
+      );
+
+    if (cekemail) {
+      const errors: RMessage = {
+        value: body.email,
+        property: 'email',
+        constraint: [this.messageService.get('customers.profile.existemail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    const profile: ProfileDocument =
+      await this.customerService.findOneCustomerById(id_profile);
+    if (!profile) {
+      const errors: RMessage = {
+        value: token.replace('Bearer ', ''),
+        property: 'token',
+        constraint: [this.messageService.get('customers.profile.invalid')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    try {
+      const updated_profile =
+        await this.customerService.updateCustomerProfileById(id_profile, body);
+      return this.responseService.success(
+        true,
+        this.messageService.get('customers.profile.success'),
+        updated_profile,
+      );
+    } catch (err: any) {
+      const errors: RMessage = {
+        value: '',
+        property: '',
+        constraint: [this.messageService.get('customers.profile.invalid')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
   }
 }

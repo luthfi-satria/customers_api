@@ -9,6 +9,7 @@ import { compare, genSalt, hash } from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
 import { Hash } from 'src/hash/hash.decorator';
 import * as moment from 'moment';
+import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 
 @Injectable()
 export class CustomersService {
@@ -107,6 +108,17 @@ export class CustomersService {
     data: Record<string, any>,
   ): Promise<ProfileDocument> {
     return this.profileRepository.save(data);
+  }
+
+  async updateCustomerProfileById(
+    id: string,
+    data: AdminCustomerProfileValidation,
+  ): Promise<ProfileDocument> {
+    const update = await this.profileRepository.update(id, data);
+    if (!update) {
+      return null;
+    }
+    return await this.profileRepository.findOne(id);
   }
 
   //--------------------------------------------------------------
