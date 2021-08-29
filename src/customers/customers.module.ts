@@ -9,7 +9,7 @@ import { ImageValidationService } from 'src/utils/image-validation.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ProfileDocument]), HttpModule],
-  exports: [CustomersService],
+  exports: [CustomersService, TypeOrmModule, HttpModule],
   providers: [CustomersService, AuthService, ImageValidationService],
   controllers: [CustomersController],
 })

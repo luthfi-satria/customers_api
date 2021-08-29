@@ -10,6 +10,7 @@ import { ResponseModule } from './response/response.module';
 import { HashModule } from './hash/hash.module';
 import { AddressModule } from './address/address.module';
 import { CommonModule } from './common/common.module';
+import { InternalModule } from './internal/internal.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CommonModule } from './common/common.module';
     HttpModule,
     AddressModule,
     CommonModule,
+    InternalModule,
   ],
   controllers: [AppController],
   providers: [AppService],
