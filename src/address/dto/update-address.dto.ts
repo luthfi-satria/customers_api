@@ -32,6 +32,10 @@ export class UpdateAddressDto extends PartialType(CreateAddressDto) {
   location_longitude: number;
 
   @IsOptional()
+  @IsString()
+  postal_code: string;
+
+  @IsOptional()
   @IsBoolean()
   is_active: boolean;
 

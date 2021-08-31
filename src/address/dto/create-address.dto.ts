@@ -31,6 +31,10 @@ export class CreateAddressDto {
   location_longitude: number;
 
   @IsNotEmpty()
+  @IsString()
+  postal_code: string;
+
+  @IsNotEmpty()
   @IsBoolean()
   is_active: boolean;
 

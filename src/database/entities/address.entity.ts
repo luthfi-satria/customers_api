@@ -36,6 +36,16 @@ export class Address {
   @Column({ type: 'text' })
   address: string;
 
+  // @ManyToOne(() => PostalCode, (postal_code) => postal_code.id)
+  // @JoinColumn({ name: 'postal_code_id' })
+  // postal_code: PostalCode;
+
+  // @Column({ default: '89f922b3-0816-449f-9f2c-7cf016c3e606' }) //monas
+  // postal_code_id: string;
+
+  @Column({ nullable: true })
+  postal_code: string;
+
   @Column('decimal', {
     default: '-6.175392',
     transformer: new ColumnNumericTransformer(),
