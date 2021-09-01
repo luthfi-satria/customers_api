@@ -1,4 +1,10 @@
 export default {
+  postal_code: {
+    not_found: {
+      code: 'POSTAL_CODE_NOT_FOUND',
+      message: 'Postal code tidak di temukan.',
+    },
+  },
   select: {
     success: 'Get data alamat sukses.',
     fail: {

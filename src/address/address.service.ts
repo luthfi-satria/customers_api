@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommonService } from 'src/common/common.service';
 import { Response } from 'src/customers/customers.decorator';
 import { Address } from 'src/database/entities/address.entity';
-import { HashService } from 'src/hash/hash.service';
 import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
+import { RMessage } from 'src/response/response.interface';
 import { ResponseService } from 'src/response/response.service';
 import { Repository } from 'typeorm';
 import { CreateAddressDto } from './dto/create-address.dto';
@@ -18,26 +19,55 @@ export class AddressService {
     @InjectRepository(Address) private addressRepository: Repository<Address>,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
-    private readonly hashService: HashService,
+    private readonly commonService: CommonService,
   ) {}
 
-  async create(createAddressDto: CreateAddressDto): Promise<Address> {
-    const create_address = this.addressRepository.create(createAddressDto);
-
-    if (createAddressDto.is_active == true) {
-      const adresses = await this.addressRepository.find({
-        where: { customer_id: create_address.customer_id },
-      });
-      const listAddressId: string[] = [];
-      adresses.forEach(async (address) => {
-        listAddressId.push(address.id);
-      });
-      const updateAddress: Partial<CreateAddressDto> = {
-        is_active: false,
+  async create(createAddressDto: CreateAddressDto) {
+    const url: string =
+      process.env.BASEURL_ADMIN_SERVICE +
+      '/api/v1/admins/internal/postal-code/' +
+      createAddressDto.postal_code;
+    const response_postal_code = await this.commonService.postHttp(url);
+    if (!response_postal_code) {
+      const errors: RMessage = {
+        value: createAddressDto.postal_code,
+        property: 'postal_code',
+        constraint: [this.messageService.get('address.postal_code.not_found')],
       };
-      await this.addressRepository.update(listAddressId, updateAddress);
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
     }
-    return await this.addressRepository.save(create_address);
+    createAddressDto.city_id = response_postal_code.data.city_id;
+    const create_address = this.addressRepository.create(createAddressDto);
+    try {
+      const create = await this.addressRepository.save(create_address);
+      if (createAddressDto.is_active == true) {
+        const setActiveParam: SetActiveAddressDto = {
+          customer_id: create.customer_id,
+          id: create.id,
+          is_active: true,
+        };
+        return await this.setActive(setActiveParam);
+      }
+    } catch (error) {
+      const errors: RMessage = {
+        value: '',
+        property: '',
+        constraint: [this.messageService.get('address.create.fail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
   }
 
   async findAll(paramDto: SelectAddressDto) {
@@ -82,40 +112,58 @@ export class AddressService {
   }
 
   async update(id: string, updateAddressDto: UpdateAddressDto) {
-    let update_address;
-    if (updateAddressDto.is_active == true) {
-      update_address = await this.addressRepository
-        .query(
-          "UPDATE customers_address SET is_active=true WHERE id = '" +
-            id +
-            "';UPDATE customers_address SET is_active = false WHERE id != '" +
-            id +
-            "' AND customer_id = '" +
-            updateAddressDto.customer_id +
-            "'",
-        )
-        .then(() => {
-          return true;
-        })
-        .catch(() => {
-          return false;
-        });
-      if (!update_address) {
-        return false;
-      }
-    } else {
-      delete updateAddressDto.is_active;
-      update_address = await this.addressRepository.update(
+    const url: string =
+      process.env.BASEURL_ADMIN_SERVICE +
+      '/api/v1/admins/internal/postal-code/' +
+      updateAddressDto.postal_code;
+    const response_postal_code = await this.commonService.postHttp(url);
+    if (!response_postal_code) {
+      const errors: RMessage = {
+        value: updateAddressDto.postal_code,
+        property: 'postal_code',
+        constraint: [this.messageService.get('address.postal_code.not_found')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    updateAddressDto.city_id = response_postal_code.data.city_id;
+    try {
+      const update_address = await this.addressRepository.update(
         id,
         updateAddressDto,
       );
-      console.log('update address', update_address);
-
-      if (!update_address.affected) {
+      if (!update_address) {
         return false;
       }
+      const address = await this.findOne(id);
+      if (updateAddressDto.is_active == true) {
+        const setActiveParam: SetActiveAddressDto = {
+          customer_id: address.customer_id,
+          id: address.id,
+          is_active: true,
+        };
+        await this.setActive(setActiveParam);
+      }
+      return address;
+    } catch (error) {
+      const errors: RMessage = {
+        value: '',
+        property: '',
+        constraint: [this.messageService.get('address.create.fail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
     }
-    return await this.findOne(id);
   }
 
   async remove(id: string) {
@@ -126,7 +174,7 @@ export class AddressService {
     return await this.addressRepository.restore(id);
   }
 
-  async setActive(setActiveParam: SetActiveAddressDto) {
+  async setActive(setActiveParam: SetActiveAddressDto): Promise<Address> {
     const set_inactive = await this.addressRepository
       .createQueryBuilder()
       .update()
@@ -134,7 +182,7 @@ export class AddressService {
       .where({ customer_id: setActiveParam.customer_id })
       .execute();
     if (!set_inactive.affected) {
-      return false;
+      return null;
     }
     const set_active = await this.addressRepository
       .createQueryBuilder()
@@ -143,7 +191,7 @@ export class AddressService {
       .where({ id: setActiveParam.id })
       .execute();
     if (!set_active.affected) {
-      return false;
+      return null;
     }
     return await this.findOne(setActiveParam.id);
   }

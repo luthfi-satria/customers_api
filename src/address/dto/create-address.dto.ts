@@ -30,6 +30,8 @@ export class CreateAddressDto {
   @IsLongitude({ message: 'Longitude yang anda masukan salah.' })
   location_longitude: number;
 
+  city_id: string;
+
   @IsNotEmpty()
   @IsString()
   postal_code: string;
