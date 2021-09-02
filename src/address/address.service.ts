@@ -23,26 +23,9 @@ export class AddressService {
   ) {}
 
   async create(createAddressDto: CreateAddressDto) {
-    const url: string =
-      process.env.BASEURL_ADMINS_SERVICE +
-      '/api/v1/admins/internal/postal-code/' +
-      createAddressDto.postal_code;
-    const response_postal_code = await this.commonService.postHttp(url);
-    if (!response_postal_code) {
-      const errors: RMessage = {
-        value: createAddressDto.postal_code,
-        property: 'postal_code',
-        constraint: [this.messageService.get('address.postal_code.not_found')],
-      };
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    }
-    createAddressDto.city_id = response_postal_code.data.city_id;
+    createAddressDto.city_id = await this.getCityId(
+      createAddressDto.postal_code,
+    );
     const create_address = this.addressRepository.create(createAddressDto);
     try {
       const create = await this.addressRepository.save(create_address);
@@ -112,26 +95,9 @@ export class AddressService {
   }
 
   async update(id: string, updateAddressDto: UpdateAddressDto) {
-    const url: string =
-      process.env.BASEURL_ADMINS_SERVICE +
-      '/api/v1/admins/internal/postal-code/' +
-      updateAddressDto.postal_code;
-    const response_postal_code = await this.commonService.postHttp(url);
-    if (!response_postal_code) {
-      const errors: RMessage = {
-        value: updateAddressDto.postal_code,
-        property: 'postal_code',
-        constraint: [this.messageService.get('address.postal_code.not_found')],
-      };
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    }
-    updateAddressDto.city_id = response_postal_code.data.city_id;
+    updateAddressDto.city_id = await this.getCityId(
+      updateAddressDto.postal_code,
+    );
     try {
       const update_address = await this.addressRepository.update(
         id,
@@ -194,5 +160,31 @@ export class AddressService {
       return null;
     }
     return await this.findOne(setActiveParam.id);
+  }
+
+  async getCityId(postal_code: string) {
+    if (!postal_code) {
+      return null;
+    }
+    const url: string =
+      process.env.BASEURL_ADMINS_SERVICE +
+      '/api/v1/admins/internal/postal-code/' +
+      postal_code;
+    const response_postal_code = await this.commonService.postHttp(url);
+    if (!response_postal_code) {
+      const errors: RMessage = {
+        value: postal_code,
+        property: 'postal_code',
+        constraint: [this.messageService.get('address.postal_code.not_found')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    return response_postal_code.data.city_id;
   }
 }
