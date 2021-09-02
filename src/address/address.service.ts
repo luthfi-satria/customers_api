@@ -24,7 +24,7 @@ export class AddressService {
 
   async create(createAddressDto: CreateAddressDto) {
     const url: string =
-      process.env.BASEURL_ADMIN_SERVICE +
+      process.env.BASEURL_ADMINS_SERVICE +
       '/api/v1/admins/internal/postal-code/' +
       createAddressDto.postal_code;
     const response_postal_code = await this.commonService.postHttp(url);
@@ -113,7 +113,7 @@ export class AddressService {
 
   async update(id: string, updateAddressDto: UpdateAddressDto) {
     const url: string =
-      process.env.BASEURL_ADMIN_SERVICE +
+      process.env.BASEURL_ADMINS_SERVICE +
       '/api/v1/admins/internal/postal-code/' +
       updateAddressDto.postal_code;
     const response_postal_code = await this.commonService.postHttp(url);
