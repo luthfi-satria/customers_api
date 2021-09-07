@@ -28,7 +28,6 @@ export class AuthService {
       }
       return payload;
     } catch (error) {
-      console.log(error);
       const errors: RMessage = {
         value: '',
         property: 'token',

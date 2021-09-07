@@ -6,6 +6,12 @@ export default {
       message: 'Get data customer gagal.',
     },
   },
+  general: {
+    invalidToken: {
+      code: 'TOKEN_INVALID',
+      message: 'Kode Token yang Anda masukan tidak valid.',
+    },
+  },
   create: {
     success: 'Create Otp Success.',
     fail: 'Create Otp Gagal.',
