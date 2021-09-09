@@ -37,7 +37,10 @@ export default {
     unauthorize: 'Authorisasi tidak valid.',
     invalid: 'Data yang anda masukan tidak valid.',
     invalid_phone: 'Nomor Telepon sudah terdaftar.',
-    existemail: 'Email sudah diapakai oleh user lain.',
+    existemail: {
+      code: 'EXIST_EMAIL',
+      message: 'Email sudah diapakai oleh user lain.',
+    },
   },
   login: {
     success: 'Login Success.',
