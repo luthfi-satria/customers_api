@@ -13,7 +13,7 @@ import { catchError, map } from 'rxjs/operators';
 import { compare, genSalt, hash } from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
 import { Hash } from 'src/hash/hash.decorator';
-import moment from 'moment';
+import * as moment from 'moment';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import { RMessage, RSuccessMessage } from 'src/response/response.interface';
 import { Response } from 'src/response/response.decorator';
