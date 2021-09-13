@@ -8,6 +8,8 @@ import { ImageValidationService } from 'src/utils/image-validation.service';
 import { PhoneConstraintService } from './customers-phone-constraint.service';
 import { PhoneConstraintController } from './customers-phone-constraint.controller';
 import { CommonService } from 'src/common/common.service';
+import { OtpVerificationService } from './customers-otp-verification.service';
+import { OtpVerificationController } from './customers-otp-verification.controller';
 // import { HashModule } from 'src/hash/hash.module';
 
 @Module({
@@ -19,7 +21,12 @@ import { CommonService } from 'src/common/common.service';
     ImageValidationService,
     PhoneConstraintService,
     CommonService,
+    OtpVerificationService,
   ],
-  controllers: [CustomersController, PhoneConstraintController],
+  controllers: [
+    CustomersController,
+    PhoneConstraintController,
+    OtpVerificationController,
+  ],
 })
 export class CustomersModule {}

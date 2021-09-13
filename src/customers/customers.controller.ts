@@ -144,7 +144,7 @@ export class CustomersController {
         ),
       );
     }
-    data.id = create_profile.id_profile;
+    data.id = create_profile.id;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-validation';
     data.user_type = 'customer';
@@ -178,6 +178,7 @@ export class CustomersController {
   @AuthJwtGuard()
   @ResponseStatusCode()
   async profile(
+    @Req() req: any,
     @Body()
     data: CustomerProfileValidation,
     @Headers('Authorization') token: string,
@@ -230,9 +231,7 @@ export class CustomersController {
         }
 
         const cekbyid: ProfileDocument =
-          await this.customerService.findOneCustomerById(
-            response.data.payload.id,
-          );
+          await this.customerService.findOneCustomerById(req.user.id);
         if (!cekbyid) {
           const errors: RMessage = {
             value: token.replace('Bearer ', ''),
@@ -247,15 +246,40 @@ export class CustomersController {
             ),
           );
         }
+        let phone = '';
+        if (data.phone) {
+          const cekphone: ProfileDocument =
+            await this.customerService.findOneCustomerByPhone(data.phone);
+
+          if (cekphone && cekphone.id != req.user.id) {
+            const errors: RMessage = {
+              value: data.phone,
+              property: 'phone',
+              constraint: [this.messageService.get('customers.create.exist')],
+            };
+            throw new BadRequestException(
+              this.responseService.error(
+                HttpStatus.BAD_REQUEST,
+                errors,
+                'Bad Request',
+              ),
+            );
+          }
+          phone = data.phone;
+        } else {
+          phone = cekbyid.phone;
+        }
 
         try {
           const profiledata: ReqUpdataProfile = {
-            id_profile: response.data.payload.id,
-            phone: cekbyid.phone,
+            id: req.user.id, // response.data.payload.id,
+            phone: phone,
             name: data.name,
             email: data.email,
             dob: data.dob ?? null,
+            gender: data.gender ?? null,
           };
+          data.id = cekbyid.id;
           await this.customerService.createCustomerProfile(profiledata, true);
           delete response.data.payload;
           return this.responseService.success(
@@ -441,7 +465,7 @@ export class CustomersController {
         ),
       );
     }
-    data.id = customer.id_profile;
+    data.id = customer.id;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE +
       '/api/v1/auth/otp-login-phone-validation';
@@ -552,7 +576,7 @@ export class CustomersController {
         ),
       );
     }
-    data.id = customer.id_profile;
+    data.id = customer.id;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE +
       '/api/v1/auth/otp-login-email-validation';
@@ -732,65 +756,10 @@ export class CustomersController {
     body: AdminCustomerProfileValidation,
     @Headers('Authorization') token: string,
   ): Promise<any> {
-    const cekemail: ProfileDocument =
-      await this.customerService.findOneCustomerByEmailExceptId(
-        body.email,
-        id_profile,
-      );
-
-    if (cekemail) {
-      const errors: RMessage = {
-        value: body.email,
-        property: 'email',
-        constraint: [this.messageService.get('customers.profile.existemail')],
-      };
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    }
-
-    const profile: ProfileDocument =
-      await this.customerService.findOneCustomerById(id_profile);
-    if (!profile) {
-      const errors: RMessage = {
-        value: token.replace('Bearer ', ''),
-        property: 'token',
-        constraint: [this.messageService.get('customers.profile.invalid')],
-      };
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    }
-
-    try {
-      const updated_profile =
-        await this.customerService.updateCustomerProfileById(id_profile, body);
-      return this.responseService.success(
-        true,
-        this.messageService.get('customers.profile.success'),
-        updated_profile,
-      );
-    } catch (err: any) {
-      const errors: RMessage = {
-        value: '',
-        property: '',
-        constraint: [this.messageService.get('customers.profile.invalid')],
-      };
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          errors,
-          'Bad Request',
-        ),
-      );
-    }
+    return await this.customerService.updateCustomerManageProfile(
+      token,
+      id_profile,
+      body,
+    );
   }
 }

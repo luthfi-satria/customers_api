@@ -1,4 +1,13 @@
-import { IsEmail, IsNotEmpty, IsOptional, Validate } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumberString,
+  IsOptional,
+  Length,
+  Validate,
+} from 'class-validator';
+import { Gender } from 'src/database/entities/profile.entity';
 import { ValidDOBRule } from './valid-dob.rule';
 
 export class CustomerProfileValidation {
@@ -16,11 +25,24 @@ export class CustomerProfileValidation {
   })
   dob: string;
 
-  gender?: string;
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEnum(Gender, { message: 'Gender tidak valid' })
+  gender: Gender;
+
   user_type: string;
   id_profile: number;
   roles: string[];
 
   @IsOptional()
   photo: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsNumberString()
+  @Length(10, 15)
+  phone: string;
+
+  @IsOptional()
+  id: string;
 }

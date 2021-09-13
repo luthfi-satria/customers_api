@@ -1,4 +1,9 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpService,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { Repository } from 'typeorm';
@@ -8,8 +13,13 @@ import { catchError, map } from 'rxjs/operators';
 import { compare, genSalt, hash } from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
 import { Hash } from 'src/hash/hash.decorator';
-import * as moment from 'moment';
+import moment from 'moment';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
+import { RMessage, RSuccessMessage } from 'src/response/response.interface';
+import { Response } from 'src/response/response.decorator';
+import { ResponseService } from 'src/response/response.service';
+import { MessageService } from 'src/message/message.service';
+import { Message } from 'src/message/message.decorator';
 
 @Injectable()
 export class CustomersService {
@@ -18,6 +28,8 @@ export class CustomersService {
     private readonly profileRepository: Repository<ProfileDocument>,
     private httpService: HttpService,
     @Hash() private readonly hashService: HashService,
+    @Response() private readonly responseService: ResponseService,
+    @Message() private readonly messageService: MessageService,
   ) {}
 
   async findOne(id: string) {
@@ -38,7 +50,7 @@ export class CustomersService {
         'address',
         'address.is_active = true',
       )
-      .where('customers_profile.id_profile = :id', { id })
+      .where('customers_profile.id = :id', { id })
       .getOne();
     return profile;
   }
@@ -59,7 +71,7 @@ export class CustomersService {
       const profile = await this.profileRepository
         .createQueryBuilder()
         .where('email = :email', { email: email })
-        .andWhere('id_profile != :id', { id: id })
+        .andWhere('id != :id', { id: id })
         .getOne();
       return profile;
     } catch (error: any) {
@@ -68,7 +80,7 @@ export class CustomersService {
   }
 
   findOneCustomerById(id: string): Promise<ProfileDocument> {
-    return this.profileRepository.findOne({ where: { id_profile: id } });
+    return this.profileRepository.findOne({ where: { id: id } });
   }
 
   async createCustomerProfile(
@@ -84,13 +96,17 @@ export class CustomersService {
       phone: data.phone,
       name: data.name,
       email: data.email,
+      // gender: data.gender,
       // password: passwordHash,
     };
     if (data.dob) {
       create_profile.dob = moment(data.dob, 'DD/MM/YYYY', true).toDate();
     }
+    if (data.gender) {
+      create_profile.gender = data.gender;
+    }
     if (flg_update) {
-      create_profile.id_profile = data.id_profile;
+      create_profile.id = data.id;
     }
     return this.profileRepository.save(create_profile);
   }
@@ -112,13 +128,100 @@ export class CustomersService {
 
   async updateCustomerProfileById(
     id: string,
-    data: AdminCustomerProfileValidation,
+    data: Partial<ProfileDocument>,
   ): Promise<ProfileDocument> {
     const update = await this.profileRepository.update(id, data);
     if (!update) {
       return null;
     }
     return await this.profileRepository.findOne(id);
+  }
+
+  async updateCustomerManageProfile(
+    token: string,
+    id_profile: string,
+    body: AdminCustomerProfileValidation,
+  ): Promise<RSuccessMessage> {
+    const cekemail: ProfileDocument = await this.findOneCustomerByEmailExceptId(
+      body.email,
+      id_profile,
+    );
+    if (cekemail) {
+      const errors: RMessage = {
+        value: body.email,
+        property: 'email',
+        constraint: [this.messageService.get('customers.profile.existemail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    const profile: ProfileDocument = await this.findOneCustomerById(id_profile);
+    if (!profile) {
+      const errors: RMessage = {
+        value: token.replace('Bearer ', ''),
+        property: 'token',
+        constraint: [this.messageService.get('customers.profile.invalid')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    if (typeof body.name != 'undefined' && body.name != '' && body.name != null)
+      profile.name = body.name;
+    if (
+      typeof body.email != 'undefined' &&
+      body.email != '' &&
+      body.email != null
+    )
+      profile.email = body.email;
+    if (body.dob) {
+      profile.dob = moment(body.dob, 'DD/MM/YYYY', true).toDate();
+    }
+    if (body.gender) {
+      profile.gender = body.gender;
+    }
+
+    if (body.is_active == true) {
+      profile.is_active = true;
+    } else {
+      profile.is_active = false;
+    }
+    try {
+      const updated_profile: Record<string, any> =
+        await this.profileRepository.save(profile);
+      if (updated_profile.dob)
+        updated_profile.dob = moment(updated_profile.dob).format('DD/MM/YYYY');
+
+      return this.responseService.success(
+        true,
+        this.messageService.get('customers.profile.success'),
+        updated_profile,
+      );
+    } catch (err: any) {
+      const errors: RMessage = {
+        value: '',
+        property: err.column,
+        constraint: [err.message], // [this.messageService.get('customers.profile.invalid')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
   }
 
   //--------------------------------------------------------------

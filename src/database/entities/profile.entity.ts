@@ -8,10 +8,15 @@ import {
 } from 'typeorm';
 import { Address } from './address.entity';
 
+export enum Gender {
+  Male = 'MALE',
+  Female = 'FEMALE',
+}
+
 @Entity({ name: 'customers_profile' })
 export class ProfileDocument {
   @PrimaryGeneratedColumn('uuid')
-  id_profile: number;
+  id: string;
 
   @Column({ length: '15' })
   phone: string;
@@ -42,4 +47,11 @@ export class ProfileDocument {
 
   @OneToMany(() => Address, (address) => address.customer)
   active_addresses: Address[];
+
+  @Column({
+    type: 'enum',
+    enum: Gender,
+    default: null,
+  })
+  gender: Gender;
 }

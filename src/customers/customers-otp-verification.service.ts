@@ -16,14 +16,13 @@ import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { CustomersService } from './customers.service';
 import { OtpCreateValidation } from './validation/otp.create.validation';
 import { CommonService } from 'src/common/common.service';
-import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
 };
 
 @Injectable()
-export class PhoneConstraintService {
+export class OtpVerificationService {
   constructor(
     @InjectRepository(ProfileDocument)
     private readonly profileRepository: Repository<ProfileDocument>,
@@ -35,7 +34,7 @@ export class PhoneConstraintService {
     private readonly commonService: CommonService,
   ) {}
 
-  async cekExistingPhone(args: Partial<OtpCreateValidation>): Promise<any> {
+  async verifyNewPhone(args: Partial<OtpCreateValidation>): Promise<any> {
     const cekPhone = await this.profileRepository
       .findOne({
         phone: args.phone,
@@ -55,108 +54,7 @@ export class PhoneConstraintService {
           ),
         );
       });
-    if (!cekPhone) {
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          {
-            value: args.phone,
-            property: 'phone',
-            constraint: [this.messageService.get('customers.error.not_found')],
-          },
-          'Bad Request',
-        ),
-      );
-    }
-    args.user_type = 'customer';
-
-    const url: string =
-      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-forget-password';
-    const response: Record<string, any> = await this.commonService.postHttp(
-      url,
-      args,
-      defaultJsonHeader,
-    );
-    if (response.statusCode) {
-      throw response;
-    }
-    return response;
-  }
-
-  async validateExistingPhone(
-    args: Partial<OtpPhoneValidateValidation>,
-  ): Promise<any> {
-    const cekPhone = await this.profileRepository
-      .findOne({
-        phone: args.phone,
-      })
-      .catch(() => {
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            {
-              value: args.phone,
-              property: 'phone',
-              constraint: [
-                this.messageService.get('customers.error.not_found'),
-              ],
-            },
-            'Bad Request',
-          ),
-        );
-      });
-    if (!cekPhone) {
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          {
-            value: args.phone,
-            property: 'phone',
-            constraint: [this.messageService.get('customers.error.not_found')],
-          },
-          'Bad Request',
-        ),
-      );
-    }
-    args.user_type = 'customer';
-    args.id = cekPhone.id;
-
-    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-validation`;
-    const response: Record<string, any> = await this.commonService.postHttp(
-      url,
-      args,
-      defaultJsonHeader,
-    );
-    if (response.statusCode) {
-      throw response;
-    }
-    return response;
-  }
-
-  async updateNewPhone(
-    args: Partial<OtpCreateValidation>,
-    req: any,
-  ): Promise<any> {
-    const cekPhone = await this.profileRepository
-      .findOne({
-        phone: args.phone,
-      })
-      .catch(() => {
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            {
-              value: args.phone,
-              property: 'phone',
-              constraint: [
-                this.messageService.get('customers.error.not_found'),
-              ],
-            },
-            'Bad Request',
-          ),
-        );
-      });
-    if (cekPhone) {
+    if (cekPhone && cekPhone.id != args.id) {
       throw new BadRequestException(
         this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -169,86 +67,20 @@ export class PhoneConstraintService {
         ),
       );
     }
-    //Get Existing Customer
-    const getPhone = await this.profileRepository
-      .findOne({ id: req.id })
-      .catch(() => {
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            {
-              value: req.id,
-              property: 'id',
-              constraint: [
-                this.messageService.get('customers.error.not_found'),
-              ],
-            },
-            'Bad Request',
-          ),
-        );
-      });
-    if (!getPhone) {
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          {
-            value: req.id,
-            property: 'id',
-            constraint: [this.messageService.get('customers.error.not_found')],
-          },
-          'Bad Request',
-        ),
-      );
-    }
-
-    //update hp
-    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-update-phone`;
-    const reqOtp = {
-      phone: getPhone.phone,
-      phone_new: args.phone,
-    };
-    const respOtp: Record<string, any> = await this.commonService.postHttp(
+    args.user_type = 'customer-verify-phone';
+    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-phone`;
+    const response: Record<string, any> = await this.commonService.postHttp(
       url,
-      reqOtp,
+      args,
       defaultJsonHeader,
     );
-    if (respOtp == null) {
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          {
-            value: args.phone,
-            property: 'phone',
-            constraint: [this.messageService.get('customers.profile.fail')],
-          },
-          'Bad Request',
-        ),
-      );
-    } else if (respOtp.statusCode) {
-      throw respOtp;
+    if (response.statusCode) {
+      throw response;
     }
-    getPhone.phone = args.phone;
-    return await this.profileRepository
-      .save(getPhone)
-      .then(() => {
-        return respOtp;
-      })
-      .catch((err) => {
-        throw new BadRequestException(
-          this.responseService.error(
-            HttpStatus.BAD_REQUEST,
-            {
-              value: '',
-              property: err.column,
-              constraint: [err.message],
-            },
-            'Bad Request',
-          ),
-        );
-      });
+    return response;
   }
 
-  async validateNewPhone(args: Partial<OtpPhoneValidateValidation>) {
+  async validationNewPhone(args: Partial<OtpCreateValidation>): Promise<any> {
     const cekPhone = await this.profileRepository
       .findOne({
         phone: args.phone,
@@ -268,32 +100,129 @@ export class PhoneConstraintService {
           ),
         );
       });
-    if (!cekPhone) {
+    if (cekPhone && cekPhone.id != args.id) {
       throw new BadRequestException(
         this.responseService.error(
           HttpStatus.BAD_REQUEST,
           {
             value: args.phone,
             property: 'phone',
-            constraint: [this.messageService.get('customers.error.not_found')],
+            constraint: [this.messageService.get('customers.create.exist')],
           },
           'Bad Request',
         ),
       );
     }
-    args.user_type = 'customer';
-    args.id = cekPhone.id;
-    const url: string =
-      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-validation';
-    args.user_type = 'customer';
-    args.roles = ['customer'];
+    args.user_type = 'customer-verify-phone';
 
+    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-phone-validation`;
     const response: Record<string, any> = await this.commonService.postHttp(
       url,
       args,
+      defaultJsonHeader,
     );
     if (response.statusCode) {
       throw response;
+    }
+    if (response.success) {
+      return { status: true };
+    }
+    return response;
+  }
+
+  async verifyNewEmail(args: Partial<OtpCreateValidation>): Promise<any> {
+    const cekEmail = await this.profileRepository
+      .findOne({
+        email: args.email,
+      })
+      .catch(() => {
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: args.email,
+              property: 'email',
+              constraint: [
+                this.messageService.get('customers.error.not_found'),
+              ],
+            },
+            'Bad Request',
+          ),
+        );
+      });
+    if (cekEmail && cekEmail.id != args.id) {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: args.email,
+            property: 'email',
+            constraint: [this.messageService.get('customers.create.exist')],
+          },
+          'Bad Request',
+        ),
+      );
+    }
+    args.user_type = 'customer-verify-email';
+    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-email`;
+    const response: Record<string, any> = await this.commonService.postHttp(
+      url,
+      args,
+      defaultJsonHeader,
+    );
+    if (response.statusCode) {
+      throw response;
+    }
+    return response;
+  }
+
+  async validationNewEmail(args: Partial<OtpCreateValidation>): Promise<any> {
+    const cekEmail = await this.profileRepository
+      .findOne({
+        email: args.email,
+      })
+      .catch(() => {
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: args.email,
+              property: 'email',
+              constraint: [
+                this.messageService.get('customers.error.not_found'),
+              ],
+            },
+            'Bad Request',
+          ),
+        );
+      });
+    if (cekEmail && cekEmail.id != args.id) {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: args.email,
+            property: 'email',
+            constraint: [this.messageService.get('customers.create.exist')],
+          },
+          'Bad Request',
+        ),
+      );
+    }
+    args.user_type = 'customer-verify-email';
+
+    const url: string =
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-email-validation';
+    const response: Record<string, any> = await this.commonService.postHttp(
+      url,
+      args,
+      defaultJsonHeader,
+    );
+    if (response.statusCode) {
+      throw response;
+    }
+    if (response.success) {
+      return { status: true };
     }
     return response;
   }

@@ -8,7 +8,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
 } from 'class-validator';
 import { CreateAddressDto } from './create-address.dto';
 import { GroupType } from 'src/database/entities/address.entity';

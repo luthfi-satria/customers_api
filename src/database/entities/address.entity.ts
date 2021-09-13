@@ -16,6 +16,7 @@ export enum GroupType {
   Home = 'home',
   Office = 'office',
   Custom = 'custom',
+  Apartment = 'apartment',
 }
 
 @Entity({ name: 'customers_address' })
@@ -23,7 +24,7 @@ export class Address {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => ProfileDocument, (profile) => profile.id_profile)
+  @ManyToOne(() => ProfileDocument, (profile) => profile.id)
   @JoinColumn({ name: 'customer_id' })
   customer: ProfileDocument;
 

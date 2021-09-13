@@ -12,6 +12,6 @@ export class OtpEmailValidateValidation {
 
   user_type: string;
   id_profile: number;
-  id: number;
+  id: string;
   roles: string[];
 }
