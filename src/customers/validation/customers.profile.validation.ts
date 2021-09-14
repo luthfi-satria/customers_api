@@ -11,6 +11,7 @@ import { Gender } from 'src/database/entities/profile.entity';
 import { ValidDOBRule } from './valid-dob.rule';
 
 export class CustomerProfileValidation {
+  @IsOptional()
   @IsNotEmpty()
   name: string;
 
