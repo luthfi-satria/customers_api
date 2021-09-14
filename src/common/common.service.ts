@@ -26,8 +26,7 @@ export class CommonService {
       return await lastValueFrom(post_response);
     } catch (error) {
       console.error('error: ', error.response.data);
-      throw error.response.data;
-      // return null;
+      return null;
     }
   }
 }
