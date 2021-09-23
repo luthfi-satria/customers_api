@@ -68,17 +68,57 @@ export class PhoneConstraintService {
         ),
       );
     }
+    if (cekPhone.email == null) {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: null,
+            property: 'email',
+            constraint: [
+              this.messageService.get('customers.general.emailNotFound'),
+            ],
+          },
+          'Bad Request',
+        ),
+      );
+    }
     args.user_type = 'customer';
-
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-forget-password';
-    const response: Record<string, any> = await this.commonService.postHttp(
-      url,
-      args,
-      defaultJsonHeader,
-    );
+    const response: Record<string, any> = await this.commonService
+      .postHttp(url, args, defaultJsonHeader)
+      .catch(() => {
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: args.phone,
+              property: 'phone',
+              constraint: [
+                this.messageService.get('customers.general.failToProcess'),
+              ],
+            },
+            'Bad Request',
+          ),
+        );
+      });
     if (response.statusCode) {
       throw response;
+    } else if (response == null) {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: args.phone,
+            property: 'phone',
+            constraint: [
+              this.messageService.get('customers.general.failToProcess'),
+            ],
+          },
+          'Bad Request',
+        ),
+      );
     }
     let email = '';
     const frontEmail = cekPhone.email.split('@')[0];
@@ -301,10 +341,23 @@ export class PhoneConstraintService {
     args.user_type = 'customer';
     args.roles = ['customer'];
 
-    const response: Record<string, any> = await this.commonService.postHttp(
-      url,
-      args,
-    );
+    const response: Record<string, any> = await this.commonService
+      .postHttp(url, args)
+      .catch(() => {
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: args.phone,
+              property: 'phone',
+              constraint: [
+                this.messageService.get('customers.general.failToProcess'),
+              ],
+            },
+            'Bad Request',
+          ),
+        );
+      });
     if (response.statusCode) {
       throw response;
     }

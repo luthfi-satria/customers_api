@@ -7,6 +7,14 @@ export default {
     },
   },
   general: {
+    emailNotFound: {
+      code: 'EMAIL_NOT_FOUND',
+      message: 'Email Customer tidak tersedia.',
+    },
+    failToProcess: {
+      code: 'FAIL_TO_PROCESS',
+      message: 'Gagal memproses request.',
+    },
     invalidToken: {
       code: 'TOKEN_INVALID',
       message: 'Kode Token yang Anda masukan tidak valid.',
