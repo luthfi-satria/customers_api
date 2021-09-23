@@ -347,6 +347,9 @@ export class CustomersController {
         destination: './upload_customers',
         filename: editFileName,
       }),
+      limits: {
+        fileSize: 2000000, //2MB
+      },
       fileFilter: imageFileFilter,
     }),
   )
