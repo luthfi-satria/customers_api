@@ -80,6 +80,19 @@ export class PhoneConstraintService {
     if (response.statusCode) {
       throw response;
     }
+    let email = '';
+    const frontEmail = cekPhone.email.split('@')[0];
+    const lenFrontEmail = frontEmail.length;
+
+    if (lenFrontEmail <= 3) {
+      email = cekPhone.email;
+    } else {
+      const maskEmail = frontEmail.substring(3).replace(/./g, '*');
+      email = `${frontEmail.substring(0, 3)}${maskEmail}@${
+        cekPhone.email.split('@')[1]
+      }`;
+    }
+    response.email = email;
     return response;
   }
 

@@ -19,7 +19,7 @@ export class PhoneConstraintController {
     @Body()
     args: Partial<OtpCreateValidation>,
   ): Promise<any> {
-    return await this.phoneConstraintService.cekExistingPhone(args);
+    return this.phoneConstraintService.cekExistingPhone(args);
   }
 
   @Post('otp-phone-problem-validation')
