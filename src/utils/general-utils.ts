@@ -56,3 +56,33 @@ export const createUrl = function (filename: any) {
     return process.env.HTTP_ADDRESS + '/api/v1/customers/image' + filename;
   }
 };
+
+export const formatingOutputTime = function formatingOutputTime(time: string) {
+  return momenttz(time).tz('Asia/Jakarta').format('YYYY-MM-DD HH:mm:ss');
+};
+
+export const formatingAllOutputTime = function formatingAllOutputTime(
+  object: any,
+) {
+  for (const key in object) {
+    if (object[key] && key.endsWith('_at')) {
+      object[key] = this.formatingOutputTime(object[key]);
+    }
+    if (object[key] && typeof object[key] === 'object') {
+      this.formatingAllOutputTime(object[key]);
+    }
+  }
+};
+
+export const removeAllFieldPassword = function removeAllFieldPassword(
+  object: any,
+) {
+  for (const key in object) {
+    if (object[key] && key.endsWith('password')) {
+      delete object[key];
+    }
+    if (object[key] && typeof object[key] === 'object') {
+      this.removeAllFieldPassword(object[key]);
+    }
+  }
+};
