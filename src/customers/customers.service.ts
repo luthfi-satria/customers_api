@@ -14,12 +14,14 @@ import { compare, genSalt, hash } from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
 import { Hash } from 'src/hash/hash.decorator';
 import * as moment from 'moment';
+import { randomUUID } from 'crypto';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import { RMessage, RSuccessMessage } from 'src/response/response.interface';
 import { Response } from 'src/response/response.decorator';
 import { ResponseService } from 'src/response/response.service';
 import { MessageService } from 'src/message/message.service';
 import { Message } from 'src/message/message.decorator';
+import { NotificationService } from 'src/common/notification/notification.service';
 
 @Injectable()
 export class CustomersService {
@@ -27,6 +29,7 @@ export class CustomersService {
     @InjectRepository(ProfileDocument)
     private readonly profileRepository: Repository<ProfileDocument>,
     private httpService: HttpService,
+    private readonly notificationService: NotificationService,
     @Hash() private readonly hashService: HashService,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
@@ -108,6 +111,57 @@ export class CustomersService {
     if (flg_update) {
       create_profile.id = data.id;
     }
+
+    if (data.email) {
+      const token = randomUUID();
+      create_profile.verification_token = token;
+      try {
+        const created_user = await this.profileRepository.save(create_profile);
+  
+        const url = `${process.env.BASEURL_ZEUS}/verification/email?t=${token}`;
+  
+        // biarkan tanpa await karena dilakukan secara asynchronous
+        this.notificationService.sendEmail(
+          data.email,
+          'Reset Password',
+          '',
+          `
+        <p>Silahkan klik link berikut untuk mereset password Anda,</p>
+        <a href="${url}">${url}</a>
+        `,
+        );
+  
+        const response: Record<string, any> = {
+          status: true,
+        };
+  
+        if (process.env.NODE_ENV == 'test') {
+          response.token = token;
+          response.url = url;
+
+          console.log('response: ', response);
+          console.log('response token + url: ', {
+            token,
+            url,
+          });
+        }
+        return created_user
+      } catch (err) {
+        const errors: RMessage = {
+          value: '',
+          property: err.column,
+          constraint: [err.message],
+        };
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            errors,
+            'Bad Request',
+          ),
+        );
+      }
+    }
+
     return this.profileRepository.save(create_profile);
   }
 

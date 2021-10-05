@@ -10,6 +10,7 @@ import { PhoneConstraintController } from './customers-phone-constraint.controll
 import { CommonService } from 'src/common/common.service';
 import { OtpVerificationService } from './customers-otp-verification.service';
 import { OtpVerificationController } from './customers-otp-verification.controller';
+import { NotificationService } from 'src/common/notification/notification.service';
 // import { HashModule } from 'src/hash/hash.module';
 
 @Module({
@@ -22,6 +23,7 @@ import { OtpVerificationController } from './customers-otp-verification.controll
     PhoneConstraintService,
     CommonService,
     OtpVerificationService,
+    NotificationService,
   ],
   controllers: [
     CustomersController,
