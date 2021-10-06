@@ -88,4 +88,8 @@ export default {
       message: 'Customer tidak ditemukan.',
     },
   },
+  email_verification: {
+    invalid_token: 'Token yang anda masukan tidak valid atau tidak ditemukan',
+    success: 'Verifikasi email sukses',
+  },
 };

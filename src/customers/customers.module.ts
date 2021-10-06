@@ -10,6 +10,8 @@ import { PhoneConstraintController } from './customers-phone-constraint.controll
 import { CommonService } from 'src/common/common.service';
 import { OtpVerificationService } from './customers-otp-verification.service';
 import { OtpVerificationController } from './customers-otp-verification.controller';
+import { EmailVerificationService } from './customers-email-verification.service';
+import { EmailVerificationController } from './customers-email-verification.controller';
 // import { HashModule } from 'src/hash/hash.module';
 
 @Module({
@@ -22,11 +24,13 @@ import { OtpVerificationController } from './customers-otp-verification.controll
     PhoneConstraintService,
     CommonService,
     OtpVerificationService,
+    EmailVerificationService,
   ],
   controllers: [
     CustomersController,
     PhoneConstraintController,
     OtpVerificationController,
+    EmailVerificationController,
   ],
 })
 export class CustomersModule {}
