@@ -39,6 +39,7 @@ import { ImageValidationService } from 'src/utils/image-validation.service';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
 import { UserType } from 'src/auth/guard/user-type.decorator';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
+import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -764,5 +765,25 @@ export class CustomersController {
       id_profile,
       body,
     );
+  }
+
+  @Post('verifications/email')
+  @UserType('customer')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async changeEmail(
+    @Req() req: any,
+    @Body()
+    body: CustomerChangeEmailValidation,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    console.log('checkpoint 1');
+
+    console.log(req.user);
+    return this.responseService.success(
+      true,
+      this.messageService.get('customers.general.success'),
+    );
+    // return await this.customerService.changeEmail(body, req.user);
   }
 }
