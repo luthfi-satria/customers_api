@@ -14,6 +14,9 @@ import { GroupType } from 'src/database/entities/address.entity';
 
 export class UpdateAddressDto extends PartialType(CreateAddressDto) {
   @IsOptional()
+  id?: string;
+
+  @IsOptional()
   @IsString()
   name: string;
 
