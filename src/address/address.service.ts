@@ -1,4 +1,9 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommonService } from 'src/common/common.service';
 import { Response } from 'src/customers/customers.decorator';
@@ -94,7 +99,20 @@ export class AddressService {
     });
   }
 
-  async update(id: string, updateAddressDto: UpdateAddressDto) {
+  async findAddressByIds(address_ids: string[]): Promise<Address[]> {
+    return this.addressRepository.findByIds(address_ids);
+  }
+
+  async findAddressByIdsWithCustomerId(
+    address_ids: any[],
+    customer_id: string,
+  ): Promise<Address[]> {
+    return this.addressRepository.findByIds(address_ids, {
+      where: { customer_id: customer_id },
+    });
+  }
+
+  async update(id: string, updateAddressDto: UpdateAddressDto | Address) {
     updateAddressDto.city_id = await this.getCityId(
       updateAddressDto.postal_code,
     );
@@ -130,6 +148,18 @@ export class AddressService {
         ),
       );
     }
+  }
+
+  async updateByEntity(id: string, address: Address): Promise<Address> {
+    return this.addressRepository.update(id, address).then(async (res) => {
+      if (res.affected == 0) {
+        Logger.log(
+          `WARN Update Address success, but doenst affect anything!`,
+          'Update Group Module',
+        );
+      }
+      return this.addressRepository.findOne(id);
+    });
   }
 
   async remove(id: string) {
