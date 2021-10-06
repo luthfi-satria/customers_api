@@ -1,10 +1,11 @@
 
 import {
   Body,
-  Controller, Get, Logger, Param, Put
+  Controller, Get, Logger, Param, Put, Query
 } from '@nestjs/common';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
+import { QueryFilterDto } from './validation/customers.profile.validation';
 
 @Controller('api/v1/customers/user-management')
 export class CustomersUserManagementController { 
@@ -14,10 +15,11 @@ export class CustomersUserManagementController {
   ) {}
 
   @Get()
-  async queryCustomerList(){ 
+  async queryCustomerList(@Query() query: QueryFilterDto){ 
     try {
+      const result = await this.customerService.queryCustomerProfile(query);
       
-      return this.responseService.success(true, 'Succes Query Customer List', []);
+      return this.responseService.success(true, 'Succes Query Customer List', result);
     } catch (e) {
       Logger.error(`ERROR ${e.message}`, '', 'GET Query Customer list')
       throw e;
