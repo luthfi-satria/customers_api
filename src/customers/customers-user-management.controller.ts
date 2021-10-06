@@ -1,40 +1,112 @@
-
 import {
   Body,
-  Controller, Get, Logger, Param, Put, Query
+  Controller,
+  Get,
+  HttpStatus,
+  Logger,
+  NotFoundException,
+  Param,
+  Put,
+  Query,
 } from '@nestjs/common';
+import { AddressService } from 'src/address/address.service';
+import { UpdateAddressDto } from 'src/address/dto/update-address.dto';
+import { Address, GroupType } from 'src/database/entities/address.entity';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
 import { QueryFilterDto } from './validation/customers.profile.validation';
 
 @Controller('api/v1/customers/user-management')
-export class CustomersUserManagementController { 
+export class CustomersUserManagementController {
   constructor(
+    private readonly addressService: AddressService,
     private readonly responseService: ResponseService,
     private readonly customerService: CustomersService,
   ) {}
 
   @Get()
-  async queryCustomerList(@Query() query: QueryFilterDto){ 
+  async queryCustomerList(@Query() query: QueryFilterDto) {
     try {
       const result = await this.customerService.queryCustomerProfile(query);
-      
-      return this.responseService.success(true, 'Succes Query Customer List', result);
+
+      return this.responseService.success(
+        true,
+        'Success Query Customer List',
+        result,
+      );
     } catch (e) {
-      Logger.error(`ERROR ${e.message}`, '', 'GET Query Customer list')
+      Logger.error(`ERROR ${e.message}`, '', 'GET Query Customer list');
       throw e;
     }
   }
 
   @Put(':id/addresses')
   async updateUserAddressInBulk(
-    @Param('id') param: string,
-    @Body() body: Record<string, any>
-  ){
+    @Param('id') id: string,
+    @Body() body: UpdateAddressDto[],
+  ) {
     try {
-      return this.responseService.success(true, 'Succes Update Customer Addresses', []);
+      const inputIds = body.map((row) => row.id);
+
+      const customerIsExist = await this.customerService.findOneCustomerById(
+        id,
+      );
+      if (!customerIsExist) {
+        throw new NotFoundException(
+          this.responseService.error(HttpStatus.NOT_FOUND, {
+            constraint: [`'customer_id' not found!`],
+            property: 'customer_id',
+            value: id,
+          }),
+        );
+      }
+
+      const address_ids =
+        await this.addressService.findAddressByIdsWithCustomerId(inputIds, id);
+
+      if (inputIds.length !== address_ids.length) {
+        const existIds = address_ids.map((e) => e.id);
+        const unknown_id = inputIds.filter((x) => !existIds.includes(x));
+
+        throw new NotFoundException(
+          this.responseService.error(HttpStatus.NOT_FOUND, {
+            constraint: [`'address_id' not found!`],
+            property: 'address_id',
+            value: unknown_id[0],
+          }),
+        );
+      }
+
+      // parse existing with new value
+      const parsedAddresses: Address[] = address_ids.map((row) => {
+        const newValue = body.find((item) => item.id == row.id);
+        return { ...row, ...newValue };
+      });
+
+      const result = await Promise.all(
+        parsedAddresses.map(async (row) => {
+          // check & validate postal code, if fail return bad exception
+          const city_detail = await this.addressService
+            .getCityId(row.postal_code)
+            .catch((e) => {
+              throw e;
+            });
+          row.city_id = city_detail;
+
+          return this.addressService.updateByEntity(row.id, row);
+        }),
+      ).catch((e) => {
+        throw e;
+      });
+
+      return this.responseService.success(
+        true,
+        'Success Update Customer Addresses',
+        result,
+      );
     } catch (e) {
       Logger.error(`ERROR ${e.message}`, '', 'PUT Update Customer Addresses');
+      throw e;
     }
   }
 
@@ -42,14 +114,55 @@ export class CustomersUserManagementController {
   async updateUserAddress(
     @Param('id') id: string,
     @Param('address_id') address_id: string,
-    @Body() body: Record<string, any>
-  ){
+    @Body() body: UpdateAddressDto,
+  ) {
     try {
-    return this.responseService.success(true, 'Succes Update Customer Address', {});
+      const customerIsExist = await this.customerService.findOneCustomerById(
+        id,
+      );
+      if (!customerIsExist) {
+        throw new NotFoundException(
+          this.responseService.error(HttpStatus.NOT_FOUND, {
+            constraint: [`param 'id' not found!`],
+            property: 'id',
+            value: id,
+          }),
+        );
+      }
+
+      const addressIsExist = await this.addressService.findOne(address_id, id);
+      if (!addressIsExist) {
+        throw new NotFoundException(
+          this.responseService.error(HttpStatus.NOT_FOUND, {
+            constraint: [`param 'address_id' not found!`],
+            property: 'address_id',
+            value: address_id,
+          }),
+        );
+      }
+
+      // parse existing with new value
+      const parsedAddresses = new Address({ ...addressIsExist, ...body });
+
+      // validate postal code, if fail return bad exception
+      const city_id = await this.addressService.getCityId(
+        parsedAddresses.postal_code,
+      );
+      parsedAddresses.city_id = city_id;
+
+      const result = await this.addressService.updateByEntity(
+        parsedAddresses.id,
+        parsedAddresses,
+      );
+
+      return this.responseService.success(
+        true,
+        'Succes Update Customer Address',
+        result,
+      );
     } catch (e) {
-      Logger.error(`ERROR ${e.message}`, '', 'PUT Update Customer Addresses');
+      Logger.error(`ERROR ${e.message}`, '', 'PUT Update Custommer Addresses');
+      throw e;
     }
   }
-
 }
-
