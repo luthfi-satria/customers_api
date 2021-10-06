@@ -37,6 +37,9 @@ export class ProfileDocument {
   is_active: boolean;
 
   @CreateDateColumn({ nullable: true })
+  email_verified_at: Date;
+
+  @CreateDateColumn({ nullable: true })
   created_at: Date;
 
   @UpdateDateColumn({ nullable: true })
