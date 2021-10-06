@@ -33,6 +33,9 @@ export class ProfileDocument {
   @Column({ nullable: true })
   photo: string;
 
+  @Column({ nullable: true })
+  verification_token: string;
+
   @Column({ nullable: false, default: true })
   is_active: boolean;
 
