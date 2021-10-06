@@ -35,52 +35,6 @@ export class EmailVerificationService {
     private readonly commonService: CommonService,
   ) {}
 
-  //   async verifyNewEmail(args: Partial<OtpCreateValidation>): Promise<any> {
-  //     const cekEmail = await this.profileRepository
-  //       .findOne({
-  //         email: args.email,
-  //       })
-  //       .catch(() => {
-  //         throw new BadRequestException(
-  //           this.responseService.error(
-  //             HttpStatus.BAD_REQUEST,
-  //             {
-  //               value: args.email,
-  //               property: 'email',
-  //               constraint: [
-  //                 this.messageService.get('customers.error.not_found'),
-  //               ],
-  //             },
-  //             'Bad Request',
-  //           ),
-  //         );
-  //       });
-  //     if (cekEmail && cekEmail.id != args.id) {
-  //       throw new BadRequestException(
-  //         this.responseService.error(
-  //           HttpStatus.BAD_REQUEST,
-  //           {
-  //             value: args.email,
-  //             property: 'email',
-  //             constraint: [this.messageService.get('customers.create.exist')],
-  //           },
-  //           'Bad Request',
-  //         ),
-  //       );
-  //     }
-  //     args.user_type = 'customer-verify-email';
-  //     const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-email`;
-  //     const response: Record<string, any> = await this.commonService.postHttp(
-  //       url,
-  //       args,
-  //       defaultJsonHeader,
-  //     );
-  //     if (response.statusCode) {
-  //       throw response;
-  //     }
-  //     return response;
-  //   }
-
   async verifyNewEmail(
     args: Partial<EmailVerificationEmailVerifyValidation>,
   ): Promise<any> {

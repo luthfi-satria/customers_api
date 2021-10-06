@@ -14,19 +14,6 @@ export class EmailVerificationController {
     private readonly emailVerificationService: EmailVerificationService,
   ) {}
 
-  //   @Post('verify-email')
-  //   @UserType('customer')
-  //   @AuthJwtGuard()
-  //   @ResponseStatusCode()
-  //   async verifyNewEmail(
-  //     @Req() req: any,
-  //     @Body()
-  //     args: Partial<OtpCreateValidation>,
-  //   ): Promise<any> {
-  //     args.id = req.user.id;
-  //     return await this.otpVerificationService.verifyNewEmail(args);
-  //   }
-
   @Put('email')
   @ResponseStatusCode()
   async verificationNewEmail(
