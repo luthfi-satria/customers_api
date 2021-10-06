@@ -90,7 +90,9 @@ export class AddressController {
   @UserType('customer')
   @AuthJwtGuard()
   async findOne(@Req() req: any, @Param('id') id: string) {
-    const address = await this.addressService.findOne(id, req.user.id);
+    const address = await this.addressService.findOne(id, req.user.id, [
+      'customer',
+    ]);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -121,7 +123,9 @@ export class AddressController {
     @Body() updateAddressDto: UpdateAddressDto,
   ) {
     updateAddressDto.customer_id = req.user.id;
-    const address = await this.addressService.findOne(id, req.user.id);
+    const address = await this.addressService.findOne(id, req.user.id, [
+      'customer',
+    ]);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -166,7 +170,9 @@ export class AddressController {
   @UserType('customer')
   @AuthJwtGuard()
   async remove(@Req() req: any, @Param('id') id: string) {
-    const address = await this.addressService.findOne(id, req.user.id);
+    const address = await this.addressService.findOne(id, req.user.id, [
+      'customer',
+    ]);
     if (!address) {
       const errors: RMessage = {
         value: id,
@@ -213,7 +219,9 @@ export class AddressController {
   ) {
     setActiveAddressDto.customer_id = req.user.id;
     setActiveAddressDto.id = id;
-    const address = await this.addressService.findOne(id, req.user.id);
+    const address = await this.addressService.findOne(id, req.user.id, [
+      'customer',
+    ]);
     if (!address) {
       const errors: RMessage = {
         value: id,

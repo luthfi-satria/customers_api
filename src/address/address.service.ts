@@ -88,13 +88,13 @@ export class AddressService {
     return list_result;
   }
 
-  async findOne(id: string, customer_id?: string) {
+  async findOne(id: string, customer_id?: string, relations?: string[]) {
     const where = { id };
     if (customer_id) {
       where['customer_id'] = customer_id;
     }
-    return await this.addressRepository.findOne({
-      relations: ['customer'],
+    return this.addressRepository.findOne({
+      relations: relations,
       where,
     });
   }

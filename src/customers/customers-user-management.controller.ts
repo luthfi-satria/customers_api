@@ -110,9 +110,9 @@ export class CustomersUserManagementController {
     }
   }
 
-  @Put(':id/addresses/:address_id')
+  @Put(':customer_id/addresses/:address_id')
   async updateUserAddress(
-    @Param('id') id: string,
+    @Param('customer_id') id: string,
     @Param('address_id') address_id: string,
     @Body() body: UpdateAddressDto,
   ) {
