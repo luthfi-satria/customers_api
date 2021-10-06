@@ -18,7 +18,7 @@ export class EmailVerificationController {
   @ResponseStatusCode()
   async verificationNewEmail(
     @Body()
-    args: Partial<EmailVerificationEmailVerifyValidation>,
+    args: EmailVerificationEmailVerifyValidation,
   ): Promise<any> {
     return await this.emailVerificationService.verifyNewEmail(args);
   }
