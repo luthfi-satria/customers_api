@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AddressService } from 'src/address/address.service';
 import { UpdateAddressDto } from 'src/address/dto/update-address.dto';
-import { Address, GroupType } from 'src/database/entities/address.entity';
+import { Address } from 'src/database/entities/address.entity';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
 import { QueryFilterDto } from './validation/customers.profile.validation';

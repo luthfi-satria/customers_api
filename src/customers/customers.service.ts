@@ -132,32 +132,47 @@ export class CustomersService {
       skip = skip < 0 ? 0 : skip; //prevent negative on skip()
 
       let status;
-      if(filter.status == undefined) {
-        status = [true, false] 
+      if (filter.status == undefined) {
+        status = [true, false];
       } else {
         switch (filter.status.toLowerCase()) {
-          case 'active': status = [true]; break;
-          case 'inactive': status = [false]; break;
-          default : status = [true, false];
+          case 'active':
+            status = [true];
+            break;
+          case 'inactive':
+            status = [false];
+            break;
+          default:
+            status = [true, false];
         }
       }
 
-      const [rows, totalCount] = await this.profileRepository.createQueryBuilder('profile')
-        .select(['profile.id', 'profile.name', 'profile.phone', 'profile.email', 'profile.email_verified_at', 'profile.is_active'])
-        .where(`
+      const [rows, totalCount] = await this.profileRepository
+        .createQueryBuilder('profile')
+        .select([
+          'profile.id',
+          'profile.name',
+          'profile.phone',
+          'profile.email',
+          'profile.email_verified_at',
+          'profile.is_active',
+        ])
+        .where(
+          `
           profile.is_active IN (:...status)
           ${search ? 'AND lower(profile.name) LIKE :name' : ''}
-        `, 
-        {
-          status: status,
-          name: `%${search}%`
-        })
+        `,
+          {
+            status: status,
+            name: `%${search}%`,
+          },
+        )
         .skip(skip)
         .take(perPage)
         .getManyAndCount()
-        .catch(e => {
+        .catch((e) => {
           throw e;
-        })
+        });
 
       const listItems: ListResponse = {
         current_page: curPage,

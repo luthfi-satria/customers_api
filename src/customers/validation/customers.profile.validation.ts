@@ -1,9 +1,7 @@
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsEmail,
-  IsEmpty,
   IsEnum,
-  IsIn,
   IsNotEmpty,
   IsNumber,
   IsNumberString,
@@ -52,7 +50,7 @@ export class CustomerProfileValidation {
   id: string;
 }
 
-export class QueryFilterDto { 
+export class QueryFilterDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
