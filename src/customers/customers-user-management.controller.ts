@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   Logger,
   NotFoundException,
@@ -15,8 +16,10 @@ import { UpdateAddressDto } from 'src/address/dto/update-address.dto';
 import { UserRoleGuard } from 'src/auth/guard/user-role.guard';
 import { UserType } from 'src/auth/guard/user-type.decorator';
 import { Address } from 'src/database/entities/address.entity';
+import { ResponseStatusCode } from 'src/response/response.decorator';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
+import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import { QueryFilterDto } from './validation/customers.profile.validation';
 
 @Controller('api/v1/customers/user-management')
@@ -43,6 +46,21 @@ export class CustomersUserManagementController {
       Logger.error(`ERROR ${e.message}`, '', 'GET Query Customer list');
       throw e;
     }
+  }
+
+  @Put('/:id_profile')
+  @UserType('admin')
+  @ResponseStatusCode()
+  async userManagement(
+    @Param('id_profile') id_profile: string,
+    @Body() body: AdminCustomerProfileValidation,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    return this.customerService.updateCustomerManageProfile(
+      token,
+      id_profile,
+      body,
+    );
   }
 
   @Put(':id/addresses')
