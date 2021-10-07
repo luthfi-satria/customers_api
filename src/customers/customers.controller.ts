@@ -525,6 +525,25 @@ export class CustomersController {
       );
     }
 
+    if (!existcust.email_verified_at) {
+      const errors: RMessage = {
+        value: existcust.email_verified_at
+          ? existcust.email_verified_at.toDateString()
+          : null,
+        property: 'email_verified_at',
+        constraint: [
+          this.messageService.get('customers.login.unverified_email'),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     const data_otp = new OtpEmailValidateValidation();
     data_otp.email = data.email;
     data_otp.user_type = 'login';
@@ -580,6 +599,26 @@ export class CustomersController {
         ),
       );
     }
+
+    if (!customer.email_verified_at) {
+      const errors: RMessage = {
+        value: customer.email_verified_at
+          ? customer.email_verified_at.toDateString()
+          : null,
+        property: 'email_verified_at',
+        constraint: [
+          this.messageService.get('customers.login.unverified_email'),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     data.id = customer.id;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE +
