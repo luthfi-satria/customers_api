@@ -2,21 +2,28 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   Logger,
   NotFoundException,
   Param,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AddressService } from 'src/address/address.service';
 import { UpdateAddressDto } from 'src/address/dto/update-address.dto';
+import { UserRoleGuard } from 'src/auth/guard/user-role.guard';
+import { UserType } from 'src/auth/guard/user-type.decorator';
 import { Address } from 'src/database/entities/address.entity';
+import { ResponseStatusCode } from 'src/response/response.decorator';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
+import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import { QueryFilterDto } from './validation/customers.profile.validation';
 
 @Controller('api/v1/customers/user-management')
+@UseGuards(UserRoleGuard)
 export class CustomersUserManagementController {
   constructor(
     private readonly addressService: AddressService,
@@ -25,6 +32,7 @@ export class CustomersUserManagementController {
   ) {}
 
   @Get()
+  @UserType('admin')
   async queryCustomerList(@Query() query: QueryFilterDto) {
     try {
       const result = await this.customerService.queryCustomerProfile(query);
@@ -40,7 +48,23 @@ export class CustomersUserManagementController {
     }
   }
 
+  @Put('/:id_profile')
+  @UserType('admin')
+  @ResponseStatusCode()
+  async userManagement(
+    @Param('id_profile') id_profile: string,
+    @Body() body: AdminCustomerProfileValidation,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    return this.customerService.updateCustomerManageProfile(
+      token,
+      id_profile,
+      body,
+    );
+  }
+
   @Put(':id/addresses')
+  @UserType('admin')
   async updateUserAddressInBulk(
     @Param('id') id: string,
     @Body() body: UpdateAddressDto[],
@@ -111,6 +135,7 @@ export class CustomersUserManagementController {
   }
 
   @Put(':customer_id/addresses/:address_id')
+  @UserType('admin')
   async updateUserAddress(
     @Param('customer_id') id: string,
     @Param('address_id') address_id: string,
