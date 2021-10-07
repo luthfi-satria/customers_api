@@ -13,5 +13,6 @@ import { ProfileDocument } from 'src/database/entities/profile.entity';
   imports: [TypeOrmModule.forFeature([Address, ProfileDocument]), CommonModule],
   controllers: [AddressController],
   providers: [AddressService, AuthService, CommonService, CustomersService],
+  exports: [AddressService],
 })
 export class AddressModule {}

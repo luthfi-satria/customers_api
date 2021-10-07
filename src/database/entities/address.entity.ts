@@ -76,4 +76,8 @@ export class Address {
 
   @DeleteDateColumn({ nullable: true })
   deleted_at: Date;
+
+  constructor(init?: Partial<Address>) {
+    Object.assign(this, init);
+  }
 }
