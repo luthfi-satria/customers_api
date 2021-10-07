@@ -777,13 +777,6 @@ export class CustomersController {
     body: CustomerChangeEmailValidation,
     @Headers('Authorization') token: string,
   ): Promise<any> {
-    console.log('checkpoint 1');
-
-    console.log(req.user);
-    return this.responseService.success(
-      true,
-      this.messageService.get('customers.general.success'),
-    );
-    // return await this.customerService.changeEmail(body, req.user);
+    return await this.customerService.changeEmail(body, req.user, token);
   }
 }

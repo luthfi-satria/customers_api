@@ -20,6 +20,9 @@ import { Response } from 'src/response/response.decorator';
 import { ResponseService } from 'src/response/response.service';
 import { MessageService } from 'src/message/message.service';
 import { Message } from 'src/message/message.decorator';
+import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
+import { randomUUID } from 'crypto';
+import { NotificationService } from 'src/common/notification/notification.service';
 
 @Injectable()
 export class CustomersService {
@@ -30,6 +33,7 @@ export class CustomersService {
     @Hash() private readonly hashService: HashService,
     @Response() private readonly responseService: ResponseService,
     @Message() private readonly messageService: MessageService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async findOne(id: string) {
@@ -224,7 +228,75 @@ export class CustomersService {
     }
   }
 
-  async;
+  async changeEmail(
+    body: CustomerChangeEmailValidation,
+    user: any,
+    token: string,
+  ): Promise<any> {
+    const profile: ProfileDocument = await this.profileRepository.findOne({
+      id: user.id,
+    });
+
+    if (!profile) {
+      const errors = {
+        value: token.replace('Bearer ', ''),
+        property: 'token',
+        constraint: [this.messageService.get('customers.profile.invalid')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    const existProfile: ProfileDocument = await this.profileRepository.findOne({
+      email: body.email,
+    });
+
+    if (existProfile) {
+      const errors = {
+        value: body.email,
+        property: 'email',
+        constraint: [this.messageService.get('customers.profile.existemail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    profile.email = body.email;
+    profile.email_verified_at = null;
+    profile.verification_token = randomUUID();
+
+    const updatedProfile = await this.profileRepository.save(profile);
+
+    const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
+    const emr = await this.notificationService.sendEmail(
+      updatedProfile.email,
+      'Verifikasi email',
+      '',
+      `
+    <p>Silahkan klik link berikut untuk memverifikasi email anda</p>
+    <a href="${url}">${url}</a>
+    `,
+    );
+
+    const result = this.responseService.success(
+      true,
+      this.messageService.get('customers.change_email.success'),
+    );
+
+    return {
+      status: true,
+    };
+  }
 
   //--------------------------------------------------------------
 

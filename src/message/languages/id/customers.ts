@@ -91,5 +91,9 @@ export default {
   email_verification: {
     invalid_token: 'Token yang anda masukan tidak valid atau tidak ditemukan',
     success: 'Verifikasi email sukses',
+    already_verified: 'Email anda sudah terverifikasi',
+  },
+  change_email: {
+    success: 'Email berhasil diupdate',
   },
 };

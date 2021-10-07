@@ -78,6 +78,24 @@ export class EmailVerificationService {
       );
     }
 
+    if (findCustomer.email_verified_at) {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: findCustomer.email_verified_at.toDateString(),
+            property: 'email_verified_at',
+            constraint: [
+              this.messageService.get(
+                'customers.email_verification.already_verified',
+              ),
+            ],
+          },
+          'Bad Request',
+        ),
+      );
+    }
+
     findCustomer.email_verified_at = new Date();
     await this.profileRepository.save(findCustomer);
 
