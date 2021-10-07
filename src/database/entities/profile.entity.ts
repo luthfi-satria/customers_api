@@ -39,7 +39,7 @@ export class ProfileDocument {
   @Column({ nullable: false, default: true })
   is_active: boolean;
 
-  @CreateDateColumn({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   email_verified_at: Date;
 
   @CreateDateColumn({ nullable: true })

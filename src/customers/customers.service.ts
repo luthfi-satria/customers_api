@@ -112,6 +112,9 @@ export class CustomersService {
     if (flg_update) {
       create_profile.id = data.id;
     }
+    if (data.email) {
+      create_profile.verification_token = randomUUID();
+    }
     return this.profileRepository.save(create_profile);
   }
 
@@ -228,6 +231,20 @@ export class CustomersService {
     }
   }
 
+  async sendVerificationEmail(user: ProfileDocument) {
+    const url = `${process.env.BASEURL_API}/verification/email?t=${user.verification_token}`;
+
+    this.notificationService.sendEmail(
+      user.email,
+      'Verifikasi email',
+      '',
+      `
+    <p>Silahkan klik link berikut untuk memverifikasi email anda</p>
+    <a href="${url}">${url}</a>
+    `,
+    );
+  }
+
   async changeEmail(
     body: CustomerChangeEmailValidation,
     user: any,
@@ -278,7 +295,7 @@ export class CustomersService {
     const updatedProfile = await this.profileRepository.save(profile);
 
     const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
-    const emr = await this.notificationService.sendEmail(
+    await this.notificationService.sendEmail(
       updatedProfile.email,
       'Verifikasi email',
       '',
@@ -288,7 +305,7 @@ export class CustomersService {
     `,
     );
 
-    const result = this.responseService.success(
+    this.responseService.success(
       true,
       this.messageService.get('customers.change_email.success'),
     );

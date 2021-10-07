@@ -281,8 +281,14 @@ export class CustomersController {
             gender: data.gender ?? null,
           };
           data.id = cekbyid.id;
-          await this.customerService.createCustomerProfile(profiledata, true);
+          const updatedProfile =
+            await this.customerService.createCustomerProfile(profiledata, true);
           delete response.data.payload;
+
+          if (!updatedProfile.email_verified_at) {
+            this.customerService.sendVerificationEmail(updatedProfile);
+          }
+
           return this.responseService.success(
             true,
             this.messageService.get('customers.profile.success'),
