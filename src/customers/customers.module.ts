@@ -10,6 +10,8 @@ import { PhoneConstraintController } from './customers-phone-constraint.controll
 import { CommonService } from 'src/common/common.service';
 import { OtpVerificationService } from './customers-otp-verification.service';
 import { OtpVerificationController } from './customers-otp-verification.controller';
+import { EmailVerificationService } from './customers-email-verification.service';
+import { EmailVerificationController } from './customers-email-verification.controller';
 import { CustomersUserManagementController } from './customers-user-management.controller';
 import { AddressModule } from 'src/address/address.module';
 import { Address } from 'src/database/entities/address.entity';
@@ -29,12 +31,14 @@ import { Address } from 'src/database/entities/address.entity';
     PhoneConstraintService,
     CommonService,
     OtpVerificationService,
+    EmailVerificationService,
   ],
   controllers: [
     CustomersUserManagementController,
     CustomersController,
     PhoneConstraintController,
     OtpVerificationController,
+    EmailVerificationController,
   ],
 })
 export class CustomersModule {}

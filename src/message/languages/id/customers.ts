@@ -65,6 +65,8 @@ export default {
       message: 'Email belum terdaftar. Daftar sebagai member?',
     },
     password_null: 'Data anda belum lengkap. Silakan lengkapi profile anda.',
+    unverified_email:
+      'Email anda belum diverifikasi. Silahkan verifikasi email terlebih dahulu.',
   },
   refresh_token: {
     success: 'Refresh Token Success.',
@@ -87,5 +89,13 @@ export default {
       code: 'CUSTOMER_NOT_FOUND',
       message: 'Customer tidak ditemukan.',
     },
+  },
+  email_verification: {
+    invalid_token: 'Token yang anda masukan tidak valid atau tidak ditemukan',
+    success: 'Verifikasi email sukses',
+    already_verified: 'Email anda sudah terverifikasi',
+  },
+  change_email: {
+    success: 'Email berhasil diupdate',
   },
 };

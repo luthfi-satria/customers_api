@@ -39,6 +39,7 @@ import { ImageValidationService } from 'src/utils/image-validation.service';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
 import { UserType } from 'src/auth/guard/user-type.decorator';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
+import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -280,8 +281,14 @@ export class CustomersController {
             gender: data.gender ?? null,
           };
           data.id = cekbyid.id;
-          await this.customerService.createCustomerProfile(profiledata, true);
+          const updatedProfile =
+            await this.customerService.createCustomerProfile(profiledata, true);
           delete response.data.payload;
+
+          if (!updatedProfile.email_verified_at) {
+            this.customerService.sendVerificationEmail(updatedProfile);
+          }
+
           return this.responseService.success(
             true,
             this.messageService.get('customers.profile.success'),
@@ -524,6 +531,25 @@ export class CustomersController {
       );
     }
 
+    if (!existcust.email_verified_at) {
+      const errors: RMessage = {
+        value: existcust.email_verified_at
+          ? existcust.email_verified_at.toDateString()
+          : null,
+        property: 'email_verified_at',
+        constraint: [
+          this.messageService.get('customers.login.unverified_email'),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     const data_otp = new OtpEmailValidateValidation();
     data_otp.email = data.email;
     data_otp.user_type = 'login';
@@ -579,6 +605,26 @@ export class CustomersController {
         ),
       );
     }
+
+    if (!customer.email_verified_at) {
+      const errors: RMessage = {
+        value: customer.email_verified_at
+          ? customer.email_verified_at.toDateString()
+          : null,
+        property: 'email_verified_at',
+        constraint: [
+          this.messageService.get('customers.login.unverified_email'),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     data.id = customer.id;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE +
@@ -764,6 +810,19 @@ export class CustomersController {
       id_profile,
       body,
     );
+  }
+
+  @Post('verifications/email')
+  @UserType('customer')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async changeEmail(
+    @Req() req: any,
+    @Body()
+    body: CustomerChangeEmailValidation,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    return await this.customerService.changeEmail(body, req.user, token);
   }
 
   @Get('user-management/:user_id')

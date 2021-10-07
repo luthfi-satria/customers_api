@@ -33,10 +33,13 @@ export class ProfileDocument {
   @Column({ nullable: true })
   photo: string;
 
+  @Column({ nullable: true })
+  verification_token: string;
+
   @Column({ nullable: false, default: true })
   is_active: boolean;
 
-  @CreateDateColumn({ nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   email_verified_at: Date;
 
   @CreateDateColumn({ nullable: true })
