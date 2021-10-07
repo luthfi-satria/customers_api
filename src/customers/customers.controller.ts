@@ -20,7 +20,7 @@ import { CustomersService } from './customers.service';
 import { HashService } from './../hash/hash.service';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
 import { Response, ResponseStatusCode } from 'src/response/response.decorator';
-import { RMessage } from 'src/response/response.interface';
+import { RMessage, RSuccessMessage } from 'src/response/response.interface';
 import { OtpCreateValidation } from './validation/otp.create.validation';
 import { catchError, map } from 'rxjs/operators';
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
@@ -763,6 +763,21 @@ export class CustomersController {
       token,
       id_profile,
       body,
+    );
+  }
+
+  @Get('user-management/:user_id')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async detailUserCustomer(
+    @Param('user_id') user_id: string,
+  ): Promise<RSuccessMessage> {
+    const profile = await this.customerService.findOne(user_id);
+    return this.responseService.success(
+      true,
+      this.messageService.get('customers.select.success'),
+      profile,
     );
   }
 }

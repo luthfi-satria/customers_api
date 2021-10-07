@@ -3,6 +3,7 @@ import {
   HttpService,
   HttpStatus,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
@@ -33,12 +34,43 @@ export class CustomersService {
   ) {}
 
   async findOne(id: string) {
-    const profile = await this.profileRepository.findOne({
-      relations: ['addresses'],
-      where: {
-        id_profile: id,
-      },
-    });
+    let profile = null;
+    try {
+      profile = await this.profileRepository.findOne({
+        relations: ['addresses'],
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      Logger.error(error);
+      const errors: RMessage = {
+        value: id,
+        property: 'user_id',
+        constraint: [this.messageService.get('customers.select.fail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    if (!profile) {
+      const errors: RMessage = {
+        value: id,
+        property: 'user_id',
+        constraint: [this.messageService.get('customers.error.not_found')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
     return profile;
   }
 
