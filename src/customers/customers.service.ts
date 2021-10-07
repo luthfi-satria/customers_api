@@ -3,6 +3,7 @@ import {
   HttpService,
   HttpStatus,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
@@ -23,6 +24,8 @@ import { Message } from 'src/message/message.decorator';
 import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
 import { randomUUID } from 'crypto';
 import { NotificationService } from 'src/common/notification/notification.service';
+import { QueryFilterDto } from './validation/customers.profile.validation';
+import { ListResponse } from '../response/response.interface';
 
 @Injectable()
 export class CustomersService {
@@ -37,12 +40,43 @@ export class CustomersService {
   ) {}
 
   async findOne(id: string) {
-    const profile = await this.profileRepository.findOne({
-      relations: ['addresses'],
-      where: {
-        id_profile: id,
-      },
-    });
+    let profile = null;
+    try {
+      profile = await this.profileRepository.findOne({
+        relations: ['addresses'],
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      Logger.error(error);
+      const errors: RMessage = {
+        value: id,
+        property: 'user_id',
+        constraint: [this.messageService.get('customers.select.fail')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+    if (!profile) {
+      const errors: RMessage = {
+        value: id,
+        property: 'user_id',
+        constraint: [this.messageService.get('customers.error.not_found')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
     return profile;
   }
 
@@ -125,6 +159,71 @@ export class CustomersService {
       phone: data.phone,
     };
     return this.profileRepository.save(create_profile);
+  }
+
+  async queryCustomerProfile(filter: QueryFilterDto): Promise<ListResponse> {
+    try {
+      const search = filter.search ? filter.search.toLowerCase() : '';
+      const curPage = filter.page || 1;
+      const perPage = filter.limit || 10;
+      let skip = (curPage - 1) * perPage;
+      skip = skip < 0 ? 0 : skip; //prevent negative on skip()
+
+      let status;
+      if (filter.status == undefined) {
+        status = [true, false];
+      } else {
+        switch (filter.status.toLowerCase()) {
+          case 'active':
+            status = [true];
+            break;
+          case 'inactive':
+            status = [false];
+            break;
+          default:
+            status = [true, false];
+        }
+      }
+
+      const [rows, totalCount] = await this.profileRepository
+        .createQueryBuilder('profile')
+        .select([
+          'profile.id',
+          'profile.name',
+          'profile.phone',
+          'profile.email',
+          'profile.email_verified_at',
+          'profile.is_active',
+        ])
+        .where(
+          `
+          profile.is_active IN (:...status)
+          ${search ? 'AND lower(profile.name) LIKE :name' : ''}
+        `,
+          {
+            status: status,
+            name: `%${search}%`,
+          },
+        )
+        .skip(skip)
+        .take(perPage)
+        .getManyAndCount()
+        .catch((e) => {
+          throw e;
+        });
+
+      const listItems: ListResponse = {
+        current_page: curPage,
+        total_item: totalCount,
+        limit: perPage,
+        items: rows,
+      };
+
+      return listItems;
+    } catch (e) {
+      Logger.error(`ERROR ${e.message}`, '', 'Query Customer List');
+      throw e;
+    }
   }
 
   async updateCustomerProfile(

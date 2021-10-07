@@ -1,7 +1,9 @@
+import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsNumberString,
   IsOptional,
   Length,
@@ -46,4 +48,22 @@ export class CustomerProfileValidation {
 
   @IsOptional()
   id: string;
+}
+
+export class QueryFilterDto {
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  limit: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  page: number;
+
+  @IsOptional()
+  status: string;
+
+  @IsOptional()
+  search: string;
 }
