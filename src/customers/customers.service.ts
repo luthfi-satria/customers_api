@@ -205,6 +205,16 @@ export class CustomersService {
             name: `%${search}%`,
           },
         )
+        .orWhere(
+          `
+          profile.is_active IN (:...status)
+          ${search ? 'AND lower(profile.phone) LIKE :phone' : ''}
+        `,
+          {
+            status: status,
+            phone: `%${search}%`,
+          },
+        )
         .skip(skip)
         .take(perPage)
         .getManyAndCount()
