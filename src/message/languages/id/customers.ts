@@ -45,9 +45,9 @@ export default {
     unauthorize: 'Authorisasi tidak valid.',
     invalid: 'Data yang anda masukan tidak valid.',
     invalid_phone: 'Nomor Telepon sudah terdaftar.',
-    existemail: {
+    exist_email: {
       code: 'EXIST_EMAIL',
-      message: 'Email sudah diapakai oleh user lain.',
+      message: 'Email sudah dipakai oleh user lain.',
     },
   },
   login: {
@@ -89,6 +89,7 @@ export default {
       code: 'CUSTOMER_NOT_FOUND',
       message: 'Customer tidak ditemukan.',
     },
+    invalid: 'Data yang anda masukan tidak valid',
   },
   email_verification: {
     invalid_token: 'Token yang anda masukan tidak valid atau tidak ditemukan',
@@ -97,5 +98,15 @@ export default {
   },
   change_email: {
     success: 'Email berhasil diupdate',
+  },
+  customer_management: {
+    phone_exist: 'Nomor handphone ini sudah dipakai oleh customer lain',
+    email_exist: 'Email ini sudah dipakai oleh customer lain',
+    phone_success: 'Nomor handphone customer berhasil diupdate',
+    email_success: 'Email customer berhasil diupdate',
+    phone_use_self:
+      'Nomor ini sudah dipakai untuk customer ini, silahkan masukan nomor lain',
+    email_use_self:
+      'Email ini sudah dipakai untuk customer ini, silahkan masukan email lain',
   },
 };
