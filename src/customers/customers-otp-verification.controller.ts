@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post, Req, Headers } from '@nestjs/common';
 
 import { ResponseStatusCode } from 'src/response/response.decorator';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
@@ -46,9 +46,26 @@ export class OtpVerificationController {
     @Req() req: any,
     @Body()
     args: Partial<OtpCreateValidation>,
+    @Headers('Authorization') token: string,
   ): Promise<any> {
     args.id = req.user.id;
+    args.token = token;
     return await this.otpVerificationService.verifyNewEmail(args);
+  }
+
+  @Post('verify-email/resend')
+  @UserType('customer')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async verifyNewEmailResend(
+    @Req() req: any,
+    @Body()
+    args: Partial<OtpCreateValidation>,
+    @Headers('Authorization') token: string,
+  ): Promise<any> {
+    args.id = req.user.id;
+    args.token = token;
+    return await this.otpVerificationService.verifyNewEmailResend(args);
   }
 
   @Post('verify-email-validation')

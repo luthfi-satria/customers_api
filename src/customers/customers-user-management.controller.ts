@@ -13,14 +13,19 @@ import {
 } from '@nestjs/common';
 import { AddressService } from 'src/address/address.service';
 import { UpdateAddressDto } from 'src/address/dto/update-address.dto';
+import { AuthJwtGuard } from 'src/auth/auth.decorators';
 import { UserRoleGuard } from 'src/auth/guard/user-role.guard';
 import { UserType } from 'src/auth/guard/user-type.decorator';
 import { Address } from 'src/database/entities/address.entity';
 import { ResponseStatusCode } from 'src/response/response.decorator';
 import { ResponseService } from 'src/response/response.service';
+import { CustomersUserManagementService } from './customers-user-management.service';
 import { CustomersService } from './customers.service';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
-import { QueryFilterDto } from './validation/customers.profile.validation';
+import {
+  CustomerProfileValidation,
+  QueryFilterDto,
+} from './validation/customers.profile.validation';
 
 @Controller('api/v1/customers/user-management')
 @UseGuards(UserRoleGuard)
@@ -29,6 +34,7 @@ export class CustomersUserManagementController {
     private readonly addressService: AddressService,
     private readonly responseService: ResponseService,
     private readonly customerService: CustomersService,
+    private readonly customerUserManagementService: CustomersUserManagementService,
   ) {}
 
   @Get()
@@ -189,5 +195,31 @@ export class CustomersUserManagementController {
       Logger.error(`ERROR ${e.message}`, '', 'PUT Update Custommer Addresses');
       throw e;
     }
+  }
+
+  @Put(':customer_id/phone')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async updateCustomerPhone(
+    @Body()
+    args: CustomerProfileValidation,
+    @Param('customer_id') customerId: string,
+  ): Promise<any> {
+    args.id = customerId;
+    return this.customerUserManagementService.updateCustomerPhone(args);
+  }
+
+  @Put(':customer_id/email')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async updateCustomerEmail(
+    @Body()
+    args: CustomerProfileValidation,
+    @Param('customer_id') customerId: string,
+  ): Promise<any> {
+    args.id = customerId;
+    return this.customerUserManagementService.updateCustomerEmail(args);
   }
 }

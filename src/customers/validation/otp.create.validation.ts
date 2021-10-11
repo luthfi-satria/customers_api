@@ -21,4 +21,7 @@ export class OtpCreateValidation {
   @IsOptional()
   @IsEmail({}, { message: 'Format email tidak benar' })
   email: string;
+
+  @IsOptional()
+  token: string;
 }

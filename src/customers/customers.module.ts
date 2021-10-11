@@ -15,6 +15,7 @@ import { EmailVerificationController } from './customers-email-verification.cont
 import { CustomersUserManagementController } from './customers-user-management.controller';
 import { AddressModule } from 'src/address/address.module';
 import { Address } from 'src/database/entities/address.entity';
+import { CustomersUserManagementService } from './customers-user-management.service';
 // import { HashModule } from 'src/hash/hash.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { Address } from 'src/database/entities/address.entity';
     CommonService,
     OtpVerificationService,
     EmailVerificationService,
+    CustomersUserManagementService,
   ],
   controllers: [
     CustomersUserManagementController,
