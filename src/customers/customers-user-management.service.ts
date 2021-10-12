@@ -55,7 +55,7 @@ export class CustomersUserManagementService {
       phone: args.phone,
     });
 
-    if (checkPhone && checkPhone.phone !== args.phone) {
+    if (checkPhone) {
       throw new BadRequestException(
         this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -65,24 +65,6 @@ export class CustomersUserManagementService {
             constraint: [
               this.messageService.get(
                 'customers.customer_management.phone_exist',
-              ),
-            ],
-          },
-          'Bad Request',
-        ),
-      );
-    }
-
-    if (checkPhone.phone === args.phone) {
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          {
-            value: args.phone,
-            property: 'phone',
-            constraint: [
-              this.messageService.get(
-                'customers.customer_management.phone_use_self',
               ),
             ],
           },
@@ -135,7 +117,6 @@ export class CustomersUserManagementService {
       args.phone,
       'Nomor ini dapat digunakai untuk login',
     );
-
     const response: Record<string, any> = this.responseService.success(
       true,
       this.messageService.get('customers.customer_management.phone_success'),
@@ -168,7 +149,7 @@ export class CustomersUserManagementService {
       email: args.email,
     });
 
-    if (checkEmail && checkEmail.email !== args.email) {
+    if (checkEmail) {
       throw new BadRequestException(
         this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -178,24 +159,6 @@ export class CustomersUserManagementService {
             constraint: [
               this.messageService.get(
                 'customers.customer_management.email_exist',
-              ),
-            ],
-          },
-          'Bad Request',
-        ),
-      );
-    }
-
-    if (checkEmail.email === args.email) {
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          {
-            value: args.phone,
-            property: 'phone',
-            constraint: [
-              this.messageService.get(
-                'customers.customer_management.email_use_self',
               ),
             ],
           },
