@@ -100,8 +100,14 @@ export default {
     success: 'Email berhasil diupdate',
   },
   customer_management: {
-    phone_exist: 'Nomor handphone ini sudah dipakai oleh customer lain',
-    email_exist: 'Email ini sudah dipakai oleh customer lain',
+    phone_exist: {
+      code: 'PHONE_ALREADY_EXIST',
+      message: 'Nomor ini sudah dipakai customer lain.',
+    },
+    email_exist: {
+      code: 'EMAIL_ALREADY_EXIST',
+      message: 'Email ini sudah dipakai customer lain.',
+    },
     phone_success: 'Nomor handphone customer berhasil diupdate',
     email_success: 'Email customer berhasil diupdate',
     phone_use_self:
