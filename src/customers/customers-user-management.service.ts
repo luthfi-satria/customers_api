@@ -37,8 +37,6 @@ export class CustomersUserManagementService {
   ) {}
 
   async updateCustomerPhone(args: CustomerProfileValidation): Promise<any> {
-    console.log('#2');
-
     if (!args.phone || !args.id) {
       throw new BadRequestException(
         this.responseService.error(
@@ -52,7 +50,6 @@ export class CustomersUserManagementService {
         ),
       );
     }
-    console.log('#3');
 
     const checkPhone = await this.profileRepository.findOne({
       phone: args.phone,
