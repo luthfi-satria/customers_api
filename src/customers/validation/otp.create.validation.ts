@@ -8,6 +8,9 @@ import {
 
 export class OtpCreateValidation {
   @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
   @IsNumberString()
   @Length(10, 15)
   phone: string;
