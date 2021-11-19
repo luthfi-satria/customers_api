@@ -219,7 +219,7 @@ export class CustomersController {
             value: data.email,
             property: 'email',
             constraint: [
-              this.messageService.get('customers.profile.existemail'),
+              this.messageService.get('customers.profile.exist_email'),
             ],
           };
           throw new BadRequestException(

@@ -266,7 +266,7 @@ export class CustomersService {
       const errors: RMessage = {
         value: body.email,
         property: 'email',
-        constraint: [this.messageService.get('customers.profile.existemail')],
+        constraint: [this.messageService.get('customers.profile.exist_email')],
       };
       throw new BadRequestException(
         this.responseService.error(
