@@ -93,6 +93,15 @@ export class CustomersService {
     return profile;
   }
 
+  async getBulkCustomers(ids: string[]): Promise<any> {
+    try {
+      return this.profileRepository.findByIds(ids);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
   findOneCustomerByPhone(id: string): Promise<ProfileDocument> {
     return this.profileRepository.findOne({ where: { phone: id } });
   }
