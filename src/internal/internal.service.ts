@@ -12,7 +12,7 @@ export class InternalService {
 
   async getCustomersBulk(ids: any): Promise<any> {
     try {
-      return this.customerService.getBulkCustomers(ids);
+      return await this.customerService.getBulkCustomers(ids);
     } catch (error) {
       console.error(error);
       throw error;

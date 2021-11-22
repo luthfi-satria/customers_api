@@ -95,7 +95,7 @@ export class CustomersService {
 
   async getBulkCustomers(ids: string[]): Promise<any> {
     try {
-      return this.profileRepository.findByIds(ids);
+      return await this.profileRepository.findByIds(ids);
     } catch (error) {
       console.error(error);
       throw error;
