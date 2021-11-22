@@ -13,6 +13,7 @@ import { MessageService } from 'src/message/message.service';
 import { RMessage } from 'src/response/response.interface';
 import { ResponseService } from 'src/response/response.service';
 import { Repository } from 'typeorm';
+import { AddressModule } from './address.module';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { SelectAddressDto } from './dto/select-address.dto';
 import { SetActiveAddressDto } from './dto/set-active-address.dto';
@@ -27,7 +28,7 @@ export class AddressService {
     private readonly commonService: CommonService,
   ) {}
 
-  async create(createAddressDto: CreateAddressDto) {
+  async create(createAddressDto: CreateAddressDto): Promise<AddressModule> {
     createAddressDto.city_id = await this.getCityId(
       createAddressDto.postal_code,
     );
