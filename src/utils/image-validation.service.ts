@@ -1,7 +1,5 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
-import { Response } from 'src/customers/customers.decorator';
 import { HashService } from 'src/hash/hash.service';
-import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { RMessage } from 'src/response/response.interface';
 import { ResponseService } from 'src/response/response.service';
@@ -10,8 +8,8 @@ import { ResponseService } from 'src/response/response.service';
 export class ImageValidationService {
   constructor(
     private readonly hashService: HashService,
-    @Message() private readonly messageService: MessageService,
-    @Response() private readonly responseService: ResponseService,
+    private readonly messageService: MessageService,
+    private readonly responseService: ResponseService,
   ) {}
 
   async validateAll(req: any, filter: Array<string>) {

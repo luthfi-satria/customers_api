@@ -6,9 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommonService } from 'src/common/common.service';
-import { Response } from 'src/customers/customers.decorator';
 import { Address } from 'src/database/entities/address.entity';
-import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { RMessage } from 'src/response/response.interface';
 import { ResponseService } from 'src/response/response.service';
@@ -22,8 +20,8 @@ import { UpdateAddressDto } from './dto/update-address.dto';
 export class AddressService {
   constructor(
     @InjectRepository(Address) private addressRepository: Repository<Address>,
-    @Response() private readonly responseService: ResponseService,
-    @Message() private readonly messageService: MessageService,
+    private readonly responseService: ResponseService,
+    private readonly messageService: MessageService,
     private readonly commonService: CommonService,
   ) {}
 

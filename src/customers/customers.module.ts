@@ -1,4 +1,4 @@
-import { HttpModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomersController } from './customers.controller';
 import { CustomersService } from './customers.service';
@@ -16,6 +16,11 @@ import { CustomersUserManagementController } from './customers-user-management.c
 import { AddressModule } from 'src/address/address.module';
 import { Address } from 'src/database/entities/address.entity';
 import { CustomersUserManagementService } from './customers-user-management.service';
+import { ResponseService } from 'src/response/response.service';
+import { MessageService } from 'src/message/message.service';
+import { ConfigService } from '@nestjs/config';
+import { HttpModule, HttpService } from '@nestjs/axios';
+import { HashService } from 'src/hash/hash.service';
 // import { HashModule } from 'src/hash/hash.module';
 
 @Module({
@@ -34,6 +39,11 @@ import { CustomersUserManagementService } from './customers-user-management.serv
     OtpVerificationService,
     EmailVerificationService,
     CustomersUserManagementService,
+    ResponseService,
+    MessageService,
+    ConfigService,
+    HashService,
+    // HttpService,
   ],
   controllers: [
     CustomersUserManagementController,

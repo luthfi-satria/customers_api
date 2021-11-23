@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   Headers,
-  HttpService,
   HttpStatus,
   Param,
   Post,
@@ -13,13 +12,12 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { CustomersService } from './customers.service';
 import { HashService } from './../hash/hash.service';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
-import { Response, ResponseStatusCode } from 'src/response/response.decorator';
+import { ResponseStatusCode } from 'src/response/response.decorator';
 import { RMessage, RSuccessMessage } from 'src/response/response.interface';
 import { OtpCreateValidation } from './validation/otp.create.validation';
 import { catchError, map } from 'rxjs/operators';
@@ -40,6 +38,7 @@ import { AuthJwtGuard } from 'src/auth/auth.decorators';
 import { UserType } from 'src/auth/guard/user-type.decorator';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
+import { HttpService } from '@nestjs/axios';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -48,8 +47,8 @@ const defaultJsonHeader: Record<string, any> = {
 @Controller('api/v1/customers')
 export class CustomersController {
   constructor(
-    @Response() private readonly responseService: ResponseService,
-    @Message() private readonly messageService: MessageService,
+    private readonly responseService: ResponseService,
+    private readonly messageService: MessageService,
     private readonly customerService: CustomersService,
     private readonly hashService: HashService,
     private httpService: HttpService,
@@ -184,9 +183,9 @@ export class CustomersController {
     data: CustomerProfileValidation,
     @Headers('Authorization') token: string,
   ): Promise<any> {
-    const payload = await this.hashService.jwtPayload(
-      token.replace('Bearer ', ''),
-    );
+    // const payload = await this.hashService.jwtPayload(
+    //   token.replace('Bearer ', ''),
+    // );
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/profile';
     const headersRequest: Record<string, any> = {
@@ -211,7 +210,7 @@ export class CustomersController {
         const cekemail: ProfileDocument =
           await this.customerService.findOneCustomerByEmailExceptId(
             data.email,
-            payload.id,
+            req.user.id,
           );
 
         if (cekemail) {
