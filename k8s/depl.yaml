@@ -6,11 +6,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: customers
+      app: efood
+      service: customers
   template:
     metadata:
       labels:
-        app: customers
+        app: efood
+        service: customers
+        sidecar.istio.io/inject: "true"
+        version: "1"
     spec:
       imagePullSecrets:
         - name: ghcr
