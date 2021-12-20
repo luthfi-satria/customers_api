@@ -355,6 +355,10 @@ export class PhoneConstraintService {
     if (response.statusCode) {
       throw response;
     }
+
+    cekPhone.phone_verified_at = new Date();
+    await this.profileRepository.save(cekPhone);
+
     return response;
   }
 }
