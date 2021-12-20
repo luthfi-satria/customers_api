@@ -36,6 +36,9 @@ export class ProfileDocument {
   @Column({ nullable: true })
   verification_token: string;
 
+  @Column({ type: 'timestamp', nullable: true })
+  phone_verified_at: Date;
+
   @Column({ nullable: false, default: true })
   is_active: boolean;
 
