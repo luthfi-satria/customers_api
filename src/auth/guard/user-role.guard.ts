@@ -1,8 +1,8 @@
+import { HttpService } from '@nestjs/axios';
 import {
   HttpStatus,
   CanActivate,
   ExecutionContext,
-  HttpService,
   Injectable,
   Logger,
   UnauthorizedException,

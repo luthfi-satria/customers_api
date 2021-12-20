@@ -1,22 +1,15 @@
-import {
-  BadRequestException,
-  HttpService,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { Repository } from 'typeorm';
-import { Response } from 'src/response/response.decorator';
-import { Message } from 'src/message/message.decorator';
 import { HashService } from 'src/hash/hash.service';
-import { Hash } from 'src/hash/hash.decorator';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { CustomersService } from './customers.service';
 import { OtpCreateValidation } from './validation/otp.create.validation';
 import { CommonService } from 'src/common/common.service';
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
+import { HttpService } from '@nestjs/axios';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -29,9 +22,10 @@ export class PhoneConstraintService {
     private readonly profileRepository: Repository<ProfileDocument>,
     private httpService: HttpService,
     private readonly customerService: CustomersService,
-    @Response() private readonly responseService: ResponseService,
-    @Message() private readonly messageService: MessageService,
-    @Hash() private readonly hashService: HashService,
+    private readonly responseService: ResponseService,
+    private readonly messageService: MessageService,
+    // @Hash()
+    private readonly hashService: HashService,
     private readonly commonService: CommonService,
   ) {}
 

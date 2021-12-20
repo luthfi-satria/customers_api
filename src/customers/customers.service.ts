@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpService,
   HttpStatus,
   Injectable,
   Logger,
@@ -13,19 +12,18 @@ import { AxiosResponse } from 'axios';
 import { catchError, map } from 'rxjs/operators';
 import { compare, genSalt, hash } from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
-import { Hash } from 'src/hash/hash.decorator';
+// import { Hash } from 'src/hash/hash.decorator';
 import * as moment from 'moment';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import { RMessage, RSuccessMessage } from 'src/response/response.interface';
-import { Response } from 'src/response/response.decorator';
 import { ResponseService } from 'src/response/response.service';
 import { MessageService } from 'src/message/message.service';
-import { Message } from 'src/message/message.decorator';
 import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
 import { randomUUID } from 'crypto';
 import { NotificationService } from 'src/common/notification/notification.service';
 import { QueryFilterDto } from './validation/customers.profile.validation';
 import { ListResponse } from '../response/response.interface';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class CustomersService {
@@ -33,9 +31,10 @@ export class CustomersService {
     @InjectRepository(ProfileDocument)
     private readonly profileRepository: Repository<ProfileDocument>,
     private httpService: HttpService,
-    @Hash() private readonly hashService: HashService,
-    @Response() private readonly responseService: ResponseService,
-    @Message() private readonly messageService: MessageService,
+    // @Hash()
+    private readonly hashService: HashService,
+    private readonly responseService: ResponseService,
+    private readonly messageService: MessageService,
     private readonly notificationService: NotificationService,
   ) {}
 
@@ -91,6 +90,15 @@ export class CustomersService {
       .where('customers_profile.id = :id', { id })
       .getOne();
     return profile;
+  }
+
+  async getBulkCustomers(ids: string[]): Promise<any> {
+    try {
+      return await this.profileRepository.findByIds(ids);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   findOneCustomerByPhone(id: string): Promise<ProfileDocument> {
@@ -266,7 +274,7 @@ export class CustomersService {
       const errors: RMessage = {
         value: body.email,
         property: 'email',
-        constraint: [this.messageService.get('customers.profile.existemail')],
+        constraint: [this.messageService.get('customers.profile.exist_email')],
       };
       throw new BadRequestException(
         this.responseService.error(

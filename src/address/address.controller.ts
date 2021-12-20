@@ -11,9 +11,7 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { Message } from 'src/message/message.decorator';
 import { MessageService } from 'src/message/message.service';
-import { Response } from 'src/response/response.decorator';
 import { RMessage } from 'src/response/response.interface';
 import { ResponseService } from 'src/response/response.service';
 import { AddressService } from './address.service';
@@ -28,8 +26,8 @@ import { AuthJwtGuard } from 'src/auth/auth.decorators';
 export class AddressController {
   constructor(
     private readonly addressService: AddressService,
-    @Response() private readonly responseService: ResponseService,
-    @Message() private readonly messageService: MessageService,
+    private readonly responseService: ResponseService,
+    private readonly messageService: MessageService,
   ) {}
 
   @Post()

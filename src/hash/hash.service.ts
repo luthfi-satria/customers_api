@@ -3,17 +3,13 @@ import { PASSWORD_SALT_LENGTH } from 'src/hash/hash.constant';
 import { ConfigService } from '@nestjs/config';
 import { hash, compare, genSalt } from 'bcrypt';
 import { isString } from 'class-validator';
-import { JwtService } from '@nestjs/jwt';
 // import { AUTH_JWT_SECRET_KEY } from 'src/auth/auth.constant';
 import { createCipheriv, createDecipheriv, scrypt } from 'crypto';
 import { promisify } from 'util';
 
 @Injectable()
 export class HashService {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
   // bcrypt
   async hashPassword(passwordString: string, salt: string): Promise<string> {
@@ -46,36 +42,36 @@ export class HashService {
   }
 
   // jwt
-  async jwtSign(payload: Record<string, any>): Promise<string> {
-    return this.jwtService.sign(payload);
-  }
+  // async jwtSign(payload: Record<string, any>): Promise<string> {
+  //   return this.jwtService.sign(payload);
+  // }
 
-  async jwtVerify(token: string): Promise<boolean> {
-    // Env
-    const authJwtTokenSecret = this.configService.get(
-      process.env.AUTH_JWT_SECRET_KEY,
-    );
+  // async jwtVerify(token: string): Promise<boolean> {
+  //   // Env
+  //   const authJwtTokenSecret = this.configService.get(
+  //     process.env.AUTH_JWT_SECRET_KEY,
+  //   );
 
-    const payload: Record<string, any> = this.jwtService.verify(token, {
-      secret: authJwtTokenSecret,
-    });
+  //   const payload: Record<string, any> = this.jwtService.verify(token, {
+  //     secret: authJwtTokenSecret,
+  //   });
 
-    return payload ? true : false;
-  }
+  //   return payload ? true : false;
+  // }
 
-  async jwtPayload(
-    token: string,
-    ignoreExpiration?: boolean,
-  ): Promise<Record<string, any>> {
-    // Env
-    const authJwtTokenSecret = this.configService.get(
-      process.env.AUTH_JWT_SECRET_KEY,
-    );
-    return this.jwtService.verify(token, {
-      secret: authJwtTokenSecret,
-      ignoreExpiration,
-    });
-  }
+  // async jwtPayload(
+  //   token: string,
+  //   ignoreExpiration?: boolean,
+  // ): Promise<Record<string, any>> {
+  //   // Env
+  //   const authJwtTokenSecret = this.configService.get(
+  //     process.env.AUTH_JWT_SECRET_KEY,
+  //   );
+  //   return this.jwtService.verify(token, {
+  //     secret: authJwtTokenSecret,
+  //     ignoreExpiration,
+  //   });
+  // }
 
   // AES 256bit
   async encryptAES256Bit(

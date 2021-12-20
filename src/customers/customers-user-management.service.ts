@@ -1,28 +1,17 @@
-import {
-  BadRequestException,
-  HttpService,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { Repository } from 'typeorm';
-import { Response } from 'src/response/response.decorator';
-import { Message } from 'src/message/message.decorator';
-import { HashService } from 'src/hash/hash.service';
-import { Hash } from 'src/hash/hash.decorator';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
-import { CustomersService } from './customers.service';
-import { OtpCreateValidation } from './validation/otp.create.validation';
 import { CommonService } from 'src/common/common.service';
-import { EmailVerificationEmailVerifyValidation } from './validation/email-verification.email-verify.validation';
 import { CustomerProfileValidation } from './validation/customers.profile.validation';
 import { NotificationService } from 'src/common/notification/notification.service';
+import { HttpService } from '@nestjs/axios';
 
-const defaultJsonHeader: Record<string, any> = {
-  'Content-Type': 'application/json',
-};
+// const defaultJsonHeader: Record<string, any> = {
+//   'Content-Type': 'application/json',
+// };
 
 @Injectable()
 export class CustomersUserManagementService {
@@ -30,8 +19,8 @@ export class CustomersUserManagementService {
     @InjectRepository(ProfileDocument)
     private readonly profileRepository: Repository<ProfileDocument>,
     private httpService: HttpService,
-    @Response() private readonly responseService: ResponseService,
-    @Message() private readonly messageService: MessageService,
+    private readonly responseService: ResponseService,
+    private readonly messageService: MessageService,
     private readonly commonService: CommonService,
     private readonly notificationService: NotificationService,
   ) {}
