@@ -356,8 +356,8 @@ export class PhoneConstraintService {
       throw response;
     }
 
-    cekPhone.phone_verified_at = new Date()
-    await this.profileRepository.save(cekPhone)
+    cekPhone.phone_verified_at = new Date();
+    await this.profileRepository.save(cekPhone);
 
     return response;
   }
