@@ -12,7 +12,7 @@ import { ResponseService } from 'src/response/response.service';
 import { MessageService } from 'src/message/message.service';
 import { ConfigService } from '@nestjs/config';
 import { HashService } from 'src/hash/hash.service';
-import { HttpModule, HttpService } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [

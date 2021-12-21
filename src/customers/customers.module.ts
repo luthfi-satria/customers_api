@@ -19,7 +19,7 @@ import { CustomersUserManagementService } from './customers-user-management.serv
 import { ResponseService } from 'src/response/response.service';
 import { MessageService } from 'src/message/message.service';
 import { ConfigService } from '@nestjs/config';
-import { HttpModule, HttpService } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios';
 import { HashService } from 'src/hash/hash.service';
 // import { HashModule } from 'src/hash/hash.module';
 

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumberString, Length } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class CustomerChangeEmailValidation {
   @IsEmail()
