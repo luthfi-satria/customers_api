@@ -50,7 +50,7 @@ export class OtpVerificationController {
   ): Promise<any> {
     args.id = req.user.id;
     args.token = token;
-    return await this.otpVerificationService.verifyNewEmail(args);
+    return this.otpVerificationService.verifyNewEmail(args);
   }
 
   @Post('verify-email/resend')
