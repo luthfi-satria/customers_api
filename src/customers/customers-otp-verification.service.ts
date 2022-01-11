@@ -113,12 +113,14 @@ export class OtpVerificationService {
     }
     args.user_type = 'customer-verify-phone';
 
+    console.log('cekPhone: ', cekPhone);
     const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-phone-validation`;
     const response: Record<string, any> = await this.commonService.postHttp(
       url,
       args,
       defaultJsonHeader,
     );
+    console.log('response: ', response);
     if (response.statusCode) {
       throw response;
     }

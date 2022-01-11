@@ -12,4 +12,5 @@ export interface ReqUpdataProfile {
   email: string;
   dob: string;
   gender: string;
+  phone_verified_at?: Date;
 }

@@ -22,7 +22,7 @@ export class OtpVerificationController {
     args: Partial<OtpCreateValidation>,
   ): Promise<any> {
     args.id = req.user.id;
-    return await this.otpVerificationService.verifyNewPhone(args);
+    return this.otpVerificationService.verifyNewPhone(args);
   }
 
   @Post('verify-phone-validation')
@@ -35,7 +35,7 @@ export class OtpVerificationController {
     args: Partial<OtpCreateValidation>,
   ): Promise<any> {
     args.id = req.user.id;
-    return await this.otpVerificationService.validationNewPhone(args);
+    return this.otpVerificationService.validationNewPhone(args);
   }
 
   @Post('verify-email')

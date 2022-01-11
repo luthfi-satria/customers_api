@@ -247,6 +247,7 @@ export class CustomersController {
           );
         }
         let phone = '';
+        let flagPhone = false;
         if (data.phone) {
           const cekphone: ProfileDocument =
             await this.customerService.findOneCustomerByPhone(data.phone);
@@ -266,6 +267,7 @@ export class CustomersController {
             );
           }
           phone = data.phone;
+          flagPhone = true;
         } else {
           phone = cekbyid.phone;
         }
@@ -278,6 +280,9 @@ export class CustomersController {
             email: data.email,
             dob: data.dob ?? null,
             gender: data.gender ?? null,
+            phone_verified_at: flagPhone
+              ? new Date()
+              : cekbyid.phone_verified_at,
           };
           data.id = cekbyid.id;
           const updatedProfile =

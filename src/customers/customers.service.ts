@@ -133,17 +133,10 @@ export class CustomersService {
     data: Record<string, any>,
     flg_update: boolean,
   ): Promise<ProfileDocument> {
-    // const salt: string = await this.hashService.randomSalt();
-    // const passwordHash = await this.hashService.hashPassword(
-    //   data.password,
-    //   salt,
-    // );
     const create_profile: Partial<ProfileDocument> = {
       phone: data.phone,
       name: data.name,
       email: data.email,
-      // gender: data.gender,
-      // password: passwordHash,
     };
     if (data.dob) {
       create_profile.dob = moment(data.dob, 'DD/MM/YYYY', true).toDate();
@@ -153,6 +146,8 @@ export class CustomersService {
     }
     if (flg_update) {
       create_profile.id = data.id;
+      if (data.phone_verified_at)
+        create_profile.phone_verified_at = data.phone_verified_at;
     }
     if (data.email) {
       create_profile.verification_token = randomUUID();
