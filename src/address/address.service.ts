@@ -111,9 +111,11 @@ export class AddressService {
   }
 
   async update(id: string, updateAddressDto: UpdateAddressDto | Address) {
-    updateAddressDto.city_id = await this.getCityId(
-      updateAddressDto.postal_code,
-    );
+    if (updateAddressDto.postal_code) {
+      updateAddressDto.city_id = await this.getCityId(
+        updateAddressDto.postal_code,
+      );
+    }
     try {
       const update_address = await this.addressRepository.update(
         id,
