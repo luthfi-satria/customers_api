@@ -485,6 +485,7 @@ export class CustomersController {
       '/api/v1/auth/otp-login-phone-validation';
     data.user_type = 'customer';
     data.roles = ['customer'];
+    data.created_at = customer.created_at;
     return (
       await this.customerService.postHttp(url, data, defaultJsonHeader)
     ).pipe(
@@ -635,6 +636,7 @@ export class CustomersController {
       '/api/v1/auth/otp-login-email-validation';
     data.user_type = 'customer';
     data.roles = ['customer'];
+    data.created_at = customer.created_at;
 
     return (
       await this.customerService.postHttp(url, data, defaultJsonHeader)
@@ -660,8 +662,17 @@ export class CustomersController {
   }
 
   @Post('refresh-token')
+  @UserType('customer')
   @AuthJwtGuard()
-  async refreshToken(@Headers('Authorization') token: string): Promise<any> {
+  async refreshToken(
+    @Headers('Authorization') token: string,
+    @Req() req: any,
+  ): Promise<any> {
+    const user = req.user;
+    const customer: ProfileDocument = await this.customerService.findOne(
+      user.id,
+    );
+
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/refresh-token';
     const headersRequest: Record<string, any> = {
@@ -672,6 +683,7 @@ export class CustomersController {
     const http_req: Record<string, any> = {
       user_type: 'customer',
       roles: ['customer'],
+      created_at: customer.created_at,
     };
 
     return (

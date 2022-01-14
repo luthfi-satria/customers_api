@@ -14,4 +14,5 @@ export class OtpEmailValidateValidation {
   id_profile: number;
   id: string;
   roles: string[];
+  created_at: Date;
 }
