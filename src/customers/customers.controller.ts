@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Body,
@@ -12,33 +13,32 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { MessageService } from 'src/message/message.service';
-import { ResponseService } from 'src/response/response.service';
-import { CustomersService } from './customers.service';
-import { HashService } from './../hash/hash.service';
-import { RequestValidationPipe } from './validation/request-validation.pipe';
-import { ResponseStatusCode } from 'src/response/response.decorator';
-import { RMessage, RSuccessMessage } from 'src/response/response.interface';
-import { OtpCreateValidation } from './validation/otp.create.validation';
-import { catchError, map } from 'rxjs/operators';
-import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
-import { CustomerProfileValidation } from './validation/customers.profile.validation';
-import { ProfileDocument } from 'src/database/entities/profile.entity';
-import { ReqUpdataProfile } from './customers.interface';
-import { CustomerResetPasswordValidation } from './validation/customers.resetpass.validation';
-import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
-import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
-import { OtpEmailValidateValidation } from './validation/otp.email-validate.validation';
-import { CommonStorageService } from 'src/common/storage/storage.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { editFileName, imageFileFilter } from 'src/utils/general-utils';
 import { diskStorage } from 'multer';
-import { ImageValidationService } from 'src/utils/image-validation.service';
+import { catchError, map } from 'rxjs/operators';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
 import { UserType } from 'src/auth/guard/user-type.decorator';
+import { CommonStorageService } from 'src/common/storage/storage.service';
+import { ProfileDocument } from 'src/database/entities/profile.entity';
+import { MessageService } from 'src/message/message.service';
+import { ResponseStatusCode } from 'src/response/response.decorator';
+import { RMessage, RSuccessMessage } from 'src/response/response.interface';
+import { ResponseService } from 'src/response/response.service';
+import { editFileName, imageFileFilter } from 'src/utils/general-utils';
+import { ImageValidationService } from 'src/utils/image-validation.service';
+import { HashService } from './../hash/hash.service';
+import { ReqUpdataProfile } from './customers.interface';
+import { CustomersService } from './customers.service';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
-import { HttpService } from '@nestjs/axios';
+import { CustomerLoginEmailValidation } from './validation/customers.loginemail.validation';
+import { CustomerLoginPhoneValidation } from './validation/customers.loginphone.validation';
+import { CustomerProfileValidation } from './validation/customers.profile.validation';
+import { CustomerResetPasswordValidation } from './validation/customers.resetpass.validation';
+import { OtpCreateValidation } from './validation/otp.create.validation';
+import { OtpEmailValidateValidation } from './validation/otp.email-validate.validation';
+import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
+import { RequestValidationPipe } from './validation/request-validation.pipe';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -425,6 +425,25 @@ export class CustomersController {
       );
     }
 
+    if (existcust.is_active === false) {
+      const errors: RMessage = {
+        value: data.phone,
+        property: 'phone',
+        constraint: [
+          this.messageService.get(
+            'customers.login.customer_account_was_inactive',
+          ),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     const data_otp = new OtpCreateValidation();
     data_otp.phone = data.phone;
     data_otp.user_type = 'login';
@@ -544,6 +563,25 @@ export class CustomersController {
         property: 'email_verified_at',
         constraint: [
           this.messageService.get('customers.login.unverified_email'),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    if (existcust.is_active === false) {
+      const errors: RMessage = {
+        value: data.email,
+        property: 'email',
+        constraint: [
+          this.messageService.get(
+            'customers.login.customer_account_was_inactive',
+          ),
         ],
       };
       throw new BadRequestException(
