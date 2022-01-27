@@ -64,6 +64,10 @@ export default {
       code: 'UNREGISTERED_EMAIL',
       message: 'Email belum terdaftar. Daftar sebagai member?',
     },
+    customer_account_was_inactive: {
+      code: 'CUSTOMER_ACCOUNT_WAS_INACTIVE',
+      message: 'Akun costumer ini sudah di-nonaktifkan',
+    },
     password_null: 'Data anda belum lengkap. Silakan lengkapi profile anda.',
     unverified_email:
       'Email anda belum diverifikasi. Silahkan verifikasi email terlebih dahulu.',
