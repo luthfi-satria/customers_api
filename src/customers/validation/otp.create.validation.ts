@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsMobilePhone,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
@@ -7,24 +8,25 @@ import {
 } from 'class-validator';
 
 export class OtpCreateValidation {
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @IsNotEmpty()
   @IsNumberString()
   @Length(10, 15)
+  @IsMobilePhone('' as any, {}, { message: 'Format nomor telepon salah' })
   phone: string;
 
-  referral_code: string;
+  referral_code?: string;
 
-  otp_code: string;
-  user_type: string;
+  otp_code?: string;
+  user_type?: string;
   id?: string;
 
   @IsOptional()
   @IsEmail({}, { message: 'Format email tidak benar' })
-  email: string;
+  email?: string;
 
   @IsOptional()
-  token: string;
+  token?: string;
 }

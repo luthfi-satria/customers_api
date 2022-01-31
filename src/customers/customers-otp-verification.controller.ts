@@ -1,10 +1,9 @@
-import { Body, Controller, Post, Req, Headers } from '@nestjs/common';
-
-import { ResponseStatusCode } from 'src/response/response.decorator';
+import { Body, Controller, Headers, Post, Req } from '@nestjs/common';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
 import { UserType } from 'src/auth/guard/user-type.decorator';
-import { OtpCreateValidation } from './validation/otp.create.validation';
+import { ResponseStatusCode } from 'src/response/response.decorator';
 import { OtpVerificationService } from './customers-otp-verification.service';
+import { OtpCreateValidation } from './validation/otp.create.validation';
 
 @Controller('api/v1/customers/profile')
 export class OtpVerificationController {
@@ -19,8 +18,9 @@ export class OtpVerificationController {
   async verifyNewPhone(
     @Req() req: any,
     @Body()
-    args: Partial<OtpCreateValidation>,
+    args: OtpCreateValidation,
   ): Promise<any> {
+    console.log(args.phone);
     args.id = req.user.id;
     return this.otpVerificationService.verifyNewPhone(args);
   }
