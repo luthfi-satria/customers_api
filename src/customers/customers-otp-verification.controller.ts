@@ -20,7 +20,6 @@ export class OtpVerificationController {
     @Body()
     args: OtpCreateValidation,
   ): Promise<any> {
-    console.log(args.phone);
     args.id = req.user.id;
     return this.otpVerificationService.verifyNewPhone(args);
   }
