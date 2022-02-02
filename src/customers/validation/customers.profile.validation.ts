@@ -8,6 +8,7 @@ import {
   IsOptional,
   Length,
   Validate,
+  ValidateIf,
 } from 'class-validator';
 import { Gender } from 'src/database/entities/profile.entity';
 import { ValidDOBRule } from './valid-dob.rule';
@@ -18,11 +19,12 @@ export class CustomerProfileValidation {
   name: string;
 
   @IsOptional()
+  @ValidateIf((o) => o.email !== '')
   @IsEmail()
   email: string;
 
   @IsOptional()
-  @IsNotEmpty()
+  @ValidateIf((o) => o.dob !== '')
   @Validate(ValidDOBRule, {
     message: 'Format tanggal lahir tidak valid (dd/mm/yyyy)',
   })
