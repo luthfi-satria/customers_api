@@ -62,6 +62,24 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpCreateValidation))
     data: OtpCreateValidation,
   ): Promise<any> {
+    const existcustWithPhone =
+      await this.customerService.findOneCustomerByPhone(data.phone);
+
+    if (existcustWithPhone) {
+      const errors: RMessage = {
+        value: data.phone,
+        property: 'phone',
+        constraint: [this.messageService.get('customers.error.already_exist')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp';
     data.user_type = 'customer';
 

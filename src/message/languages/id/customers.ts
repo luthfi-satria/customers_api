@@ -93,6 +93,10 @@ export default {
       code: 'CUSTOMER_NOT_FOUND',
       message: 'Customer tidak ditemukan.',
     },
+    already_exist: {
+      code: 'CUSTOMER_ALREADY_EXIST',
+      message: 'Customer ini sudah terdaftar',
+    },
     invalid: 'Data yang anda masukan tidak valid',
   },
   email_verification: {
