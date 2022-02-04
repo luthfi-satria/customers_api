@@ -28,7 +28,7 @@ export class PhoneConstraintController {
     @Body()
     args: Partial<OtpPhoneValidateValidation>,
   ): Promise<any> {
-    return await this.phoneConstraintService.validateExistingPhone(args);
+    return this.phoneConstraintService.validateExistingPhone(args);
   }
 
   @Post('otp-phone-problem-new')
@@ -40,7 +40,7 @@ export class PhoneConstraintController {
     @Body()
     args: Partial<OtpCreateValidation>,
   ): Promise<any> {
-    return await this.phoneConstraintService.updateNewPhone(args, req.user);
+    return this.phoneConstraintService.updateNewPhone(args, req.user);
   }
 
   @Post('otp-phone-problem-validation-new')
@@ -52,6 +52,6 @@ export class PhoneConstraintController {
     @Body()
     args: Partial<OtpPhoneValidateValidation>,
   ): Promise<any> {
-    return await this.phoneConstraintService.validateNewPhone(args);
+    return this.phoneConstraintService.validateNewPhone(args, req.user);
   }
 }
