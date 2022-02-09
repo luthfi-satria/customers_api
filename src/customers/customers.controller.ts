@@ -361,7 +361,7 @@ export class CustomersController {
   ): Promise<any> {
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-forget-password';
-    data.user_type = 'customer';
+    data.user_type = 'forget-password';
 
     return (
       await this.customerService.postHttp(url, data, defaultJsonHeader)
@@ -411,7 +411,7 @@ export class CustomersController {
     }
 
     const url: string = process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp';
-    data.user_type = 'customer';
+    data.user_type = 'registration';
 
     return (
       await this.customerService.postHttp(url, data, defaultJsonHeader)
