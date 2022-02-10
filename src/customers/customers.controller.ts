@@ -464,6 +464,7 @@ export class CustomersController {
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-validation';
     data.user_type = 'customer';
     data.roles = ['customer'];
+    data.created_at = create_profile.created_at;
 
     return (
       await this.customerService.postHttp(url, data, defaultJsonHeader)
