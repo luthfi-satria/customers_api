@@ -502,6 +502,26 @@ export class CustomersController {
     // const payload = await this.hashService.jwtPayload(
     //   token.replace('Bearer ', ''),
     // );
+    const customer = await this.customerService.findOneCustomerById(
+      req.user.id,
+    );
+    if (!customer) {
+      const errors: RMessage = {
+        value: req.user.id,
+        property: 'customer_id',
+        constraint: [
+          this.messageService.get('customers.login.unregistered_phone'),
+        ],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/profile';
     const headersRequest: Record<string, any> = {
@@ -510,6 +530,7 @@ export class CustomersController {
     };
     data.user_type = 'customer';
     data.roles = ['customer'];
+    data.created_at = customer.created_at;
     return (await this.customerService.putHttp(url, data, headersRequest)).pipe(
       map(async (response) => {
         const rsp: Record<string, any> = response;

@@ -50,6 +50,7 @@ export class CustomerProfileValidation {
 
   @IsOptional()
   id: string;
+  created_at: Date;
 }
 
 export class QueryFilterDto {
