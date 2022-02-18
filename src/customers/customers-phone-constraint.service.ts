@@ -10,6 +10,7 @@ import { OtpCreateValidation } from './validation/otp.create.validation';
 import { CommonService } from 'src/common/common.service';
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
 import { HttpService } from '@nestjs/axios';
+import { isDefined } from 'class-validator';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -77,9 +78,9 @@ export class PhoneConstraintService {
         ),
       );
     }
-    args.user_type = 'customer';
+    args.user_type = 'phone-problem';
     const url: string =
-      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-forget-password';
+      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-phone-problem';
     const response: Record<string, any> = await this.commonService
       .postHttp(url, args, defaultJsonHeader)
       .catch(() => {
@@ -165,10 +166,10 @@ export class PhoneConstraintService {
         ),
       );
     }
-    args.user_type = 'customer';
+    args.user_type = 'phone-problem';
     args.id = cekPhone.id;
 
-    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-validation`;
+    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-phone-problem-validation`;
     const response: Record<string, any> = await this.commonService.postHttp(
       url,
       args,
@@ -203,7 +204,7 @@ export class PhoneConstraintService {
           ),
         );
       });
-    if (cekPhone) {
+    if (cekPhone && cekPhone.is_active) {
       throw new BadRequestException(
         this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -249,7 +250,7 @@ export class PhoneConstraintService {
     }
 
     //update hp
-    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-update-phone`;
+    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-phone-problem-phonenew`;
     const reqOtp = {
       phone: getPhone.phone,
       phone_new: args.phone,
@@ -257,7 +258,7 @@ export class PhoneConstraintService {
     const respOtp: Record<string, any> = await this.commonService.postHttp(
       url,
       reqOtp,
-      defaultJsonHeader,
+      // defaultJsonHeader,
     );
     if (respOtp == null) {
       throw new BadRequestException(
@@ -274,8 +275,8 @@ export class PhoneConstraintService {
     } else if (respOtp.statusCode) {
       throw respOtp;
     }
-    getPhone.phone = args.phone;
-    return await this.profileRepository
+    // getPhone.phone = args.phone;
+    return this.profileRepository
       .save(getPhone)
       .then(() => {
         return respOtp;
@@ -295,7 +296,39 @@ export class PhoneConstraintService {
       });
   }
 
-  async validateNewPhone(args: Partial<OtpPhoneValidateValidation>) {
+  async validateNewPhone(args: Partial<OtpPhoneValidateValidation>, req: any) {
+    //Get Existing Customer
+    const getPhone = await this.profileRepository
+      .findOne({ id: req.id })
+      .catch(() => {
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: req.id,
+              property: 'id',
+              constraint: [
+                this.messageService.get('customers.error.not_found'),
+              ],
+            },
+            'Bad Request',
+          ),
+        );
+      });
+    if (!getPhone) {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value: req.id,
+            property: 'id',
+            constraint: [this.messageService.get('customers.error.not_found')],
+          },
+          'Bad Request',
+        ),
+      );
+    }
+
     const cekPhone = await this.profileRepository
       .findOne({
         phone: args.phone,
@@ -315,28 +348,33 @@ export class PhoneConstraintService {
           ),
         );
       });
-    if (!cekPhone) {
-      throw new BadRequestException(
-        this.responseService.error(
-          HttpStatus.BAD_REQUEST,
-          {
-            value: args.phone,
-            property: 'phone',
-            constraint: [this.messageService.get('customers.error.not_found')],
-          },
-          'Bad Request',
-        ),
-      );
+
+    if (isDefined(cekPhone)) {
+      if (cekPhone.is_active) {
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: args.phone,
+              property: 'phone',
+              constraint: [this.messageService.get('customers.create.exist')],
+            },
+            'Bad Request',
+          ),
+        );
+      }
     }
-    args.user_type = 'customer';
-    args.id = cekPhone.id;
-    const url: string =
-      process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-validation';
-    args.user_type = 'customer';
-    args.roles = ['customer'];
+    args.id = getPhone.id;
+    const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-phone-problem-phonenew-validation`;
+    const reqOtp = {
+      phone: getPhone.phone,
+      phone_new: args.phone,
+      otp_code: args.otp_code,
+      id: getPhone.id,
+    };
 
     const response: Record<string, any> = await this.commonService
-      .postHttp(url, args)
+      .postHttp(url, reqOtp)
       .catch(() => {
         throw new BadRequestException(
           this.responseService.error(
@@ -356,8 +394,9 @@ export class PhoneConstraintService {
       throw response;
     }
 
-    cekPhone.phone_verified_at = new Date();
-    await this.profileRepository.save(cekPhone);
+    getPhone.phone_verified_at = new Date();
+    getPhone.phone = args.phone;
+    await this.profileRepository.save(getPhone);
 
     return response;
   }
