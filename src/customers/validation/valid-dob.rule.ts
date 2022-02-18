@@ -3,7 +3,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import * as moment from 'moment';
+import moment from 'moment';
 
 @ValidatorConstraint({ name: 'DOB' })
 @Injectable()
