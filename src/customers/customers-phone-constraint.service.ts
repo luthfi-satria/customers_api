@@ -80,6 +80,7 @@ export class PhoneConstraintService {
     }
     args.user_type = 'phone-problem';
     args.name = cekPhone.name;
+    args.email = cekPhone.email;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-phone-problem';
     const response: Record<string, any> = await this.commonService
