@@ -1,16 +1,16 @@
+import { HttpService } from '@nestjs/axios';
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isDefined } from 'class-validator';
+import { CommonService } from 'src/common/common.service';
+import { ProfileDocument } from 'src/database/entities/profile.entity';
+import { HashService } from 'src/hash/hash.service';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { Repository } from 'typeorm';
-import { HashService } from 'src/hash/hash.service';
-import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { CustomersService } from './customers.service';
 import { OtpCreateValidation } from './validation/otp.create.validation';
-import { CommonService } from 'src/common/common.service';
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
-import { HttpService } from '@nestjs/axios';
-import { isDefined } from 'class-validator';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -79,6 +79,7 @@ export class PhoneConstraintService {
       );
     }
     args.user_type = 'phone-problem';
+    args.name = cekPhone.name;
     const url: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-phone-problem';
     const response: Record<string, any> = await this.commonService
