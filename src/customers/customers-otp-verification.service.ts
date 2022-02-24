@@ -12,6 +12,7 @@ import { CommonService } from 'src/common/common.service';
 import { randomUUID } from 'crypto';
 import { NotificationService } from 'src/common/notification/notification.service';
 import { HttpService } from '@nestjs/axios';
+import { generateMessageUrlVerification } from 'src/utils/general-utils';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -189,14 +190,15 @@ export class OtpVerificationService {
     const updatedProfile = await this.profileRepository.save(profile);
 
     const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
+    const messageUrlVerifivation = await generateMessageUrlVerification(
+      profile.name,
+      url,
+    );
     await this.notificationService.sendEmail(
       updatedProfile.email,
       'Verifikasi email',
       '',
-      `
-    <p>Silahkan klik link berikut untuk memverifikasi email anda</p>
-    <a href="${url}">${url}</a>
-    `,
+      messageUrlVerifivation,
     );
 
     this.responseService.success(
@@ -253,14 +255,15 @@ export class OtpVerificationService {
     const updatedProfile = await this.profileRepository.save(profile);
 
     const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
+    const messageUrlVerifivation = await generateMessageUrlVerification(
+      profile.name,
+      url,
+    );
     await this.notificationService.sendEmail(
       updatedProfile.email,
       'Verifikasi email',
       '',
-      `
-    <p>Silahkan klik link berikut untuk memverifikasi email anda</p>
-    <a href="${url}">${url}</a>
-    `,
+      messageUrlVerifivation,
     );
 
     this.responseService.success(

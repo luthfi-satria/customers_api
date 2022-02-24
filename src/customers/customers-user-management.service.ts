@@ -6,6 +6,7 @@ import { NotificationService } from 'src/common/notification/notification.servic
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
+import { generateMessageChangeActiveEmail } from 'src/utils/general-utils';
 import { Repository } from 'typeorm';
 import { CustomerProfileValidation } from './validation/customers.profile.validation';
 import { wordingNotifFormatForSms } from './wordings/wording-notif-format-for-sms';
@@ -196,11 +197,15 @@ export class CustomersUserManagementService {
 
     findCustomer.email = args.email;
     await this.profileRepository.save(findCustomer);
+    const messageChangeActiveEmail = await generateMessageChangeActiveEmail(
+      findCustomer.name,
+    );
 
     await this.notificationService.sendEmail(
       args.email,
       'Notifikasi Update Email',
-      'Email ini dapat digunakai untuk login',
+      '',
+      messageChangeActiveEmail,
     );
 
     const response: Record<string, any> = this.responseService.success(
