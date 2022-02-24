@@ -256,6 +256,7 @@ export class PhoneConstraintService {
     const reqOtp = {
       phone: getPhone.phone,
       phone_new: args.phone,
+      name: getPhone.name,
     };
     const respOtp: Record<string, any> = await this.commonService.postHttp(
       url,
