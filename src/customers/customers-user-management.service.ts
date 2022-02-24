@@ -1,13 +1,14 @@
+import { HttpService } from '@nestjs/axios';
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommonService } from 'src/common/common.service';
+import { NotificationService } from 'src/common/notification/notification.service';
+import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { Repository } from 'typeorm';
-import { ProfileDocument } from 'src/database/entities/profile.entity';
-import { CommonService } from 'src/common/common.service';
 import { CustomerProfileValidation } from './validation/customers.profile.validation';
-import { NotificationService } from 'src/common/notification/notification.service';
-import { HttpService } from '@nestjs/axios';
+import { wordingNotifFormatForSms } from './wordings/wording-notif-format-for-sms';
 
 // const defaultJsonHeader: Record<string, any> = {
 //   'Content-Type': 'application/json',
@@ -104,7 +105,7 @@ export class CustomersUserManagementService {
 
     await this.notificationService.sendSms(
       args.phone,
-      'Nomor ini dapat digunakai untuk login',
+      wordingNotifFormatForSms(args.name),
     );
     const response: Record<string, any> = this.responseService.success(
       true,
