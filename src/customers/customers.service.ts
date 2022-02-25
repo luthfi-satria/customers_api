@@ -24,6 +24,7 @@ import { NotificationService } from 'src/common/notification/notification.servic
 import { QueryFilterDto } from './validation/customers.profile.validation';
 import { ListResponse } from '../response/response.interface';
 import { HttpService } from '@nestjs/axios';
+import { generateMessageUrlVerification } from 'src/utils/general-utils';
 
 @Injectable()
 export class CustomersService {
@@ -344,16 +345,17 @@ export class CustomersService {
   }
 
   async sendVerificationEmail(user: ProfileDocument) {
-    const url = `${process.env.BASEURL_API}/verification/email?t=${user.verification_token}`;
+    const url = `${process.env.BASEURL_ZEUS}/verification/email?t=${user.verification_token}`;
+    const messageUrlVerifivation = await generateMessageUrlVerification(
+      user.name,
+      url,
+    );
 
     this.notificationService.sendEmail(
       user.email,
       'Verifikasi email',
       '',
-      `
-    <p>Silahkan klik link berikut untuk memverifikasi email anda</p>
-    <a href="${url}">${url}</a>
-    `,
+      messageUrlVerifivation,
     );
   }
 
@@ -406,15 +408,16 @@ export class CustomersService {
 
     const updatedProfile = await this.profileRepository.save(profile);
 
-    const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
+    const url = `${process.env.BASEURL_ZEUS}/verification/email?t=${profile.verification_token}`;
+    const messageUrlVerifivation = await generateMessageUrlVerification(
+      profile.name,
+      url,
+    );
     await this.notificationService.sendEmail(
       updatedProfile.email,
       'Verifikasi email',
       '',
-      `
-    <p>Silahkan klik link berikut untuk memverifikasi email anda</p>
-    <a href="${url}">${url}</a>
-    `,
+      messageUrlVerifivation,
     );
 
     this.responseService.success(

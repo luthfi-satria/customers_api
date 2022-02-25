@@ -101,6 +101,7 @@ export class CustomersController {
     const data_otp = new OtpCreateValidation();
     data_otp.phone = data.phone;
     data_otp.user_type = 'login';
+    data_otp.name = existcust.name;
 
     const url_otp: string =
       process.env.BASEURL_AUTH_SERVICE + '/api/v1/auth/otp-login-phone';
