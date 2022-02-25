@@ -105,8 +105,8 @@ export class CustomersUserManagementService {
     await this.profileRepository.save(findCustomer);
 
     await this.notificationService.sendSms(
-      checkPhone.phone,
-      wordingNotifFormatForSms(checkPhone.name),
+      findCustomer.phone,
+      wordingNotifFormatForSms(findCustomer.name),
     );
     const response: Record<string, any> = this.responseService.success(
       true,
