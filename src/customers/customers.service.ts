@@ -345,7 +345,7 @@ export class CustomersService {
   }
 
   async sendVerificationEmail(user: ProfileDocument) {
-    const url = `${process.env.BASEURL_API}/verification/email?t=${user.verification_token}`;
+    const url = `${process.env.BASEURL_ZEUS}/verification/email?t=${user.verification_token}`;
     const messageUrlVerifivation = await generateMessageUrlVerification(
       user.name,
       url,
@@ -408,7 +408,7 @@ export class CustomersService {
 
     const updatedProfile = await this.profileRepository.save(profile);
 
-    const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
+    const url = `${process.env.BASEURL_ZEUS}/verification/email?t=${profile.verification_token}`;
     const messageUrlVerifivation = await generateMessageUrlVerification(
       profile.name,
       url,

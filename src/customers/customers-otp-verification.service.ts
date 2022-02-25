@@ -189,7 +189,7 @@ export class OtpVerificationService {
 
     const updatedProfile = await this.profileRepository.save(profile);
 
-    const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
+    const url = `${process.env.BASEURL_ZEUS}/verification/email?t=${profile.verification_token}`;
     const messageUrlVerifivation = await generateMessageUrlVerification(
       profile.name,
       url,
@@ -254,7 +254,7 @@ export class OtpVerificationService {
 
     const updatedProfile = await this.profileRepository.save(profile);
 
-    const url = `${process.env.BASEURL_API}/verification/email?t=${profile.verification_token}`;
+    const url = `${process.env.BASEURL_ZEUS}/verification/email?t=${profile.verification_token}`;
     const messageUrlVerifivation = await generateMessageUrlVerification(
       profile.name,
       url,
