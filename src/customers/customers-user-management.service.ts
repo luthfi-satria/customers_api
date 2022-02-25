@@ -105,7 +105,7 @@ export class CustomersUserManagementService {
     await this.profileRepository.save(findCustomer);
 
     await this.notificationService.sendSms(
-      findCustomer.phone,
+      args.phone,
       wordingNotifFormatForSms(findCustomer.name),
     );
     const response: Record<string, any> = this.responseService.success(
