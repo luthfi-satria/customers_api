@@ -8,8 +8,8 @@ import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { generateMessageChangeActiveEmail } from 'src/utils/general-utils';
 import { Repository } from 'typeorm';
+import { generateSmsChangeActiveNoHp } from './../utils/general-utils';
 import { CustomerProfileValidation } from './validation/customers.profile.validation';
-import { wordingNotifFormatForSms } from './wordings/wording-notif-format-for-sms';
 
 // const defaultJsonHeader: Record<string, any> = {
 //   'Content-Type': 'application/json',
@@ -104,10 +104,9 @@ export class CustomersUserManagementService {
     findCustomer.phone = args.phone;
     await this.profileRepository.save(findCustomer);
 
-    await this.notificationService.sendSms(
-      args.phone,
-      wordingNotifFormatForSms(findCustomer.name),
-    );
+    const smsMessage = generateSmsChangeActiveNoHp(findCustomer.name);
+
+    await this.notificationService.sendSms(args.phone, smsMessage);
     const response: Record<string, any> = this.responseService.success(
       true,
       this.messageService.get('customers.customer_management.phone_success'),

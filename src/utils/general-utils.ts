@@ -1,8 +1,8 @@
-import { extname } from 'path';
-import momenttz from 'moment-timezone';
 import { randomBytes } from 'crypto';
-import moment from 'moment';
 import { FirebaseDynamicLinks } from 'firebase-dynamic-links';
+import moment from 'moment';
+import momenttz from 'moment-timezone';
+import { extname } from 'path';
 
 export function CreateRandomNumber(pjg: number): string {
   const random_number = parseInt(randomBytes(4).toString('hex'), 16).toString();
@@ -144,5 +144,42 @@ export const generateMessageResetPassword = async (
   Untuk mengubah Kata Sandi Anda, Klik link berikut: <a href="${shortLink}">${shortLink}</a> . <br>
   JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
   WASPADA PENIPUAN!`;
+  return message;
+};
+
+export const generateSmsUrlVerification = async (
+  name: string,
+  link: string,
+): Promise<string> => {
+  const fbLink = new FirebaseDynamicLinks(process.env.FIREBASE_API_KEY);
+  const { shortLink } = await fbLink.createLink({
+    dynamicLinkInfo: {
+      domainUriPrefix: 'https://s.efood.co.id',
+      link,
+    },
+  });
+  const message = `Hai, ${name}!\n\nUntuk verifikasi perubahan No HP Anda klik link berikut: ${shortLink} .\nJANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD.\nWASPADA PENIPUAN!
+  `;
+  return message;
+};
+
+export const generateSmsChangeActiveNoHp = (name: string): string => {
+  const message = `Hai, ${name}!\n\nNo HP Anda berhasil diperbaharui, Anda dapat login pada aplikasi eFOOD menggunakan No HP ini.!`;
+  return message;
+};
+
+export const generateSmsResetPassword = async (
+  name: string,
+  link: string,
+): Promise<string> => {
+  const fbLink = new FirebaseDynamicLinks(process.env.FIREBASE_API_KEY);
+  const { shortLink } = await fbLink.createLink({
+    dynamicLinkInfo: {
+      domainUriPrefix: 'https://s.efood.co.id',
+      link,
+    },
+  });
+
+  const message = `Hai, ${name}!\n\nUntuk mengubah Kata Sandi Anda, Klik link berikut: ${shortLink} .\nJANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD.\nWASPADA PENIPUAN!`;
   return message;
 };
