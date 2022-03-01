@@ -10,6 +10,7 @@ export class OtpEmailValidateValidation {
   @IsNumberString()
   otp_code: string;
 
+  name: string;
   user_type: string;
   id_profile: number;
   id: string;

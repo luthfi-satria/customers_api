@@ -1,18 +1,18 @@
+import { HttpService } from '@nestjs/axios';
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MessageService } from 'src/message/message.service';
-import { ResponseService } from 'src/response/response.service';
-import { Repository } from 'typeorm';
-import { HashService } from 'src/hash/hash.service';
+import { randomUUID } from 'crypto';
+import { CommonService } from 'src/common/common.service';
+import { NotificationService } from 'src/common/notification/notification.service';
 // import { Hash } from 'src/hash/hash.decorator';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
+import { HashService } from 'src/hash/hash.service';
+import { MessageService } from 'src/message/message.service';
+import { ResponseService } from 'src/response/response.service';
+import { generateMessageUrlVerification } from 'src/utils/general-utils';
+import { Repository } from 'typeorm';
 import { CustomersService } from './customers.service';
 import { OtpCreateValidation } from './validation/otp.create.validation';
-import { CommonService } from 'src/common/common.service';
-import { randomUUID } from 'crypto';
-import { NotificationService } from 'src/common/notification/notification.service';
-import { HttpService } from '@nestjs/axios';
-import { generateMessageUrlVerification } from 'src/utils/general-utils';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -66,7 +66,11 @@ export class OtpVerificationService {
         ),
       );
     }
+    const existCostumer = await this.profileRepository.findOne({
+      id: args.id,
+    });
     args.user_type = 'customer-verify-phone';
+    args.name = existCostumer.name;
     const url = `${process.env.BASEURL_AUTH_SERVICE}/api/v1/auth/otp-phone`;
     const response: Record<string, any> = await this.commonService.postHttp(
       url,

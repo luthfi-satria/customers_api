@@ -250,6 +250,7 @@ export class CustomersController {
 
     const data_otp = new OtpEmailValidateValidation();
     data_otp.email = data.email;
+    data_otp.name = existcust.name;
     data_otp.user_type = 'login';
 
     const url_otp: string =
