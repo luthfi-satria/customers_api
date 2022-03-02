@@ -25,6 +25,8 @@ import { QueryFilterDto } from './validation/customers.profile.validation';
 import { ListResponse } from '../response/response.interface';
 import { HttpService } from '@nestjs/axios';
 import { generateMessageUrlVerification } from 'src/utils/general-utils';
+import { Readable } from 'stream';
+import { CommonStorageService } from 'src/common/storage/storage.service';
 
 @Injectable()
 export class CustomersService {
@@ -37,6 +39,7 @@ export class CustomersService {
     private readonly responseService: ResponseService,
     private readonly messageService: MessageService,
     private readonly notificationService: NotificationService,
+    private readonly storage: CommonStorageService,
   ) {}
 
   async findOne(id: string) {
@@ -77,6 +80,8 @@ export class CustomersService {
         ),
       );
     }
+    profile.photo =
+      process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
     return profile;
   }
 
@@ -90,6 +95,8 @@ export class CustomersService {
       )
       .where('customers_profile.id = :id', { id })
       .getOne();
+    profile.photo =
+      process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
     return profile;
   }
 
@@ -323,6 +330,12 @@ export class CustomersService {
       if (updated_profile.dob)
         updated_profile.dob = moment(updated_profile.dob).format('DD/MM/YYYY');
 
+      updated_profile.photo =
+        process.env.BASEURL_API +
+        '/api/v1/customers/' +
+        updated_profile.id +
+        '/image';
+
       return this.responseService.success(
         true,
         this.messageService.get('customers.profile.success'),
@@ -451,6 +464,81 @@ export class CustomersService {
     passwordHashed: string,
   ): Promise<boolean> {
     return compare(passwordString, passwordHashed);
+  }
+
+  async getExt(data) {
+    let ext = null;
+    let type = null;
+    const resultCustomer = await this.profileRepository
+      .findOne(data.id)
+      .catch(() => {
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            {
+              value: data.id,
+              property: 'customer_id',
+              constraint: [
+                this.messageService.get('general.general.dataNotFound'),
+              ],
+            },
+            'Bad Request',
+          ),
+        );
+      });
+
+    if (resultCustomer) {
+      ext =
+        resultCustomer.photo.split('.')[
+          resultCustomer.photo.split('.').length - 1
+        ];
+      if (ext == 'png' || ext == 'jpg' || ext == 'jpeg' || ext == 'gif') {
+        type = 'image';
+      }
+    }
+
+    return { ext, type };
+  }
+
+  async getBufferS3(data: any) {
+    let url = null;
+
+    try {
+      const customer = await this.profileRepository.findOne({
+        id: data.id,
+      });
+      url = customer.photo;
+
+      if (!customer) {
+        const errors: RMessage = {
+          value: data.id,
+          property: 'id',
+          constraint: [this.messageService.get('general.general.dataNotFound')],
+        };
+        throw new BadRequestException(
+          this.responseService.error(
+            HttpStatus.BAD_REQUEST,
+            errors,
+            'Bad Request',
+          ),
+        );
+      }
+    } catch (error) {
+      Logger.log(error);
+    }
+    const bufferurl = await this.storage.getBuff(url);
+
+    return bufferurl;
+  }
+
+  async getReadableStream(buffer: Buffer) {
+    const stream = new Readable();
+
+    // stream._read = () => {};;;
+    stream.push(buffer);
+    stream.push(null);
+
+    return stream;
   }
 
   async postHttp(
