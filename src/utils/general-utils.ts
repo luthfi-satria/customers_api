@@ -158,7 +158,7 @@ export const generateSmsUrlVerification = async (
       link,
     },
   });
-  const message = `Hai, ${name}!\n\nUntuk verifikasi perubahan No HP Anda klik link berikut: ${shortLink} .\nJANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD.\nWASPADA PENIPUAN!
+  const message = `Hai, ${name}!\n\nUntuk verifikasi No HP Anda klik link berikut: ${shortLink} .\nJANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD.\nWASPADA PENIPUAN!
   `;
   return message;
 };
