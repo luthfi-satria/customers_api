@@ -4,15 +4,20 @@ import {
   Controller,
   Get,
   Headers,
+  HttpException,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Put,
   Req,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import etag from 'etag';
 import { diskStorage } from 'multer';
 import { catchError, map } from 'rxjs/operators';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
@@ -51,6 +56,7 @@ export class CustomersController {
     private readonly storage: CommonStorageService,
     private readonly imageValidationService: ImageValidationService,
   ) {}
+  logger = new Logger();
 
   @Post('login/phone')
   @ResponseStatusCode()
@@ -716,6 +722,8 @@ export class CustomersController {
     profile.photo = photo_url;
     try {
       await this.customerService.updateCustomerProfile(profile);
+      profile.photo =
+        process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
       return this.responseService.success(
         true,
         this.messageService.get('customers.profile.success'),
@@ -915,6 +923,39 @@ export class CustomersController {
     @Headers('Authorization') token: string,
   ): Promise<any> {
     return await this.customerService.changeEmail(body, req.user, token);
+  }
+
+  @Get(':id/image')
+  async streamFile(
+    @Param('id') id: string,
+    @Res() res: Response,
+    @Req() req: any,
+    // @Query() qry,
+  ) {
+    let buffer = null;
+    let stream = null;
+    let format = null;
+    const data = { id };
+    try {
+      buffer = await this.customerService.getBufferS3(data);
+      stream = await this.customerService.getReadableStream(buffer);
+      format = await this.customerService.getExt(data);
+    } catch (error) {
+      this.logger.log(error);
+    }
+
+    const tag = etag(buffer);
+    if (req.headers['if-none-match'] && req.headers['if-none-match'] === tag) {
+      throw new HttpException('Not Modified', HttpStatus.NOT_MODIFIED);
+    }
+
+    res.set({
+      'Content-Type': format.type + '/' + format.ext,
+      'Content-Length': buffer.length,
+      ETag: tag,
+    });
+
+    stream.pipe(res);
   }
 
   @Get('user-management/:user_id')
