@@ -80,8 +80,9 @@ export class CustomersService {
         ),
       );
     }
-    profile.photo =
-      process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
+    if (profile.photo)
+      profile.photo =
+        process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
     return profile;
   }
 
@@ -95,8 +96,9 @@ export class CustomersService {
       )
       .where('customers_profile.id = :id', { id })
       .getOne();
-    profile.photo =
-      process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
+    if (profile.photo)
+      profile.photo =
+        process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
     return profile;
   }
 
@@ -330,11 +332,12 @@ export class CustomersService {
       if (updated_profile.dob)
         updated_profile.dob = moment(updated_profile.dob).format('DD/MM/YYYY');
 
-      updated_profile.photo =
-        process.env.BASEURL_API +
-        '/api/v1/customers/' +
-        updated_profile.id +
-        '/image';
+      if (updated_profile.photo)
+        updated_profile.photo =
+          process.env.BASEURL_API +
+          '/api/v1/customers/' +
+          updated_profile.id +
+          '/image';
 
       return this.responseService.success(
         true,
