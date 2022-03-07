@@ -723,8 +723,6 @@ export class CustomersController {
     profile.photo = photo_url;
     try {
       await this.customerService.updateCustomerProfile(profile);
-      profile.photo =
-        process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
       return this.responseService.success(
         true,
         this.messageService.get('customers.profile.success'),
@@ -926,7 +924,7 @@ export class CustomersController {
     return await this.customerService.changeEmail(body, req.user, token);
   }
 
-  @Get(':id/image')
+  @Get(':id/image/:image')
   async streamFile(
     @Param('id') id: string,
     @Res() res: Response,
