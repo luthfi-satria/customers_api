@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   HttpStatus,
@@ -5,28 +6,27 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProfileDocument } from 'src/database/entities/profile.entity';
-import { Repository } from 'typeorm';
-import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import { catchError, map } from 'rxjs/operators';
 import { compare, genSalt, hash } from 'bcrypt';
-import { HashService } from 'src/hash/hash.service';
+import { randomUUID } from 'crypto';
 // import { Hash } from 'src/hash/hash.decorator';
 import moment from 'moment';
-import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
+import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { NotificationService } from 'src/common/notification/notification.service';
+import { CommonStorageService } from 'src/common/storage/storage.service';
+import { ProfileDocument } from 'src/database/entities/profile.entity';
+import { HashService } from 'src/hash/hash.service';
+import { MessageService } from 'src/message/message.service';
 import { RMessage, RSuccessMessage } from 'src/response/response.interface';
 import { ResponseService } from 'src/response/response.service';
-import { MessageService } from 'src/message/message.service';
-import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
-import { randomUUID } from 'crypto';
-import { NotificationService } from 'src/common/notification/notification.service';
-import { QueryFilterDto } from './validation/customers.profile.validation';
-import { ListResponse } from '../response/response.interface';
-import { HttpService } from '@nestjs/axios';
 import { generateMessageUrlVerification } from 'src/utils/general-utils';
 import { Readable } from 'stream';
-import { CommonStorageService } from 'src/common/storage/storage.service';
+import { Repository } from 'typeorm';
+import { ListResponse } from '../response/response.interface';
+import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
+import { CustomerChangeEmailValidation } from './validation/customers.change-email.validation';
+import { QueryFilterDto } from './validation/customers.profile.validation';
 
 @Injectable()
 export class CustomersService {
@@ -174,7 +174,15 @@ export class CustomersService {
     if (data.email) {
       create_profile.verification_token = randomUUID();
     }
-    return this.profileRepository.save(create_profile);
+    for (const key in create_profile) {
+      if (!create_profile[key]) {
+        delete create_profile[key];
+      }
+    }
+
+    await this.profileRepository.update(create_profile.id, create_profile);
+
+    return this.profileRepository.findOne(create_profile.id);
   }
 
   async createCustomerProfileOTP(

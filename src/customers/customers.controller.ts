@@ -16,8 +16,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
 import etag from 'etag';
+import { Response } from 'express';
 import { diskStorage } from 'multer';
 import { catchError, map } from 'rxjs/operators';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
@@ -513,6 +513,7 @@ export class CustomersController {
     const customer = await this.customerService.findOneCustomerById(
       req.user.id,
     );
+
     if (!customer) {
       const errors: RMessage = {
         value: req.user.id,
