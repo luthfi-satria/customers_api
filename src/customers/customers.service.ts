@@ -80,9 +80,15 @@ export class CustomersService {
         ),
       );
     }
-    if (profile.photo)
-      profile.photo =
-        process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
+    if (profile.photo) {
+      const fileName =
+        profile.photo.split('/')[profile.photo.split('/').length - 1];
+      process.env.BASEURL_API +
+        '/api/v1/customers/' +
+        profile.id +
+        '/image/' +
+        fileName;
+    }
     return profile;
   }
 
@@ -96,9 +102,15 @@ export class CustomersService {
       )
       .where('customers_profile.id = :id', { id })
       .getOne();
-    if (profile.photo)
-      profile.photo =
-        process.env.BASEURL_API + '/api/v1/customers/' + profile.id + '/image';
+    if (profile.photo) {
+      const fileName =
+        profile.photo.split('/')[profile.photo.split('/').length - 1];
+      process.env.BASEURL_API +
+        '/api/v1/customers/' +
+        profile.id +
+        '/image/' +
+        fileName;
+    }
     return profile;
   }
 
@@ -252,7 +264,20 @@ export class CustomersService {
   async updateCustomerProfile(
     data: Record<string, any>,
   ): Promise<ProfileDocument> {
-    return this.profileRepository.save(data);
+    const updatedProfile = await this.profileRepository.save(data);
+    if (updatedProfile && updatedProfile.photo) {
+      const fileName =
+        updatedProfile.photo.split('/')[
+          updatedProfile.photo.split('/').length - 1
+        ];
+      process.env.BASEURL_API +
+        '/api/v1/customers/' +
+        updatedProfile.id +
+        '/image/' +
+        fileName;
+    }
+
+    return updatedProfile;
   }
 
   async updateCustomerProfileById(
@@ -332,12 +357,17 @@ export class CustomersService {
       if (updated_profile.dob)
         updated_profile.dob = moment(updated_profile.dob).format('DD/MM/YYYY');
 
-      if (updated_profile.photo)
-        updated_profile.photo =
-          process.env.BASEURL_API +
+      if (updated_profile.photo) {
+        const fileName =
+          updated_profile.photo.split('/')[
+            updated_profile.photo.split('/').length - 1
+          ];
+        process.env.BASEURL_API +
           '/api/v1/customers/' +
           updated_profile.id +
-          '/image';
+          '/image/' +
+          fileName;
+      }
 
       return this.responseService.success(
         true,
