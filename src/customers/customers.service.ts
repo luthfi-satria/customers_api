@@ -192,6 +192,7 @@ export class CustomersService {
   ): Promise<ProfileDocument> {
     const create_profile: Partial<ProfileDocument> = {
       phone: data.phone,
+      name: data.name,
     };
     return this.profileRepository.save(create_profile);
   }

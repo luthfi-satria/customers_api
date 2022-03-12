@@ -1,6 +1,10 @@
-import { IsNotEmpty, IsNumberString, Length } from 'class-validator';
+import { IsNotEmpty, IsNumberString, IsString, Length } from 'class-validator';
 
 export class OtpPhoneValidateValidation {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
   @IsNotEmpty()
   @IsNumberString()
   @Length(10, 15)
