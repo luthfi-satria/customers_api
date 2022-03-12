@@ -83,7 +83,8 @@ export class CustomersService {
     if (profile.photo) {
       const fileName =
         profile.photo.split('/')[profile.photo.split('/').length - 1];
-      process.env.BASEURL_API +
+      profile.photo =
+        process.env.BASEURL_API +
         '/api/v1/customers/' +
         profile.id +
         '/image/' +
@@ -105,7 +106,8 @@ export class CustomersService {
     if (profile.photo) {
       const fileName =
         profile.photo.split('/')[profile.photo.split('/').length - 1];
-      process.env.BASEURL_API +
+      profile.photo =
+        process.env.BASEURL_API +
         '/api/v1/customers/' +
         profile.id +
         '/image/' +
@@ -278,7 +280,8 @@ export class CustomersService {
         updatedProfile.photo.split('/')[
           updatedProfile.photo.split('/').length - 1
         ];
-      process.env.BASEURL_API +
+      updatedProfile.photo =
+        process.env.BASEURL_API +
         '/api/v1/customers/' +
         updatedProfile.id +
         '/image/' +
@@ -370,7 +373,8 @@ export class CustomersService {
           updated_profile.photo.split('/')[
             updated_profile.photo.split('/').length - 1
           ];
-        process.env.BASEURL_API +
+        updated_profile.photo =
+          process.env.BASEURL_API +
           '/api/v1/customers/' +
           updated_profile.id +
           '/image/' +
