@@ -40,6 +40,7 @@ import { CustomerProfileValidation } from './validation/customers.profile.valida
 import { CustomerResetPasswordValidation } from './validation/customers.resetpass.validation';
 import { OtpCreateValidation } from './validation/otp.create.validation';
 import { OtpEmailValidateValidation } from './validation/otp.email-validate.validation';
+import { OtpPhoneRegisterValidateValidation } from './validation/otp.phone-register-validate.validation';
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
 
@@ -447,8 +448,8 @@ export class CustomersController {
   @Post('otp-validation')
   @ResponseStatusCode()
   async validateeotp(
-    @Body(RequestValidationPipe(OtpPhoneValidateValidation))
-    data: OtpPhoneValidateValidation,
+    @Body(RequestValidationPipe(OtpPhoneRegisterValidateValidation))
+    data: OtpPhoneRegisterValidateValidation,
   ): Promise<any> {
     const create_profile = await this.customerService.createCustomerProfileOTP(
       data,
