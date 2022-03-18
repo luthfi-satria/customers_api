@@ -49,6 +49,10 @@ export default {
       code: 'EXIST_EMAIL',
       message: 'Email sudah dipakai oleh user lain.',
     },
+    not_found: {
+      code: 'NOT_FOUND',
+      message: 'Profile tidak ditemukan..',
+    },
   },
   login: {
     success: 'Login Success.',
