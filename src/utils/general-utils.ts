@@ -109,20 +109,28 @@ export const generateMessageUrlVerification = async (
     },
   });
 
+  // const message = `
+  // Hai, ${name || 'User'}!
+  // <br><br>
+  // Untuk verifikasi perubahan Email Anda klik link berikut: <a href="${shortLink}">${shortLink}</a> . <br>
+  // JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
+  // WASPADA PENIPUAN!`;
   const message = `
-  Hai, ${name || 'User'}!
-  <br><br>
-  Untuk verifikasi perubahan Email Anda klik link berikut: <a href="${shortLink}">${shortLink}</a> . <br>
-  JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
-  WASPADA PENIPUAN!`;
+  <h1 class="title">Hai, ${name || 'User'}!</h1>
+  <p class="content"> Untuk verifikasi perubahan Email Anda klik link berikut: <a href="${shortLink}">${shortLink}</a> . </p>
+  <p class="content"> JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
+  WASPADA PENIPUAN! </p>`;
   return message;
 };
 
 export const generateMessageChangeActiveEmail = (name: string): string => {
+  // const message = `
+  // Hai, ${name || 'User'}!
+  // <br><br>
+  // Alamat email Anda berhasil diperbaharui, Anda dapat login pada aplikasi eFOOD menggunakan email ini.`;
   const message = `
-  Hai, ${name || 'User'}!
-  <br><br>
-  Alamat email Anda berhasil diperbaharui, Anda dapat login pada aplikasi eFOOD menggunakan email ini.`;
+  <h1 class="title">Hai, ${name || 'User'}!</h1>
+  <p class="content"> Alamat email Anda berhasil diperbaharui, Anda dapat login pada aplikasi eFOOD menggunakan email ini.</p>`;
   return message;
 };
 
@@ -138,12 +146,17 @@ export const generateMessageResetPassword = async (
     },
   });
 
+  // const message = `
+  // Hai, ${name || 'User'}!
+  // <br><br>
+  // Untuk mengubah Kata Sandi Anda, Klik link berikut: <a href="${shortLink}">${shortLink}</a> . <br>
+  // JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
+  // WASPADA PENIPUAN!`;
   const message = `
-  Hai, ${name || 'User'}!
-  <br><br>
-  Untuk mengubah Kata Sandi Anda, Klik link berikut: <a href="${shortLink}">${shortLink}</a> . <br>
-  JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
-  WASPADA PENIPUAN!`;
+  <h1 class="title">Hai, ${name || 'User'}!</h1>
+  <p class="content"> Untuk mengubah Kata Sandi Anda, Klik link berikut: <a href="${shortLink}">${shortLink}</a> . </p>
+  <p class="content"> JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
+  WASPADA PENIPUAN! </p>`;
   return message;
 };
 
