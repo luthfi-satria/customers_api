@@ -20,7 +20,7 @@ import etag from 'etag';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
 import { catchError, map } from 'rxjs/operators';
-import { AuthJwtGuard } from 'src/auth/auth.decorators';
+import { AuthJwtGuard, User } from 'src/auth/auth.decorators';
 import { UserType } from 'src/auth/guard/user-type.decorator';
 import { CommonStorageService } from 'src/common/storage/storage.service';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
@@ -43,6 +43,7 @@ import { OtpEmailValidateValidation } from './validation/otp.email-validate.vali
 import { OtpPhoneRegisterValidateValidation } from './validation/otp.phone-register-validate.validation';
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
+import { UpdateSettingNotificationPromoValidation } from './validation/update-setting-notification-promo.validation';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -969,6 +970,26 @@ export class CustomersController {
     return this.responseService.success(
       true,
       this.messageService.get('customers.select.success'),
+      profile,
+    );
+  }
+
+  @Put('settings/notifications/promo')
+  @UserType('customer')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async updateSettingNotificationPromo(
+    @Body()
+    body: UpdateSettingNotificationPromoValidation,
+    @User() user: any,
+  ): Promise<any> {
+    const profile = await this.customerService.updateCustomerProfileAllowPromo(
+      user.id,
+      body,
+    );
+    return this.responseService.success(
+      true,
+      this.messageService.get('customers.profile.success'),
       profile,
     );
   }
