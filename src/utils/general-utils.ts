@@ -97,6 +97,11 @@ export const removeAllFieldPassword = function removeAllFieldPassword(
   }
 };
 
+const STYLE_HEADER =
+  "font-weight:700;min-height: 10px;left: 0px;top: 40px;font-family: 'Lato';font-style: normal;font-size: 20px;line-height: 24px;font-feature-settings: 'pnum'on, 'lnum'on;color: #26272A;align-self: stretch;";
+const CONTENT =
+  "min-height: 10px;left: 0px;top: 40px;font-family: 'Lato';font-style: normal;font-size: 20px;line-height: 24px;font-feature-settings: 'pnum'on, 'lnum'on;color: #26272A;flex: none;order: 1;align-self: stretch;flex-grow: 0;";
+
 export const generateMessageUrlVerification = async (
   name: string,
   link: string,
@@ -116,9 +121,9 @@ export const generateMessageUrlVerification = async (
   // JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
   // WASPADA PENIPUAN!`;
   const message = `
-  <h1 class="title">Hai, ${name || 'User'}!</h1>
-  <p class="content"> Untuk verifikasi perubahan Email Anda klik link berikut: <a href="${shortLink}">${shortLink}</a> . </p>
-  <p class="content"> JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
+  <p style="${STYLE_HEADER}">Hai, ${name || 'User'}!</p>
+  <p style="${CONTENT}"> Untuk verifikasi perubahan Email Anda klik link berikut: <a href="${shortLink}">${shortLink}</a> . </p>
+  <p style="${CONTENT}"> JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
   WASPADA PENIPUAN! </p>`;
   return message;
 };
@@ -129,8 +134,8 @@ export const generateMessageChangeActiveEmail = (name: string): string => {
   // <br><br>
   // Alamat email Anda berhasil diperbaharui, Anda dapat login pada aplikasi eFOOD menggunakan email ini.`;
   const message = `
-  <h1 class="title">Hai, ${name || 'User'}!</h1>
-  <p class="content"> Alamat email Anda berhasil diperbaharui, Anda dapat login pada aplikasi eFOOD menggunakan email ini.</p>`;
+  <p style="${STYLE_HEADER}">Hai, ${name || 'User'}!</p>
+  <p style="${CONTENT}"> Alamat email Anda berhasil diperbaharui, Anda dapat login pada aplikasi eFOOD menggunakan email ini.</p>`;
   return message;
 };
 
@@ -153,9 +158,9 @@ export const generateMessageResetPassword = async (
   // JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
   // WASPADA PENIPUAN!`;
   const message = `
-  <h1 class="title">Hai, ${name || 'User'}!</h1>
-  <p class="content"> Untuk mengubah Kata Sandi Anda, Klik link berikut: <a href="${shortLink}">${shortLink}</a> . </p>
-  <p class="content"> JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
+  <p style="${STYLE_HEADER}">Hai, ${name || 'User'}!</p>
+  <p style="${CONTENT}"> Untuk mengubah Kata Sandi Anda, Klik link berikut: <a href="${shortLink}">${shortLink}</a> . </p>
+  <p style="${CONTENT}"> JANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD. <br>
   WASPADA PENIPUAN! </p>`;
   return message;
 };
