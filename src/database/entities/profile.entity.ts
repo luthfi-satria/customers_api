@@ -42,6 +42,16 @@ export class ProfileDocument {
   @Column({ nullable: false, default: true })
   is_active: boolean;
 
+  @Column({ nullable: false, default: true })
+  allow_notification_promo: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: Gender,
+    default: null,
+  })
+  gender: Gender;
+
   @Column({ type: 'timestamp', nullable: true })
   email_verified_at: Date;
 
@@ -56,11 +66,4 @@ export class ProfileDocument {
 
   @OneToMany(() => Address, (address) => address.customer)
   active_addresses: Address[];
-
-  @Column({
-    type: 'enum',
-    enum: Gender,
-    default: null,
-  })
-  gender: Gender;
 }

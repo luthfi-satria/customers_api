@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
@@ -83,7 +84,8 @@ export class CustomersService {
     if (profile.photo) {
       const fileName =
         profile.photo.split('/')[profile.photo.split('/').length - 1];
-      process.env.BASEURL_API +
+      profile.photo =
+        process.env.BASEURL_API +
         '/api/v1/customers/' +
         profile.id +
         '/image/' +
@@ -105,7 +107,8 @@ export class CustomersService {
     if (profile.photo) {
       const fileName =
         profile.photo.split('/')[profile.photo.split('/').length - 1];
-      process.env.BASEURL_API +
+      profile.photo =
+        process.env.BASEURL_API +
         '/api/v1/customers/' +
         profile.id +
         '/image/' +
@@ -279,7 +282,8 @@ export class CustomersService {
         updatedProfile.photo.split('/')[
           updatedProfile.photo.split('/').length - 1
         ];
-      process.env.BASEURL_API +
+      updatedProfile.photo =
+        process.env.BASEURL_API +
         '/api/v1/customers/' +
         updatedProfile.id +
         '/image/' +
@@ -371,7 +375,8 @@ export class CustomersService {
           updated_profile.photo.split('/')[
             updated_profile.photo.split('/').length - 1
           ];
-        process.env.BASEURL_API +
+        updated_profile.photo =
+          process.env.BASEURL_API +
           '/api/v1/customers/' +
           updated_profile.id +
           '/image/' +
@@ -483,6 +488,31 @@ export class CustomersService {
     return {
       status: true,
     };
+  }
+
+  async updateCustomerProfileAllowPromo(
+    id: string,
+    payload: Partial<ProfileDocument>,
+  ) {
+    const updatedCustomerProfile = await this.profileRepository.update(id, {
+      allow_notification_promo: payload.allow_notification_promo,
+    });
+    if (!updatedCustomerProfile.affected) {
+      const errors: RMessage = {
+        value: id,
+        property: 'id',
+        constraint: [this.messageService.get('customers.profile.not_found')],
+      };
+      throw new NotFoundException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+
+    return this.profileRepository.findOne(id);
   }
 
   //--------------------------------------------------------------
