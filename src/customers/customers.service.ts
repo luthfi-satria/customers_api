@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
 import { compare, genSalt, hash } from 'bcrypt';
 import { randomUUID } from 'crypto';
-// import { Hash } from 'src/hash/hash.decorator';
+// import {Hash} from 'src/hash/hash.decorator';
 import moment from 'moment';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
