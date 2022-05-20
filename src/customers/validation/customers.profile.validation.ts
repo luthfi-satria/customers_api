@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsNumberString,
   IsOptional,
+  IsString,
   Length,
   Validate,
   ValidateIf,
@@ -69,4 +70,24 @@ export class QueryFilterDto {
 
   @IsOptional()
   search: string;
+}
+
+export class CustomerListProfileValidation {
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  limit: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  page: number;
+
+  @IsOptional()
+  @IsString()
+  date_start: string;
+
+  @IsOptional()
+  @IsString()
+  date_end: string;
 }
