@@ -23,6 +23,7 @@ import { CustomersUserManagementService } from './customers-user-management.serv
 import { CustomersService } from './customers.service';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import {
+  CustomerListProfileValidation,
   CustomerProfileValidation,
   QueryFilterDto,
 } from './validation/customers.profile.validation';
@@ -36,6 +37,29 @@ export class CustomersUserManagementController {
     private readonly customerService: CustomersService,
     private readonly customerUserManagementService: CustomersUserManagementService,
   ) {}
+
+  @Get('new-customers')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async updateSettingNotificationPromo(
+    @Query() query: CustomerListProfileValidation,
+  ): Promise<any> {
+    try {
+      const profile =
+        await this.customerUserManagementService.listCustomerWithRangeDate(
+          query,
+        );
+      return this.responseService.success(
+        true,
+        'Success Query New Customer List',
+        profile,
+      );
+    } catch (e) {
+      Logger.error(`ERROR ${e.message}`, '', 'GET Query New Customer list');
+      throw e;
+    }
+  }
 
   @Get()
   @UserType('admin')
