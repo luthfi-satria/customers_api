@@ -6,6 +6,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import ExcelJS from 'exceljs';
+import { Response } from 'express';
+import moment from 'moment';
 import { CommonService } from 'src/common/common.service';
 import { NotificationService } from 'src/common/notification/notification.service';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
@@ -16,6 +19,7 @@ import { generateMessageChangeActiveEmail } from 'src/utils/general-utils';
 import { Brackets, Repository } from 'typeorm';
 import { generateSmsChangeActiveNoHp } from './../utils/general-utils';
 import {
+  CustomerListProfileDownloadValidation,
   CustomerListProfileValidation,
   CustomerProfileValidation,
 } from './validation/customers.profile.validation';
@@ -276,6 +280,141 @@ export class CustomersUserManagementService {
         }),
       };
       return response;
+    } catch (error) {
+      this.errorReport(error, 'profile.error.list_failed');
+    }
+  }
+
+  async listCustomerWithRangeDateDownload(
+    data: Partial<CustomerListProfileDownloadValidation>,
+    res: Response<any, Record<string, any>>,
+  ): Promise<any> {
+    const dateStart = data.date_start || null;
+    const dateEnd = data.date_end || null;
+
+    if ((dateStart && !dateEnd) || (dateEnd && !dateStart)) {
+      this.errorGenerator('', 'date', 'profile.error.dateFilterMissing');
+    }
+
+    try {
+      const query = this.profileRepository.createQueryBuilder('profile');
+      if (dateStart && dateEnd) {
+        query.where(
+          new Brackets((qb) => {
+            qb.where(
+              new Brackets((iqb) => {
+                iqb
+                  .where('profile.phone_verified_at >= :dateStart', {
+                    dateStart,
+                  })
+                  .andWhere('profile.phone_verified_at <= :dateEnd', {
+                    dateEnd,
+                  });
+              }),
+            );
+          }),
+        );
+      }
+      const result = await query.getManyAndCount();
+      const response: {
+        total_item: number;
+        items: Partial<ProfileDocument>[];
+      } = {
+        total_item: result[1],
+        items: result[0].map((profileCustomer) => {
+          const profile: Partial<ProfileDocument> = {
+            name: profileCustomer.name,
+            phone: profileCustomer.phone,
+            phone_verified_at: profileCustomer.phone_verified_at,
+          };
+          return profile;
+        }),
+      };
+
+      const columns = ['phone', 'name', 'phone_verified_at'];
+
+      //=> create workbook
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Efood';
+
+      //=> create sheetEfood
+      const sheetEfood = workbook.addWorksheet('List New Customers', {
+        properties: { defaultColWidth: 20 },
+      });
+
+      const sheetEfoodColumns: any[] = [];
+      sheetEfoodColumns.push({
+        header: 'No.',
+        key: 'no',
+        width: 15,
+      });
+
+      for (const key of columns) {
+        const column = {
+          header: key.toUpperCase(),
+          key: key,
+          width: key.substring(key.length - 3, key.length) == '_id' ? 30 : 25,
+        };
+
+        switch (key) {
+          case 'phone':
+            column.header = 'No. Handphone';
+            break;
+          case 'name':
+            column.header = 'Nama';
+            break;
+          case 'phone_verified_at':
+            column.header = 'Tanggal Join';
+            break;
+        }
+        sheetEfoodColumns.push(column);
+      }
+      sheetEfood.columns = sheetEfoodColumns;
+      sheetEfood.getRow(1).font = { bold: true };
+      sheetEfood.getRow(1).alignment = { horizontal: 'center', wrapText: true };
+      if (response.items.length > 0) {
+        for (const [idx, obj] of response.items.entries()) {
+          const row = [];
+          row.push(idx + 1);
+          for (const key of columns) {
+            switch (key) {
+              case 'phone':
+                const phoneNumber = obj.phone ? obj.phone : '-';
+                row.push(phoneNumber);
+                break;
+              case 'name':
+                const name = obj.name ? obj.name : '-';
+                row.push(name);
+                break;
+              case 'phone_verified_at':
+                const joinDate = obj.phone_verified_at
+                  ? moment(obj.phone_verified_at).format('DD/MM/YYYY')
+                  : '-';
+                row.push(joinDate);
+                break;
+            }
+          }
+          sheetEfood.addRow(row);
+        }
+      }
+      for (let rowIndex = 2; rowIndex <= sheetEfood.rowCount; rowIndex++) {
+        sheetEfood.getRow(rowIndex).alignment = {
+          horizontal: 'center',
+          wrapText: true,
+        };
+      }
+
+      const dateTitle = moment().format('YYMMDDHHmmss');
+      const fileName = `List_Customer_Baru_${dateTitle}.xlsx`;
+
+      res.set({
+        'Content-Type':
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename=${fileName}`,
+      });
+      await workbook.xlsx.write(res);
+
+      res.end();
     } catch (error) {
       this.errorReport(error, 'profile.error.list_failed');
     }
