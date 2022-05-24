@@ -91,3 +91,13 @@ export class CustomerListProfileValidation {
   @IsString()
   date_end: string;
 }
+
+export class CustomerListProfileDownloadValidation {
+  @IsOptional()
+  @IsString()
+  date_start: string;
+
+  @IsOptional()
+  @IsString()
+  date_end: string;
+}
