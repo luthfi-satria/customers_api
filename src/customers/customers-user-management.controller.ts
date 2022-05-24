@@ -9,8 +9,10 @@ import {
   Param,
   Put,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AddressService } from 'src/address/address.service';
 import { UpdateAddressDto } from 'src/address/dto/update-address.dto';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
@@ -23,6 +25,7 @@ import { CustomersUserManagementService } from './customers-user-management.serv
 import { CustomersService } from './customers.service';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import {
+  CustomerListProfileDownloadValidation,
   CustomerListProfileValidation,
   CustomerProfileValidation,
   QueryFilterDto,
@@ -38,11 +41,31 @@ export class CustomersUserManagementController {
     private readonly customerUserManagementService: CustomersUserManagementService,
   ) {}
 
+  @Get('new-customers/generate')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async listNewCustomerDownload(
+    @Query() query: CustomerListProfileDownloadValidation,
+    @Res() res: Response,
+  ): Promise<any> {
+    console.log('test');
+    try {
+      await this.customerUserManagementService.listCustomerWithRangeDateDownload(
+        query,
+        res,
+      );
+    } catch (e) {
+      Logger.error(`ERROR ${e.message}`, '', 'GET Download New Customer list');
+      throw e;
+    }
+  }
+
   @Get('new-customers')
   @UserType('admin')
   @AuthJwtGuard()
   @ResponseStatusCode()
-  async updateSettingNotificationPromo(
+  async listNewCustomer(
     @Query() query: CustomerListProfileValidation,
   ): Promise<any> {
     try {
