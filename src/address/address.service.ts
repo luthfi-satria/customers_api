@@ -26,18 +26,32 @@ export class AddressService {
   ) {}
 
   async create(createAddressDto: CreateAddressDto) {
+    const oldAddress = await this.findByCustomerId(
+      createAddressDto.customer_id,
+      true,
+      true,
+    );
+
     createAddressDto.city_id = await this.getCityId(
       createAddressDto.postal_code,
     );
-    const create_address = this.addressRepository.create(createAddressDto);
+
+    const create_address = oldAddress
+      ? Object.assign(oldAddress, {
+          ...createAddressDto,
+        })
+      : this.addressRepository.create(createAddressDto);
+
     try {
       const create = await this.addressRepository.save(create_address);
+
       if (createAddressDto.is_active == true) {
         const setActiveParam: SetActiveAddressDto = {
           customer_id: create.customer_id,
           id: create.id,
           is_active: true,
         };
+
         return await this.setActive(setActiveParam);
       }
     } catch (error) {
@@ -46,6 +60,7 @@ export class AddressService {
         property: '',
         constraint: [this.messageService.get('address.create.fail')],
       };
+
       throw new BadRequestException(
         this.responseService.error(
           HttpStatus.BAD_REQUEST,
@@ -56,25 +71,66 @@ export class AddressService {
     }
   }
 
+  async findByCustomerId(
+    customerId: string,
+    isLatest = true,
+    isCustomAddress = true,
+  ) {
+    if (!customerId) {
+      return;
+    }
+
+    let addressQuery = this.addressRepository
+      .createQueryBuilder('customers_address')
+      .leftJoinAndSelect('customers_address.customer', 'customers_profile')
+      .where('customers_profile.id = :customerId', {
+        customerId,
+      });
+
+    if (isCustomAddress) {
+      addressQuery = addressQuery.andWhere('customers_address.type = :type', {
+        type: 'custom',
+      });
+    }
+
+    if (isLatest) {
+      addressQuery = addressQuery.orderBy(
+        'customers_address.created_at',
+        'DESC',
+      );
+    }
+
+    return await addressQuery.getOne();
+  }
+
   async findAll(paramDto: SelectAddressDto) {
     const address = this.addressRepository
       .createQueryBuilder('customers_address')
-      .leftJoinAndSelect('customers_address.customer', 'customers_profile');
+      .leftJoinAndSelect('customers_address.customer', 'customers_profile')
+      .where('customers_address.type IN (:...types)', {
+        types: ['office', 'home'],
+      });
+
     if (paramDto.id_profile) {
       address.andWhere('customers_address.customer = :id_profile', {
         id_profile: paramDto.id_profile,
       });
     }
+
     if (paramDto.search) {
       address.andWhere('customers_address.name ilike :name', {
         name: `%${paramDto.search}%`,
       });
     }
+
     const skip = (+paramDto.page - 1) * +paramDto.limit;
+
     address.skip(skip);
+
     address.take(+paramDto.limit);
 
     const totalItems = await address.getCount();
+
     const list = await address.getMany();
 
     const list_result = {
@@ -83,6 +139,7 @@ export class AddressService {
       current_page: Number(paramDto.page),
       items: list,
     };
+
     return list_result;
   }
 
