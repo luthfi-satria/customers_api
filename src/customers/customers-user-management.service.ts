@@ -1,15 +1,28 @@
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import ExcelJS from 'exceljs';
+import { Response } from 'express';
+import moment from 'moment';
 import { CommonService } from 'src/common/common.service';
 import { NotificationService } from 'src/common/notification/notification.service';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { MessageService } from 'src/message/message.service';
+import { ListResponse, RMessage } from 'src/response/response.interface';
 import { ResponseService } from 'src/response/response.service';
 import { generateMessageChangeActiveEmail } from 'src/utils/general-utils';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { generateSmsChangeActiveNoHp } from './../utils/general-utils';
-import { CustomerProfileValidation } from './validation/customers.profile.validation';
+import {
+  CustomerListProfileDownloadValidation,
+  CustomerListProfileValidation,
+  CustomerProfileValidation,
+} from './validation/customers.profile.validation';
 
 // const defaultJsonHeader: Record<string, any> = {
 //   'Content-Type': 'application/json',
@@ -17,6 +30,8 @@ import { CustomerProfileValidation } from './validation/customers.profile.valida
 
 @Injectable()
 export class CustomersUserManagementService {
+  private readonly logger = new Logger(CustomersUserManagementService.name);
+
   constructor(
     @InjectRepository(ProfileDocument)
     private readonly profileRepository: Repository<ProfileDocument>,
@@ -216,5 +231,244 @@ export class CustomersUserManagementService {
       throw response;
     }
     return response;
+  }
+
+  async listCustomerWithRangeDate(
+    data: Partial<CustomerListProfileValidation>,
+  ): Promise<ListResponse> {
+    const currentPage = data.page || 1;
+    const perPage = data.limit || 10;
+    const dateStart = data.date_start || null;
+    const dateEnd = data.date_end || null;
+
+    if ((dateStart && !dateEnd) || (dateEnd && !dateStart)) {
+      this.errorGenerator('', 'date', 'profile.error.dateFilterMissing');
+    }
+
+    try {
+      const query = this.profileRepository.createQueryBuilder('profile');
+      if (dateStart && dateEnd) {
+        query.where(
+          new Brackets((qb) => {
+            qb.where(
+              new Brackets((iqb) => {
+                iqb
+                  .where('profile.phone_verified_at >= :dateStart', {
+                    dateStart,
+                  })
+                  .andWhere('profile.phone_verified_at <= :dateEnd', {
+                    dateEnd,
+                  });
+              }),
+            );
+          }),
+        );
+      }
+      query.skip((currentPage - 1) * perPage).take(perPage);
+      const result = await query.getManyAndCount();
+      const response: ListResponse = {
+        total_item: result[1],
+        limit: perPage,
+        current_page: currentPage,
+        items: result[0].map((profileCustomer) => {
+          const profile: Partial<ProfileDocument> = {
+            name: profileCustomer.name,
+            phone: profileCustomer.phone,
+            phone_verified_at: profileCustomer.phone_verified_at,
+          };
+          return profile;
+        }),
+      };
+      return response;
+    } catch (error) {
+      this.errorReport(error, 'profile.error.list_failed');
+    }
+  }
+
+  async listCustomerWithRangeDateDownload(
+    data: Partial<CustomerListProfileDownloadValidation>,
+    res: Response<any, Record<string, any>>,
+  ): Promise<any> {
+    const dateStart = data.date_start || null;
+    const dateEnd = data.date_end || null;
+
+    if ((dateStart && !dateEnd) || (dateEnd && !dateStart)) {
+      this.errorGenerator('', 'date', 'profile.error.dateFilterMissing');
+    }
+
+    try {
+      const query = this.profileRepository.createQueryBuilder('profile');
+      if (dateStart && dateEnd) {
+        query.where(
+          new Brackets((qb) => {
+            qb.where(
+              new Brackets((iqb) => {
+                iqb
+                  .where('profile.phone_verified_at >= :dateStart', {
+                    dateStart,
+                  })
+                  .andWhere('profile.phone_verified_at <= :dateEnd', {
+                    dateEnd,
+                  });
+              }),
+            );
+          }),
+        );
+      }
+      const result = await query.getManyAndCount();
+      const response: {
+        total_item: number;
+        items: Partial<ProfileDocument>[];
+      } = {
+        total_item: result[1],
+        items: result[0].map((profileCustomer) => {
+          const profile: Partial<ProfileDocument> = {
+            name: profileCustomer.name,
+            phone: profileCustomer.phone,
+            phone_verified_at: profileCustomer.phone_verified_at,
+          };
+          return profile;
+        }),
+      };
+
+      const columns = ['phone', 'name', 'phone_verified_at'];
+
+      //=> create workbook
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Efood';
+
+      //=> create sheetEfood
+      const sheetEfood = workbook.addWorksheet('List New Customers', {
+        properties: { defaultColWidth: 20 },
+      });
+
+      const sheetEfoodColumns: any[] = [];
+      sheetEfoodColumns.push({
+        header: 'No.',
+        key: 'no',
+        width: 15,
+      });
+
+      for (const key of columns) {
+        const column = {
+          header: key.toUpperCase(),
+          key: key,
+          width: key.substring(key.length - 3, key.length) == '_id' ? 30 : 25,
+        };
+
+        switch (key) {
+          case 'phone':
+            column.header = 'No. Handphone';
+            break;
+          case 'name':
+            column.header = 'Nama';
+            break;
+          case 'phone_verified_at':
+            column.header = 'Tanggal Join';
+            break;
+        }
+        sheetEfoodColumns.push(column);
+      }
+      sheetEfood.columns = sheetEfoodColumns;
+      sheetEfood.getRow(1).font = { bold: true };
+      sheetEfood.getRow(1).alignment = { horizontal: 'center', wrapText: true };
+      if (response.items.length > 0) {
+        for (const [idx, obj] of response.items.entries()) {
+          const row = [];
+          row.push(idx + 1);
+          for (const key of columns) {
+            switch (key) {
+              case 'phone':
+                const phoneNumber = obj.phone ? obj.phone : '-';
+                row.push(phoneNumber);
+                break;
+              case 'name':
+                const name = obj.name ? obj.name : '-';
+                row.push(name);
+                break;
+              case 'phone_verified_at':
+                const joinDate = obj.phone_verified_at
+                  ? moment(obj.phone_verified_at).format('DD/MM/YYYY')
+                  : '-';
+                row.push(joinDate);
+                break;
+            }
+          }
+          sheetEfood.addRow(row);
+        }
+      }
+      for (let rowIndex = 2; rowIndex <= sheetEfood.rowCount; rowIndex++) {
+        sheetEfood.getRow(rowIndex).alignment = {
+          horizontal: 'center',
+          wrapText: true,
+        };
+      }
+
+      const dateTitle = moment().format('YYMMDDHHmmss');
+      const fileName = `List_Customer_Baru_${dateTitle}.xlsx`;
+
+      res.set({
+        'Content-Type':
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename=${fileName}`,
+      });
+      await workbook.xlsx.write(res);
+
+      res.end();
+    } catch (error) {
+      this.errorReport(error, 'profile.error.list_failed');
+    }
+  }
+
+  private errorReport(error: any, message: string) {
+    this.logger.error(error);
+    if (error.message == 'Bad Request Exception') {
+      throw error;
+    } else {
+      const errors: RMessage = {
+        value: '',
+        property: '',
+        constraint: [this.messageService.get(message), error.message],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
+  }
+
+  private errorGenerator(
+    value: string,
+    property: string,
+    constraint: string | any[],
+  ) {
+    if (typeof constraint == 'string') {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value,
+            property,
+            constraint: [this.messageService.get(constraint)],
+          },
+          'Bad Request',
+        ),
+      );
+    } else {
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          {
+            value,
+            property,
+            constraint: constraint,
+          },
+          'Bad Request',
+        ),
+      );
+    }
   }
 }

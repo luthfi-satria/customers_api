@@ -9,8 +9,10 @@ import {
   Param,
   Put,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AddressService } from 'src/address/address.service';
 import { UpdateAddressDto } from 'src/address/dto/update-address.dto';
 import { AuthJwtGuard } from 'src/auth/auth.decorators';
@@ -23,6 +25,8 @@ import { CustomersUserManagementService } from './customers-user-management.serv
 import { CustomersService } from './customers.service';
 import { AdminCustomerProfileValidation } from './validation/admin.customers.profile.validation';
 import {
+  CustomerListProfileDownloadValidation,
+  CustomerListProfileValidation,
   CustomerProfileValidation,
   QueryFilterDto,
 } from './validation/customers.profile.validation';
@@ -36,6 +40,49 @@ export class CustomersUserManagementController {
     private readonly customerService: CustomersService,
     private readonly customerUserManagementService: CustomersUserManagementService,
   ) {}
+
+  @Get('new-customers/generate')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async listNewCustomerDownload(
+    @Query() query: CustomerListProfileDownloadValidation,
+    @Res() res: Response,
+  ): Promise<any> {
+    console.log('test');
+    try {
+      await this.customerUserManagementService.listCustomerWithRangeDateDownload(
+        query,
+        res,
+      );
+    } catch (e) {
+      Logger.error(`ERROR ${e.message}`, '', 'GET Download New Customer list');
+      throw e;
+    }
+  }
+
+  @Get('new-customers')
+  @UserType('admin')
+  @AuthJwtGuard()
+  @ResponseStatusCode()
+  async listNewCustomer(
+    @Query() query: CustomerListProfileValidation,
+  ): Promise<any> {
+    try {
+      const profile =
+        await this.customerUserManagementService.listCustomerWithRangeDate(
+          query,
+        );
+      return this.responseService.success(
+        true,
+        'Success Query New Customer List',
+        profile,
+      );
+    } catch (e) {
+      Logger.error(`ERROR ${e.message}`, '', 'GET Query New Customer list');
+      throw e;
+    }
+  }
 
   @Get()
   @UserType('admin')
