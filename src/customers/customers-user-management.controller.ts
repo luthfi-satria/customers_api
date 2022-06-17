@@ -49,7 +49,6 @@ export class CustomersUserManagementController {
     @Query() query: CustomerListProfileDownloadValidation,
     @Res() res: Response,
   ): Promise<any> {
-    console.log('test');
     try {
       await this.customerUserManagementService.listCustomerWithRangeDateDownload(
         query,

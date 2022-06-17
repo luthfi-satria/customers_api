@@ -253,10 +253,10 @@ export class CustomersUserManagementService {
             qb.where(
               new Brackets((iqb) => {
                 iqb
-                  .where('profile.phone_verified_at >= :dateStart', {
+                  .where('profile.created_at >= :dateStart', {
                     dateStart,
                   })
-                  .andWhere('profile.phone_verified_at <= :dateEnd', {
+                  .andWhere('profile.created_at <= :dateEnd', {
                     dateEnd,
                   });
               }),
@@ -274,7 +274,7 @@ export class CustomersUserManagementService {
           const profile: Partial<ProfileDocument> = {
             name: profileCustomer.name,
             phone: profileCustomer.phone,
-            phone_verified_at: profileCustomer.phone_verified_at,
+            created_at: profileCustomer.created_at,
           };
           return profile;
         }),
@@ -304,10 +304,10 @@ export class CustomersUserManagementService {
             qb.where(
               new Brackets((iqb) => {
                 iqb
-                  .where('profile.phone_verified_at >= :dateStart', {
+                  .where('profile.created_at >= :dateStart', {
                     dateStart,
                   })
-                  .andWhere('profile.phone_verified_at <= :dateEnd', {
+                  .andWhere('profile.created_at <= :dateEnd', {
                     dateEnd,
                   });
               }),
@@ -325,13 +325,13 @@ export class CustomersUserManagementService {
           const profile: Partial<ProfileDocument> = {
             name: profileCustomer.name,
             phone: profileCustomer.phone,
-            phone_verified_at: profileCustomer.phone_verified_at,
+            created_at: profileCustomer.created_at,
           };
           return profile;
         }),
       };
 
-      const columns = ['phone', 'name', 'phone_verified_at'];
+      const columns = ['phone', 'name', 'created_at'];
 
       //=> create workbook
       const workbook = new ExcelJS.Workbook();
@@ -363,7 +363,7 @@ export class CustomersUserManagementService {
           case 'name':
             column.header = 'Nama';
             break;
-          case 'phone_verified_at':
+          case 'created_at':
             column.header = 'Tanggal Join';
             break;
         }
@@ -386,9 +386,9 @@ export class CustomersUserManagementService {
                 const name = obj.name ? obj.name : '-';
                 row.push(name);
                 break;
-              case 'phone_verified_at':
-                const joinDate = obj.phone_verified_at
-                  ? moment(obj.phone_verified_at).format('DD/MM/YYYY')
+              case 'created_at':
+                const joinDate = obj.created_at
+                  ? moment(obj.created_at).format('DD/MM/YYYY')
                   : '-';
                 row.push(joinDate);
                 break;
