@@ -239,7 +239,7 @@ export class CustomersUserManagementService {
     const currentPage = data.page || 1;
     const perPage = data.limit || 10;
     const dateStart = data.date_start || null;
-    const dateEnd = data.date_end || null;
+    const dateEnd = data.date_end ? new Date(data.date_end + +`Z23:59`) : null;
 
     if ((dateStart && !dateEnd) || (dateEnd && !dateStart)) {
       this.errorGenerator('', 'date', 'profile.error.dateFilterMissing');
@@ -290,7 +290,7 @@ export class CustomersUserManagementService {
     res: Response<any, Record<string, any>>,
   ): Promise<any> {
     const dateStart = data.date_start || null;
-    const dateEnd = data.date_end || null;
+    const dateEnd = data.date_end ? new Date(data.date_end + +`Z23:59`) : null;
 
     if ((dateStart && !dateEnd) || (dateEnd && !dateStart)) {
       this.errorGenerator('', 'date', 'profile.error.dateFilterMissing');
