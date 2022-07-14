@@ -708,7 +708,7 @@ export class CustomersController {
         filename: editFileName,
       }),
       limits: {
-        fileSize: 2000000, //2MB
+        fileSize: 5000000, //2MB
       },
       fileFilter: imageFileFilter,
     }),
