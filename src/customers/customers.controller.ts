@@ -44,6 +44,7 @@ import { OtpPhoneRegisterValidateValidation } from './validation/otp.phone-regis
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
 import { UpdateSettingNotificationPromoValidation } from './validation/update-setting-notification-promo.validation';
+import { SetFieldEmptyUtils } from "../utils/set-field-empty-utils";
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -707,7 +708,7 @@ export class CustomersController {
         filename: editFileName,
       }),
       limits: {
-        fileSize: 2000000, //2MB
+        fileSize: 5000000, //2MB
       },
       fileFilter: imageFileFilter,
     }),
@@ -719,12 +720,22 @@ export class CustomersController {
     await this.imageValidationService.validateAll(req, ['required']);
 
     const path_photo = '/upload_customers/' + file.filename;
+
     const photo_url = await this.storage.store(path_photo);
+
     const profile: ProfileDocument =
       await this.customerService.findOneCustomerById(req.user.id);
+
     profile.photo = photo_url;
+
+    Object.assign(
+      profile,
+      new SetFieldEmptyUtils().apply(profile, req?.delete_files),
+    );
+
     try {
       await this.customerService.updateCustomerProfile(profile);
+
       return this.responseService.success(
         true,
         this.messageService.get('customers.profile.success'),
