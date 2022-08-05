@@ -44,7 +44,7 @@ import { OtpPhoneRegisterValidateValidation } from './validation/otp.phone-regis
 import { OtpPhoneValidateValidation } from './validation/otp.phone-validate.validation';
 import { RequestValidationPipe } from './validation/request-validation.pipe';
 import { UpdateSettingNotificationPromoValidation } from './validation/update-setting-notification-promo.validation';
-import { SetFieldEmptyUtils } from "../utils/set-field-empty-utils";
+import { SetFieldEmptyUtils } from '../utils/set-field-empty-utils';
 
 const defaultJsonHeader: Record<string, any> = {
   'Content-Type': 'application/json',
@@ -453,6 +453,22 @@ export class CustomersController {
     @Body(RequestValidationPipe(OtpPhoneRegisterValidateValidation))
     data: OtpPhoneRegisterValidateValidation,
   ): Promise<any> {
+    const existcustWithPhone =
+      await this.customerService.findOneCustomerByPhone(data.phone);
+    if (existcustWithPhone) {
+      const errors: RMessage = {
+        value: data.phone,
+        property: 'phone',
+        constraint: [this.messageService.get('customers.error.already_exist')],
+      };
+      throw new BadRequestException(
+        this.responseService.error(
+          HttpStatus.BAD_REQUEST,
+          errors,
+          'Bad Request',
+        ),
+      );
+    }
     const create_profile = await this.customerService.createCustomerProfileOTP(
       data,
     );
@@ -708,7 +724,7 @@ export class CustomersController {
         filename: editFileName,
       }),
       limits: {
-        fileSize: 5242880,//5MB
+        fileSize: 5242880, //5MB
       },
       fileFilter: imageFileFilter,
     }),
