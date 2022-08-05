@@ -1,6 +1,15 @@
-import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { InternalService } from './internal.service';
+import { GetCustomerBulkDto } from './get-customer-bulk.dto';
 
 @Controller('api/v1/internal')
 export class InternalController {
@@ -16,5 +25,12 @@ export class InternalController {
   @Get('customers/:id')
   async getCustomer(@Param('id') id: string): Promise<ProfileDocument> {
     return this.internalService.getCustomer(id);
+  }
+
+  @Post('customers/bulk')
+  async getCustomers(
+    @Body() data: GetCustomerBulkDto,
+  ): Promise<ProfileDocument> {
+    return this.internalService.getCustomersBulk(data.ids);
   }
 }
