@@ -105,6 +105,7 @@ export class CustomersService {
       .where('customers_profile.id = :id', { id })
       .getOne();
     if (profile.photo) {
+    if (profile && profile.photo) {
       const fileName =
         profile.photo.split('/')[profile.photo.split('/').length - 1];
       profile.photo =
