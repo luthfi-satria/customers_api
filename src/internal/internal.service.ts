@@ -18,4 +18,13 @@ export class InternalService {
       throw error;
     }
   }
+
+  async getAllCustomers(): Promise<any> {
+    try {
+      return await this.customerService.findAll();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 }

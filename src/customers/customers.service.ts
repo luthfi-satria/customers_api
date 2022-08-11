@@ -94,6 +94,32 @@ export class CustomersService {
     return profile;
   }
 
+  async findAll() {
+    let profile = null;
+    try {
+      profile = await this.profileRepository
+      .createQueryBuilder('customers_profile')
+      .where('customers_profile.phone_verified_at is not null')
+      .orWhere('customers_profile.email_verified_at is not null')
+      .getMany()
+    } catch (error) {
+      console.log(error);
+      Logger.error(error);
+      throw error;
+    }
+    if (profile.photo) {
+      const fileName =
+        profile.photo.split('/')[profile.photo.split('/').length - 1];
+      profile.photo =
+        process.env.BASEURL_API +
+        '/api/v1/customers/' +
+        profile.id +
+        '/image/' +
+        fileName;
+    }
+    return profile;
+  }
+
   async findOneWithActiveAddresses(id: string) {
     const profile = await this.profileRepository
       .createQueryBuilder('customers_profile')
