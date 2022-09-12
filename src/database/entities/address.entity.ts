@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ColumnNumericTransformer } from '../helper/column_numberic_transformer';
 
 import { ProfileDocument } from './profile.entity';
 
