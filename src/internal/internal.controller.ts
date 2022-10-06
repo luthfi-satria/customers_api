@@ -1,4 +1,4 @@
-import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post, Query } from "@nestjs/common";
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { InternalService } from './internal.service';
 
@@ -15,6 +15,13 @@ export class InternalController {
 
   @Get('customers/bulk')
   async getCustomersBulk(@Query() data: any): Promise<ProfileDocument> {
+    return this.internalService.getCustomersBulk(data.ids);
+  }
+
+  @Post('customers/bulk/post/method')
+  async getCustomersBulkPostMethod(
+    @Body() data: any,
+  ): Promise<ProfileDocument> {
     return this.internalService.getCustomersBulk(data.ids);
   }
 
