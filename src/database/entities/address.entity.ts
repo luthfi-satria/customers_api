@@ -44,13 +44,13 @@ export class Address {
   postal_code: string;
 
   @Column('decimal', {
-    default: '-6.175392',
+    // default: '-6.175392',
     transformer: new ColumnNumericTransformer(),
   }) //monas
   location_latitude: number;
 
   @Column('decimal', {
-    default: '106.827153',
+    // default: '106.827153',
     transformer: new ColumnNumericTransformer(),
   }) //monas
   location_longitude: number;
