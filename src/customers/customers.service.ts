@@ -98,10 +98,10 @@ export class CustomersService {
     let profile = null;
     try {
       profile = await this.profileRepository
-      .createQueryBuilder('customers_profile')
-      .where('customers_profile.phone_verified_at is not null')
-      .orWhere('customers_profile.email_verified_at is not null')
-      .getMany()
+        .createQueryBuilder('customers_profile')
+        .where('customers_profile.phone_verified_at is not null')
+        .orWhere('customers_profile.email_verified_at is not null')
+        .getMany();
     } catch (error) {
       console.log(error);
       Logger.error(error);
