@@ -1,5 +1,7 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { AuthJwtGuard } from 'src/auth/auth.decorators';
+import { UserTypeAndLevel } from 'src/auth/guard/user-type-and-level.decorator';
 import { MessageService } from 'src/message/message.service';
 import { ResponseStatusCode } from 'src/response/response.decorator';
 import { ResponseService } from 'src/response/response.service';
@@ -16,13 +18,8 @@ export class ReportsController {
 
   //** LIST NEW CUSTOMER */
   @Get()
-  // @UserTypeAndLevel(
-  //   'admin.*',
-  //   'merchant.group',
-  //   'merchant.merchant',
-  //   'merchant.store',
-  // )
-  // @AuthJwtGuard()
+  @UserTypeAndLevel('admin.*', 'merchant.*')
+  @AuthJwtGuard()
   @ResponseStatusCode()
   async getNewCustomer(@Query() data: ListReprotNewCustomerDTO): Promise<any> {
     try {
@@ -39,13 +36,8 @@ export class ReportsController {
 
   //** GENERATE LIST NEW CUSTOMER */
   @Get('generate')
-  // @UserTypeAndLevel(
-  //   'admin.*',
-  //   'merchant.group',
-  //   'merchant.merchant',
-  //   'merchant.store',
-  // )
-  // @AuthJwtGuard()
+  @UserTypeAndLevel('admin.*', 'merchant.*')
+  @AuthJwtGuard()
   @ResponseStatusCode()
   async generateXLSX(
     @Query() data: ListReprotNewCustomerDTO,

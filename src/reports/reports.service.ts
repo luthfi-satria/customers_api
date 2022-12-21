@@ -27,6 +27,7 @@ export class ReportsService {
 
   logger = new Logger(ReportsService.name);
 
+  //** LIST NEW CUSTOMER */
   async processListNewMerchants(data: ListReprotNewCustomerDTO): Promise<any> {
     try {
       //** GET DATA FROM DATABASE */
