@@ -220,7 +220,7 @@ export class ReportsService {
                 row.push(nameA);
                 break;
               case 'city':
-                const city = obj.city_id;
+                const city = obj.address_city_id;
                 const getCities = await this.getCityId(city);
                 const nameCi = getCities ? getCities : '-';
                 row.push(nameCi);
@@ -234,8 +234,19 @@ export class ReportsService {
                 row.push(nameE);
                 break;
               case 'created':
-                const nameJ = obj.cp_created_at ? obj.cp_created_at : '-';
-                row.push(nameJ);
+                const dateCr = new Date(obj.cp_created_at);
+                const yearCr = dateCr.toLocaleString('default', {
+                  year: 'numeric',
+                });
+                const monthCr = dateCr.toLocaleString('default', {
+                  month: '2-digit',
+                });
+                const dayCr = dateCr.toLocaleString('default', {
+                  day: '2-digit',
+                });
+                const formatDateCr = dayCr + '-' + monthCr + '-' + yearCr;
+                const nameC = formatDateCr ? formatDateCr : '-';
+                row.push(nameC);
                 break;
             }
           }

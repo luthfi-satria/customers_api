@@ -29,6 +29,8 @@ export class ListReprotNewCustomerDTO {
   @IsOptional()
   status: string;
 
+  city_id: string;
+
   @IsOptional()
   @IsArray()
   columns?: string[];

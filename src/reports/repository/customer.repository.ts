@@ -29,6 +29,7 @@ export class CustomerRepositoryDocument extends Repository<ProfileDocument> {
     const indexPage = (Number(currentPage) - 1) * perPage;
     const dateStart = data.date_start || null;
     const dateEnd = data.date_end || null;
+    const cityId = data.city_id || null;
 
     let status;
     if (data.status == undefined) {
@@ -73,6 +74,12 @@ export class CustomerRepositoryDocument extends Repository<ProfileDocument> {
           );
         }),
       );
+    }
+
+    if (cityId) {
+      queries.andWhere('address.city_id = :cityId', {
+        cityId,
+      });
     }
 
     //** STATUS CUSTOMER */
