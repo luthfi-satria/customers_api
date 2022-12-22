@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Logger, Param, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { InternalService } from './internal.service';
 
