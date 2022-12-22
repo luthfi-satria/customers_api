@@ -26,6 +26,13 @@ export class InternalController {
     return this.internalService.getCustomersBulk(data.ids);
   }
 
+  // @Post('customers/bulk/post/method')
+  // async getCustomersBulkPostMethod(
+  //   @Body() data: any,
+  // ): Promise<ProfileDocument> {
+  //   return this.internalService.getCustomersBulk(data.ids);
+  // }
+
   @Get('customers/:id')
   async getCustomer(@Param('id') id: string): Promise<ProfileDocument> {
     return this.internalService.getCustomer(id);
