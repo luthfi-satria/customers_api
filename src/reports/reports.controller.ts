@@ -8,7 +8,7 @@ import { ResponseService } from 'src/response/response.service';
 import { ListReprotNewCustomerDTO } from './dto/report.dto';
 import { ReportsService } from './reports.service';
 
-@Controller('api/v1/customers/reports')
+@Controller('api/v1/customers')
 export class ReportsController {
   constructor(
     private readonly reportsService: ReportsService,
@@ -17,7 +17,7 @@ export class ReportsController {
   ) {}
 
   //** LIST NEW CUSTOMER */
-  @Get()
+  @Get('reports')
   @UserTypeAndLevel('admin.*', 'merchant.*')
   @AuthJwtGuard()
   @ResponseStatusCode()
@@ -35,7 +35,7 @@ export class ReportsController {
   }
 
   //** GENERATE LIST NEW CUSTOMER */
-  @Get('generate')
+  @Get('reports/generate')
   @UserTypeAndLevel('admin.*', 'merchant.*')
   @AuthJwtGuard()
   @ResponseStatusCode()
