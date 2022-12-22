@@ -59,16 +59,18 @@ export class CustomerRepositoryDocument extends Repository<ProfileDocument> {
 
     //** SEARCH BY DARE */
     if (dateStart && dateEnd) {
+      const start = dateStart + ' 00:00:00';
+      const end = dateEnd + ' 23:59:00';
       queries.andWhere(
         new Brackets((qb) => {
           qb.where(
             new Brackets((iqb) => {
               iqb
-                .where('cp.created_at >= :dateStart', {
-                  dateStart,
+                .where('cp.created_at > :start', {
+                  start,
                 })
-                .andWhere('cp.created_at <= :dateEnd', {
-                  dateEnd,
+                .andWhere('cp.created_at < :end', {
+                  end,
                 });
             }),
           );
@@ -97,7 +99,7 @@ export class CustomerRepositoryDocument extends Repository<ProfileDocument> {
     }
 
     const rawAll = await queries.getRawMany();
-    const raw = rawAll.slice(indexPage, indexPage + perPage);
+    const raw = rawAll.slice(indexPage, indexPage + Number(perPage));
     const count = rawAll.length;
 
     raw.forEach((item) => {
@@ -116,7 +118,7 @@ export class CustomerRepositoryDocument extends Repository<ProfileDocument> {
     try {
       return {
         total_item: count,
-        limit: perPage,
+        limit: Number(perPage),
         current_page: Number(currentPage),
         items: raw,
       };
@@ -127,9 +129,7 @@ export class CustomerRepositoryDocument extends Repository<ProfileDocument> {
           {
             value: '',
             property: '',
-            constraint: [
-              this.messageService.get('merchant.general.idNotFound'),
-            ],
+            constraint: [this.messageService.get('customers.select.fail')],
           },
           'Bad Request',
         ),
