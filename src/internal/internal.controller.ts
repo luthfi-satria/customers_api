@@ -25,6 +25,12 @@ export class InternalController {
     return this.internalService.getCustomersBulk(data.ids);
   }
 
+  //** GET CUSTOMER BY CITY */
+  @Get('customers-city/:id')
+  async getCustomerByCity(@Param('id') id: string): Promise<ProfileDocument> {
+    return this.internalService.getCustomerByCity(id);
+  }
+
   @Get('customers/:id')
   async getCustomer(@Param('id') id: string): Promise<ProfileDocument> {
     return this.internalService.getCustomer(id);
