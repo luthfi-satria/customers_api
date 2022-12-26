@@ -26,12 +26,12 @@ export class InternalController {
     return this.internalService.getCustomersBulk(data.ids);
   }
 
-  // @Post('customers/bulk/post/method')
-  // async getCustomersBulkPostMethod(
-  //   @Body() data: any,
-  // ): Promise<ProfileDocument> {
-  //   return this.internalService.getCustomersBulk(data.ids);
-  // }
+  @Post('customers/bulk/post/method')
+  async getCustomersBulkPostMethod(
+    @Body() data: any,
+  ): Promise<ProfileDocument> {
+    return this.internalService.getCustomersBulk(data.ids);
+  }
 
   //** GET CUSTOMER BY CITY */
   @Get('customers-city/:id')
