@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Logger, Param, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { InternalService } from './internal.service';
 
@@ -23,6 +31,12 @@ export class InternalController {
     @Body() data: any,
   ): Promise<ProfileDocument> {
     return this.internalService.getCustomersBulk(data.ids);
+  }
+
+  //** GET CUSTOMER BY CITY */
+  @Get('customers-city/:id')
+  async getCustomerByCity(@Param('id') id: string): Promise<ProfileDocument> {
+    return this.internalService.getCustomerByCity(id);
   }
 
   @Get('customers/:id')
