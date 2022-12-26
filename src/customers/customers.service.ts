@@ -123,7 +123,7 @@ export class CustomersService {
   //** GET CUSTOMER BY CITY */
   async findCustomerByCity(id: string): Promise<any> {
     const currentPage = 1;
-    const perPage = 100;
+    const perPage = 1000;
     const indexPage = (Number(currentPage) - 1) * perPage;
     const profile = await this.profileRepository
       .createQueryBuilder('customers_profile')
