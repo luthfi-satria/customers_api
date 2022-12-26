@@ -6,6 +6,11 @@ import { ProfileDocument } from 'src/database/entities/profile.entity';
 export class InternalService {
   constructor(private readonly customerService: CustomersService) {}
 
+  //** GET CUSTOMER BY CITY */
+  async getCustomerByCity(id: string): Promise<ProfileDocument> {
+    return this.customerService.findCustomerByCity(id);
+  }
+
   async getCustomer(id: string): Promise<ProfileDocument> {
     return this.customerService.findOneWithActiveAddresses(id);
   }

@@ -120,6 +120,45 @@ export class CustomersService {
     return profile;
   }
 
+  //** GET CUSTOMER BY CITY */
+  async findCustomerByCity(id: string): Promise<any> {
+    const currentPage = 1;
+    const perPage = 100;
+    const indexPage = (Number(currentPage) - 1) * perPage;
+    const profile = await this.profileRepository
+      .createQueryBuilder('customers_profile')
+      .leftJoinAndSelect(
+        'customers_profile.active_addresses',
+        'address',
+        'address.is_active = true',
+      )
+      .where('address.city_id = :id', { id })
+      .orderBy('customers_profile.created_at', 'ASC');
+
+    const rawAll = await profile.getRawMany();
+    const raw = rawAll.slice(indexPage, indexPage + Number(perPage));
+    const count = rawAll.length;
+
+    raw.forEach((item) => {
+      for (const key in item) {
+        if (Object.prototype.hasOwnProperty.call(item, key)) {
+          const element = item[key];
+          if (key.startsWith('di_')) {
+            item[key.slice(3)] = element;
+            delete item[key];
+          }
+        }
+      }
+    });
+
+    return {
+      total_item: count,
+      limit: Number(perPage),
+      current_page: Number(currentPage),
+      items: raw,
+    };
+  }
+
   async findOneWithActiveAddresses(id: string) {
     const profile = await this.profileRepository
       .createQueryBuilder('customers_profile')
