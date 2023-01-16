@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -20,6 +21,7 @@ export enum GroupType {
 }
 
 @Entity({ name: 'customers_address' })
+@Index(['customer_id', 'deleted_at'])
 export class Address {
   @PrimaryGeneratedColumn('uuid')
   id: string;
