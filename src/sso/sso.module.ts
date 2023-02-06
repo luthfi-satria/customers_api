@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AdminsDocument } from 'src/database/entities/admins.entity';
+import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { SettingDocument } from 'src/database/entities/settings.entity';
 import { SettingsService } from 'src/settings/settings.service';
 import { SsoService } from './sso.service';
@@ -10,7 +10,7 @@ import { HttpModule, HttpModule as HttpModuleAxios } from '@nestjs/axios';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AdminsDocument, SettingDocument]),
+    TypeOrmModule.forFeature([ProfileDocument, SettingDocument]),
     HttpModuleAxios,
     HttpModule,
     ScheduleModule.forRoot(),

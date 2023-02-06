@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom, map } from 'rxjs';
-import { AdminsDocument } from 'src/database/entities/admins.entity';
+import { ProfileDocument } from 'src/database/entities/profile.entity';
 import { SettingsService } from 'src/settings/settings.service';
 import { generateDatabaseDateTime } from 'src/utils/general-utils';
 import { Brackets, Repository } from 'typeorm';
@@ -11,13 +11,13 @@ import { Brackets, Repository } from 'typeorm';
 export class SsoService {
   constructor(
     private readonly settingRepo: SettingsService,
-    @InjectRepository(AdminsDocument)
-    private readonly adminRepository: Repository<AdminsDocument>,
+    @InjectRepository(ProfileDocument)
+    private readonly CustomerRepository: Repository<ProfileDocument>,
     private readonly httpService: HttpService,
   ) {}
   cronConfigs = {
     // enable or disabled process
-    sso_process: 0,
+    sso_process: 1,
     // time range of sync execution
     sso_timespan: 60,
     // last update of sync process
@@ -42,25 +42,28 @@ export class SsoService {
           this.cronConfigs.iteration % this.cronConfigs.sso_refresh_config ==
           0
         ) {
-          this.logger.log('SSO -> ADMINS CONFIGS');
-          await this.getAdminsConfig();
+          this.logger.log('SSO -> CUSTOMERS CONFIGS');
+          // await this.getCustomersConfig();
         }
         this.cronConfigs.iteration++;
         if (this.cronConfigs.sso_process) {
           this.logger.log('SSO -> SYNC IS STARTED');
-          const syncAdmin = await this.getAdmins();
+          const res = await this.CustomerRepository.find();
+          console.log(res);
+          // const syncCustomer = await this.getCustomers();
           if (
             this.cronConfigs.total_data > 0 &&
             this.cronConfigs.offset >= this.cronConfigs.total_data
           ) {
-            this.logger.log('ELASTIC -> UPDATE CONFIGS');
+            this.logger.log('SSO -> UPDATE CONFIGS');
             await this.updateSettings();
           }
-          const callback = {
-            syncAdmins: syncAdmin,
-          };
+          // const callback = {
+          //   syncCustomers: syncCustomer,
+          // };
+          // console.log(syncCustomer);
           // console.log(callback, '<= Sync status');
-          return callback;
+          // return callback;
         }
         return {
           code: 400,
@@ -83,7 +86,7 @@ export class SsoService {
       throw error;
     }
   }
-  async getAdminsConfig() {
+  async getCustomersConfig() {
     const settings = await this.settingRepo.getSettingsByNamePattern('sso');
     settings.forEach((element) => {
       if (element.name == 'sso_lastupdate') {
@@ -101,7 +104,7 @@ export class SsoService {
     return updateSettings;
   }
 
-  async getAdmins() {
+  async getCustomers() {
     // console.log(this.cronConfigs.offset, '<= initial offset');
     if (this.cronConfigs.offset == 0) {
       const queryCount = this.queryStatement();
@@ -117,7 +120,7 @@ export class SsoService {
           configs: this.cronConfigs,
           cond: this.cronConfigs.offset < this.cronConfigs.total_data,
         },
-        '<= ELASTIC - CONFIG PROCESS',
+        '<= SSO - CONFIG PROCESS',
       );
     }
     if (this.cronConfigs.offset < this.cronConfigs.total_data) {
@@ -136,24 +139,25 @@ export class SsoService {
     return {};
   }
   queryStatement() {
-    const queryData = this.adminRepository.createQueryBuilder('admins_profile');
+    const queryData =
+      this.CustomerRepository.createQueryBuilder('customers_profile');
 
     // .leftJoinAndSelect('merchant_store.menus', 'menus');
     if (this.cronConfigs.sso_lastupdate) {
       queryData.where(
         new Brackets((qb) => {
-          qb.where('admins_profile.updated_at > :lastUpdate', {
+          qb.where('customers_profile.updated_at > :lastUpdate', {
             lastUpdate: this.cronConfigs.sso_lastupdate,
           });
-          qb.orWhere('admins_profile.created_at > :lastUpdate', {
+          qb.orWhere('customers_profile.created_at > :lastUpdate', {
             lastUpdate: this.cronConfigs.sso_lastupdate,
           });
-          qb.orWhere('admins_profile.deleted_at > :lastUpdate', {
+          qb.orWhere('customers_profile.deleted_at > :lastUpdate', {
             lastUpdate: this.cronConfigs.sso_lastupdate,
           });
         }),
       );
-      queryData.orWhere('sso_id.admins_profile is null');
+      queryData.orWhere('customers_profile.sso_id is null');
     }
     return queryData;
   }
@@ -162,8 +166,8 @@ export class SsoService {
     const body = {
       name: process.env.SSO_CLIENT_NAME,
       secret_key: process.env.SSO_CLIENT_SECRET,
-      device_id: 'adminservice',
-      device_name: 'ADMINS_SERVICE',
+      device_id: 'customerservice',
+      device_name: 'CUSTOMERS_SERVICE',
     };
     try {
       return await firstValueFrom(
@@ -173,5 +177,11 @@ export class SsoService {
       console.log('SSO ERROR', error);
       throw error;
     }
+  }
+  async getCustomer(): Promise<any> {
+    const result = await this.CustomerRepository.findOne(
+      'f364f4cc-6934-4c83-a156-f00b8bcd3ba6',
+    );
+    console.log(result);
   }
 }

@@ -13,6 +13,8 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthModule } from './auth/auth.module';
 import { ReportsModule } from './reports/reports.module';
 import { SsoModule } from './sso/sso.module';
+import { SeederModule } from './database/seeders/seeder.module';
+import { SettingModule } from './settings/setting.module';
 
 @Module({
   imports: [
@@ -20,8 +22,10 @@ import { SsoModule } from './sso/sso.module';
     TypeOrmModule.forRootAsync({
       useClass: DatabaseService,
     }),
+    SeederModule,
     CustomersModule,
     HttpModule,
+    SettingModule,
     AddressModule,
     CommonModule,
     InternalModule,
