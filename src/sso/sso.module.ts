@@ -6,17 +6,20 @@ import { SettingDocument } from 'src/database/entities/settings.entity';
 import { SettingsService } from 'src/settings/settings.service';
 import { SsoService } from './sso.service';
 import { SsoController } from './sso.controller';
-import { HttpModule, HttpModule as HttpModuleAxios } from '@nestjs/axios';
+import { HttpModule } from '@nestjs/axios';
+import { MessageService } from 'src/message/message.service';
+import { ResponseService } from 'src/response/response.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProfileDocument, SettingDocument]),
-    HttpModuleAxios,
-    HttpModule,
     ScheduleModule.forRoot(),
+    ConfigModule,
+    HttpModule,
   ],
 
-  providers: [SettingsService, SsoService],
+  providers: [SettingsService, SsoService, MessageService, ResponseService],
 
   controllers: [SsoController],
 })
