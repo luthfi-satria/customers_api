@@ -4,7 +4,7 @@ import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.service';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
-import { SettingDocument } from 'src/database/entities/settings.entity';
+import { SettingDocument } from 'src/database/entities/setting.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([SettingDocument])],
