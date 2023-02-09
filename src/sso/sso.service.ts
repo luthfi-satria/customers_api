@@ -1,19 +1,20 @@
+import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
+import { genSaltSync, hash } from 'bcrypt';
+import { lastValueFrom, map } from 'rxjs';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
+import { MessageService } from 'src/message/message.service';
+import { ResponseService } from 'src/response/response.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { Brackets, Repository } from 'typeorm';
-import { Cron } from '@nestjs/schedule';
-import { HttpService } from '@nestjs/axios';
-import { AxiosResponse } from 'axios';
-import { lastValueFrom, map } from 'rxjs';
 import { ssoDto } from './dto/sso.dto';
+import { AxiosResponse } from 'axios';
 import { SsoAuthDocument } from './dto/sso-auth.dto';
 import { RMessage } from 'src/response/response.interface';
-import { ResponseService } from 'src/response/response.service';
 import { generateDatabaseDateTime } from 'src/utils/general-utils';
-import { MessageService } from 'src/message/message.service';
-import { genSaltSync, hash } from 'bcrypt';
+
 @Injectable()
 export class SsoService {
   cronConfigs = {
@@ -24,7 +25,7 @@ export class SsoService {
     // last update of sync process
     sso_lastupdate: null,
     // limit data execution
-    sso_data_limit: 1,
+    sso_data_limit: 10,
     sso_refresh_config: 60,
     // skip of data index
     offset: 0,
@@ -33,7 +34,6 @@ export class SsoService {
     // iteration counter
     iteration: 1,
   };
-
   constructor(
     private readonly settingRepo: SettingsService,
     @InjectRepository(ProfileDocument)
@@ -45,24 +45,6 @@ export class SsoService {
 
   logger = new Logger(SsoService.name);
 
-  /**
-   * CUSTOMER SERVICE SETTINGS
-   */
-  async getCustomersConfig() {
-    const settings = await this.settingRepo.getSettingsByNamePattern('sso');
-    settings.forEach((element) => {
-      if (element.name == 'sso_lastupdate') {
-        this.cronConfigs[element.name] = element.value;
-      } else {
-        this.cronConfigs[element.name] = parseInt(element.value);
-      }
-    });
-  }
-
-  /**
-   * CRON JOB FUNCTION
-   * @returns
-   */
   @Cron('* * * * * *')
   async syncUsers() {
     try {
@@ -73,6 +55,7 @@ export class SsoService {
           this.cronConfigs.iteration % this.cronConfigs.sso_refresh_config ==
           0
         ) {
+          this.cronConfigs.iteration = 1;
           this.logger.log('SSO -> SSO CONFIGS');
           // reinitialize cron setting
           await this.getCustomersConfig();
@@ -116,8 +99,8 @@ export class SsoService {
             }
           }
         }
-        this.cronConfigs.iteration++;
       }
+      this.cronConfigs.iteration++;
     } catch (error) {
       console.log(error);
       this.cronConfigs.iteration++;
@@ -126,7 +109,25 @@ export class SsoService {
   }
 
   /**
+   * ##################################################################################
+   * CUSTOMER SERVICE SETTINGS
+   * ##################################################################################
+   */
+  async getCustomersConfig() {
+    const settings = await this.settingRepo.getSettingsByNamePattern('sso');
+    settings.forEach((element) => {
+      if (element.name == 'sso_lastupdate') {
+        this.cronConfigs[element.name] = element.value;
+      } else {
+        this.cronConfigs[element.name] = parseInt(element.value);
+      }
+    });
+  }
+
+  /**
+   * ##################################################################################
    * DATABASE HANDLER -> GET UPDATED CUSTOMERS USERS
+   * ##################################################################################
    * @returns
    */
   async getUpdatedUsers() {
@@ -156,7 +157,7 @@ export class SsoService {
       if (queryResult) {
         for (const rows in queryResult) {
           const ssoPayload: Partial<ssoDto> = {
-            eshop_id: queryResult[rows].id,
+            ext_id: queryResult[rows].id,
             sso_id: queryResult[rows].sso_id,
             email: queryResult[rows].email ? queryResult[rows].email : '',
             fullname: queryResult[rows].name,
@@ -195,97 +196,6 @@ export class SsoService {
     }
     this.cronConfigs.offset = 0;
     return {};
-  }
-
-  /**
-   * SSO AUTHENTICATION PROCESS
-   * @returns
-   */
-  async ssoAuthentication() {
-    const headerRequest = {
-      'Content-Type': 'application/json',
-    };
-    const authData: SsoAuthDocument = {
-      name: process.env.SSO_NAME,
-      secret_key: process.env.SSO_SECRET_KEY,
-      device_id: process.env.SSO_DEVICE_ID,
-      device_type: process.env.SSO_DEVICE_TYPE,
-    };
-    const authenticate = await this.httpSsoRequests(
-      authData,
-      `api/token/get`,
-      headerRequest,
-    );
-    return authenticate;
-  }
-
-  /**
-   * BULK REGISTRATION TO SSO
-   * @param UsersData
-   * @returns
-   */
-  async registerBulk(UsersData) {
-    // sso authentication process
-    const loginSSO = await this.ssoAuthentication();
-    if (loginSSO && loginSSO.data.token) {
-      // set sso-token from authentication process into registration header process
-      const headerRequest = {
-        'Content-Type': 'application/json',
-        'sso-token': loginSSO.data.token.token_code,
-      };
-
-      // bulk registration process
-      const syncUsers = await this.httpSsoRequests(
-        UsersData,
-        'api/user/register_personal_business_bulk',
-        headerRequest,
-      );
-
-      console.log(syncUsers, '<= SYNC USER SSO');
-      return syncUsers;
-    }
-
-    // IF THERE IS NO token IN SSO RESPONSE THEN RETURNING UNAUTHORIZED ERROR
-    const errors: RMessage = {
-      value: '',
-      property: 'SSO Service',
-      constraint: [loginSSO],
-    };
-    return this.responseService.error(
-      HttpStatus.UNAUTHORIZED,
-      errors,
-      'UNAUTHORIZED',
-    );
-  }
-
-  /**
-   * GENERAL HTTP SSO REQUEST
-   * @param payload
-   * @param urlPath
-   * @param headerRequest
-   * @returns
-   */
-  async httpSsoRequests(payload: any, urlPath: string, headerRequest) {
-    try {
-      // SSO URL
-      const url = `${process.env.SSO_HOST}/${urlPath}`;
-
-      // SSO POST REQUEST
-      const post_request = this.httpService
-        .post(url, payload, { headers: headerRequest })
-        .pipe(
-          map((axiosResponse: AxiosResponse) => {
-            return axiosResponse.data;
-          }),
-        );
-
-      // GETTING RESPONSE FROM SSO
-      const response = await lastValueFrom(post_request);
-      return response;
-    } catch (error) {
-      console.log(error.response.data);
-      return error.response.data;
-    }
   }
 
   /**
@@ -329,22 +239,134 @@ export class SsoService {
   }
 
   /**
+   * ##################################################################################
+   * SSO PROCESS
+   * @param UsersData
+   * @returns
+   * ##################################################################################
+   */
+  async registerBulk(UsersData) {
+    // sso authentication process
+    const loginSSO = await this.ssoAuthentication();
+    if (loginSSO && loginSSO.data.token) {
+      // set sso-token from authentication process into registration header process
+      const headerRequest = {
+        'Content-Type': 'application/json',
+        'sso-token': loginSSO.data.token.token_code,
+      };
+      // console.log(UsersData);
+      // bulk registration process
+      const syncUsers = await this.httpSsoRequests(
+        UsersData,
+        'api/user/register_personal_business_bulk',
+        headerRequest,
+      );
+
+      const updateData = [];
+      if (syncUsers && syncUsers.data.length > 0) {
+        console.log(syncUsers);
+        syncUsers.data.forEach((rows) => {
+          if (rows.sso_id != 0) {
+            const bulkUpdate: Partial<ProfileDocument> = {
+              id: rows.ext_id,
+              sso_id: rows.sso_id,
+            };
+            updateData.push(bulkUpdate);
+          }
+        });
+      }
+
+      let updateStatus = [];
+      if (updateData.length > 0) {
+        // console.log(updateData);
+        updateStatus = await this.customerRepository.save(updateData);
+      }
+
+      console.log(
+        {
+          syncStatus: syncUsers,
+          updateStatus: updateStatus,
+        },
+        '<= SYNC USER SSO',
+      );
+      return syncUsers;
+    }
+
+    // IF THERE IS NO token IN SSO RESPONSE THEN RETURNING UNAUTHORIZED ERROR
+    const errors: RMessage = {
+      value: '',
+      property: 'SSO Service',
+      constraint: [loginSSO],
+    };
+    return this.responseService.error(
+      HttpStatus.UNAUTHORIZED,
+      errors,
+      'UNAUTHORIZED',
+    );
+  }
+
+  /**
+   * SSO AUTHENTICATION PROCESS
+   * @returns
+   */
+  async ssoAuthentication() {
+    const headerRequest = {
+      'Content-Type': 'application/json',
+    };
+    const authData: SsoAuthDocument = {
+      name: process.env.SSO_NAME,
+      secret_key: process.env.SSO_SECRET_KEY,
+      device_id: process.env.SSO_DEVICE_ID,
+      device_type: process.env.SSO_DEVICE_TYPE,
+    };
+    const authenticate = await this.httpSsoRequests(
+      authData,
+      `api/token/get`,
+      headerRequest,
+    );
+    return authenticate;
+  }
+
+  /**
+   * GENERAL HTTP SSO REQUEST
+   * @param payload
+   * @param urlPath
+   * @param headerRequest
+   * @returns
+   */
+  async httpSsoRequests(payload: any, urlPath: string, headerRequest) {
+    try {
+      // SSO URL
+      const url = `${process.env.SSO_HOST}/${urlPath}`;
+
+      // SSO POST REQUEST
+      const post_request = this.httpService
+        .post(url, payload, { headers: headerRequest })
+        .pipe(
+          map((axiosResponse: AxiosResponse) => {
+            return axiosResponse.data;
+          }),
+        );
+
+      // GETTING RESPONSE FROM SSO
+      const response = await lastValueFrom(post_request);
+      return response;
+    } catch (error) {
+      console.log(error.response.data);
+      return error.response.data;
+    }
+  }
+
+  /**
+   * ##################################################################################
    * THIS FUNCTION ONLY FOR TESTING
+   * ##################################################################################   *
    * @returns
    */
   async testingSSO() {
     try {
       const updatedCustomers = await this.getUpdatedUsers();
       const synchronize = await this.registerBulk(updatedCustomers);
-      if (synchronize && synchronize.data.length > 0) {
-        const updateData = [];
-        synchronize.data.forEach((rows) => {
-          updateData.push({
-            id: rows.ext_id,
-            sso_id: rows.sso_id,
-          });
-        });
-      }
 
       return this.responseService.success(
         true,
@@ -358,7 +380,9 @@ export class SsoService {
   }
 
   /**
+   * ##################################################################################
    * GENERATE DEFAULT PASSWORD
+   * ##################################################################################
    * @param password
    * @returns
    */
