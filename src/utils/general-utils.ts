@@ -207,3 +207,7 @@ export const generateSmsResetPassword = async (
   }!\n\nUntuk mengubah Kata Sandi Anda, Klik link berikut: ${shortLink} .\nJANGAN BAGIKAN LINK TERSEBUT KE SIAPAPUN termasuk eFOOD.\nWASPADA PENIPUAN!`;
   return message;
 };
+
+export const generateDatabaseDateTime = (date: Date, gmtOffset: string) => {
+  return date.toISOString().replace('T', ' ').substring(0, 19) + gmtOffset;
+};

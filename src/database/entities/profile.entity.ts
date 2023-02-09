@@ -66,4 +66,7 @@ export class ProfileDocument {
 
   @OneToMany(() => Address, (address) => address.customer)
   active_addresses: Address[];
+
+  @Column({ nullable: true })
+  sso_id: number;
 }
