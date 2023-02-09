@@ -13,7 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { ReportsModule } from './reports/reports.module';
 // import { SsoModule } from './sso/sso.module';
 // import { SeederModule } from './database/seeders/seeder.module';
-import { SettingModule } from './settings/setting.module';
+// import { SettingModule } from './settings/setting.module';
 
 @Module({
   imports: [
