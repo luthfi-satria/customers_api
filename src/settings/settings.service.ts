@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SettingDocument } from 'src/database/entities/settings.entity';
+import { SettingDocument } from 'src/database/entities/setting.entity';
 import { Repository, Like } from 'typeorm';
 import {
   UpdateContactDto,
