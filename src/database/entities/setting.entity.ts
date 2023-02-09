@@ -1,19 +1,19 @@
 import {
-  AfterUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity({ name: 'customers_settings' })
 export class SettingDocument {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  constructor(init?: Partial<SettingDocument>) {
+    Object.assign(this, init);
+  }
 
-  @Column({ type: 'varchar', nullable: true })
+  @PrimaryColumn({ type: 'varchar', nullable: false })
   name: string;
 
   @Column({ type: 'varchar', nullable: true })
@@ -27,9 +27,4 @@ export class SettingDocument {
 
   @DeleteDateColumn({ nullable: true, select: false })
   deleted_at: Date;
-
-  @AfterUpdate()
-  updateData() {
-    delete this.deleted_at;
-  }
 }
