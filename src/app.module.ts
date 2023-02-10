@@ -5,7 +5,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseService } from './database/database.service';
 import { CustomersModule } from './customers/customers.module';
-// import { HashModule } from './hash/hash.module';
 import { AddressModule } from './address/address.module';
 import { CommonModule } from './common/common.module';
 import { InternalModule } from './internal/internal.module';
@@ -22,7 +21,6 @@ import { SettingModule } from './settings/setting.module';
     TypeOrmModule.forRootAsync({
       useClass: DatabaseService,
     }),
-    SeederModule,
     CustomersModule,
     HttpModule,
     SettingModule,
@@ -30,6 +28,7 @@ import { SettingModule } from './settings/setting.module';
     CommonModule,
     InternalModule,
     AuthModule,
+    SeederModule,
     ReportsModule,
     SsoModule,
   ],
