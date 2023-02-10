@@ -215,9 +215,6 @@ export class SsoService {
           qb.orWhere('customers_profile.created_at > :lastUpdate', {
             lastUpdate: this.cronConfigs.sso_lastupdate,
           });
-          qb.orWhere('customers_profile.deleted_at > :lastUpdate', {
-            lastUpdate: this.cronConfigs.sso_lastupdate,
-          });
         }),
       );
       queryData.orWhere('customers_profile.sso_id is null');
