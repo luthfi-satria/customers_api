@@ -102,6 +102,12 @@ export class CustomersSsoService {
     }
   }
 
+  /**
+   * REGISTER NEW USERS SSO IF NOT EXISTS IN EFOOD
+   * @param ssoDecoding
+   * @param loginSSO
+   * @returns
+   */
   async registerSsoUser(ssoDecoding, loginSSO) {
     // GET SSO USER DETAIL
     const find = {
@@ -150,6 +156,49 @@ export class CustomersSsoService {
       return custData;
     }
     return ssoDetail;
+  }
+
+  async verificationSSOToken(data) {
+    // CHECKING OAUTH SSO TOKEN
+    let tokenValidity = false;
+    const validateTokenHeader = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: data.authorization,
+      },
+    };
+    const validateToken = await this.httpGetSsoRequest(
+      'api/oauth/token/check_oauth_token',
+      validateTokenHeader,
+    );
+
+    if (validateToken && validateToken.data) {
+      tokenValidity = validateToken.data.isValid;
+    }
+
+    if (tokenValidity) {
+      // DECODE TOKEN
+      const token = {
+        access_token: data.authorization,
+      };
+      token.access_token = token.access_token.substring(7);
+      const decode = this.decodeSsoToken(token);
+      if (decode) {
+        // VERIFY SSO ID IN EFOOD CUSTOMER TABLE
+        const verifyUser = await this.verifyEfoodUsers(decode);
+
+        if (!verifyUser) {
+          // IF NOT EXISTS, REGISTER NEW CUSTOMER
+          await this.registerSsoUser(decode, token);
+        }
+
+        // GENERATE EFOOD TOKEN
+        const efoodToken = await this.generateEfoodToken(verifyUser);
+
+        return efoodToken;
+      }
+    }
+    return this.returningError(validateToken);
   }
 
   /**
@@ -270,6 +319,26 @@ export class CustomersSsoService {
     }
   }
 
+  async httpGetSsoRequest(urlPath: string, headerRequest) {
+    try {
+      // AUTH URL
+      const url = `${process.env.SSO_HOST}/${urlPath}`;
+
+      // SSO POST REQUEST
+      const post_request = this.httpService.get(url, headerRequest).pipe(
+        map((axiosResponse: AxiosResponse) => {
+          return axiosResponse.data;
+        }),
+      );
+
+      // GETTING RESPONSE FROM SSO
+      const response = await lastValueFrom(post_request);
+      return response;
+    } catch (error) {
+      console.log(error.response.data);
+      return error.response.data;
+    }
+  }
   /**
    * ##################################################################################
    * GENERATE DEFAULT PASSWORD
