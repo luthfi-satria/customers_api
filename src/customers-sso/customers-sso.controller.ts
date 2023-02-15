@@ -5,7 +5,7 @@ import { ResponseStatusCode } from 'src/response/response.decorator';
 import { CustomersSsoService } from './customers-sso.service';
 import { CustomerLoginSsoValidation } from './validation/customers.sso.validation';
 
-@Controller('api/v1/customer/sso')
+@Controller('api/v1/customers/sso')
 export class CustomersSsoController {
   constructor(
     private readonly messageService: MessageService,
