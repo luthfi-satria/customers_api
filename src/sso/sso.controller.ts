@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ResponseStatusCode } from 'src/response/response.decorator';
 import { SsoService } from './sso.service';
 
-@Controller('api/v1/customer/sso')
+@Controller('api/v1/customers/sso')
 export class SsoController {
   constructor(private readonly ssoService: SsoService) {}
   @Get()

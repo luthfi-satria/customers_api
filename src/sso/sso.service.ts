@@ -180,11 +180,11 @@ export class SsoService {
           };
 
           if (!ssoPayload.sso_id) {
-            let password = queryResult[rows].phone
+            const password = queryResult[rows].phone
               ? '0' + queryResult[rows].phone.substring(2)
               : '123456';
 
-            password = await this.generateHashPassword(password);
+            // password = await this.generateHashPassword(password);
 
             ssoPayload.password = password;
           }
