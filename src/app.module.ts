@@ -14,6 +14,7 @@ import { ReportsModule } from './reports/reports.module';
 import { SsoModule } from './sso/sso.module';
 import { SeederModule } from './database/seeders/seeder.module';
 import { SettingModule } from './settings/setting.module';
+import { CustomersSsoModule } from './customers-sso/customers-sso.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SettingModule } from './settings/setting.module';
     SeederModule,
     ReportsModule,
     SsoModule,
+    CustomersSsoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
