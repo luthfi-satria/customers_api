@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { genSaltSync, hash } from 'bcrypt';
 import { lastValueFrom, map } from 'rxjs';
 import { ProfileDocument } from 'src/database/entities/profile.entity';
+import { Address } from 'src/database/entities/address.entity';
 import { MessageService } from 'src/message/message.service';
 import { ResponseService } from 'src/response/response.service';
 import { SettingsService } from 'src/settings/settings.service';
@@ -156,6 +157,29 @@ export class SsoService {
       const requestData = [];
       if (queryResult) {
         for (const rows in queryResult) {
+          const userAddress = [];
+          const address: Partial<Address[]> = queryResult[rows].addresses;
+          if (address) {
+            address.forEach((items) => {
+              userAddress.push({
+                label: items.type,
+                label_owner: items.type,
+                phone: queryResult[rows].phone,
+                notes: items.address_detail,
+                is_primary: true,
+                address: items.address,
+                kode_pos: items.postal_code,
+                latitude: items.location_latitude,
+                longitude: items.location_longitude,
+                label_latitude_longitude: items.type,
+                detail_label_latitude_longitude: items.address_detail,
+                provinsi: null,
+                kabupaten: null,
+                kecamatan: null,
+                kelurahan: null,
+              });
+            });
+          }
           const ssoPayload: Partial<ssoDto> = {
             ext_id: queryResult[rows].id,
             sso_id: queryResult[rows].sso_id,
@@ -176,15 +200,13 @@ export class SsoService {
             skip_email: true,
             skip_phone: true,
             business: [],
-            address: [],
+            address: userAddress,
           };
 
           if (!ssoPayload.sso_id) {
             const password = queryResult[rows].phone
               ? '0' + queryResult[rows].phone.substring(2)
               : '123456';
-
-            // password = await this.generateHashPassword(password);
 
             ssoPayload.password = password;
           }
@@ -203,8 +225,14 @@ export class SsoService {
    * @returns
    */
   queryStatement() {
-    const queryData =
-      this.customerRepository.createQueryBuilder('customers_profile');
+    const queryData = this.customerRepository
+      .createQueryBuilder('customers_profile')
+      .leftJoinAndSelect(
+        'customers_profile.addresses',
+        'address',
+        'address.is_active = :active',
+        { active: true },
+      );
     // IF SSO LAST UPDATE IS NOT EMPTY
     if (this.cronConfigs.sso_lastupdate) {
       queryData.where(
