@@ -245,7 +245,7 @@ export class SsoService {
           });
         }),
       );
-      queryData.orWhere('customers_profile.sso_id is null');
+      // queryData.orWhere('customers_profile.sso_id is null');
     }
     return queryData;
   }
